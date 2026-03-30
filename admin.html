@@ -362,6 +362,17 @@
     </div>
   </div>
 
+  <!-- Modal: Entregas -->
+  <div class="overlay" id="entregas-modal" role="dialog" aria-modal="true" aria-labelledby="entregas-modal-title">
+    <div class="modal" style="max-width:560px">
+      <button class="modal-close" type="button" onclick="closeEntregasModal()" aria-label="Fechar modal">
+        <span aria-hidden="true">✕</span>
+      </button>
+      <h3 id="entregas-modal-title">📤 Entregas da Equipe</h3>
+      <div id="entregas-modal-body" style="margin-top:1rem"></div>
+    </div>
+  </div>
+
   <!-- Modal: Materiais -->
   <div class="overlay" id="material-modal" role="dialog" aria-modal="true" aria-labelledby="material-modal-title">
     <div class="modal">
@@ -535,6 +546,7 @@
                 <div class="card-sub">${membros} integrante${membros !== 1 ? 's' : ''} · ${entregues}/4 entregas</div>
               </div>
               <div class="card-actions">
+                <button class="btn-icon" onclick="openEntregasModal('${g.id}')" title="Ver entregas" aria-label="Ver entregas de ${g.nome}">📤</button>
                 <button class="btn-icon" onclick="openMemberModal('${g.id}')" title="Gerenciar membros" aria-label="Gerenciar membros de ${g.nome}">👥</button>
                 <button class="btn-icon" onclick="openFeedbackModal('${g.id}')" title="Adicionar feedback" aria-label="Adicionar feedback para ${g.nome}">💬</button>
                 <button class="btn-icon" onclick="editTeam('${g.id}')" title="Editar equipe" aria-label="Editar ${g.nome}">✏️</button>
@@ -607,6 +619,48 @@
 
     function editTeam(id) {
       openTeamModal(id);
+    }
+
+    // ── Modal Entregas ────────────────────────────────────────────────────
+    const ENTREGA_TITULOS = ['Plano de Ação 5W2H', 'Matriz GUT + Diagnóstico', 'Relatório de Desenvolvimento', 'Apresentação Final'];
+
+    function openEntregasModal(gid) {
+      const g = getGrupos().find(g => g.id === gid);
+      if (!g) return;
+      document.getElementById('entregas-modal-title').textContent = `📤 Entregas — ${g.nome}`;
+      const entregas = g.entregas || [];
+      const body = document.getElementById('entregas-modal-body');
+      if (entregas.length === 0) {
+        body.innerHTML = '<p style="color:var(--muted);font-size:13px">Nenhuma entrega registrada ainda.</p>';
+      } else {
+        body.innerHTML = entregas.map((e, i) => {
+          const titulo = ENTREGA_TITULOS[i] || `Entrega ${e.numero}`;
+          const done   = e.status === 'entregue';
+          const data   = e.data ? new Date(e.data).toLocaleDateString('pt-BR') : '';
+          return `
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-left:3px solid ${done ? '#5ae09a' : 'rgba(255,255,255,0.15)'};border-radius:10px;padding:1rem;margin-bottom:0.75rem">
+              <div style="font-weight:700;font-size:13px;margin-bottom:0.3rem">ENTREGA ${e.numero} — ${titulo}</div>
+              <div style="font-size:12px;margin-bottom:0.6rem">
+                <span style="padding:0.2rem 0.65rem;border-radius:20px;font-size:11px;font-weight:700;${done ? 'background:rgba(50,200,100,0.15);color:#5ae09a' : 'background:rgba(255,255,255,0.06);color:var(--muted)'}">
+                  ${done ? '✅ Entregue' : e.status === 'pendente' ? '🟡 Pendente' : '🔒 Bloqueado'}
+                </span>
+                ${data ? `<span style="color:var(--muted);margin-left:0.75rem;font-size:11px">📅 ${data}</span>` : ''}
+              </div>
+              ${done && e.link
+                ? `<a href="${e.link}" target="_blank" rel="noopener noreferrer"
+                      style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:linear-gradient(135deg,var(--orange),#ffb347);color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">
+                     🔗 Abrir / Baixar arquivo
+                   </a>`
+                : `<span style="color:var(--muted);font-size:12px">Sem arquivo enviado.</span>`
+              }
+            </div>`;
+        }).join('');
+      }
+      document.getElementById('entregas-modal').classList.add('open');
+    }
+
+    function closeEntregasModal() {
+      document.getElementById('entregas-modal').classList.remove('open');
     }
 
     function deleteTeam(id) {

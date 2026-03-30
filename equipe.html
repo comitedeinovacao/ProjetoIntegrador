@@ -6,6 +6,7 @@
   <title>Painel da Equipe — PI Logística</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
   <style>
     /* Page-specific styles */
     .page { padding-top: 68px; min-height: 100vh; }
@@ -97,6 +98,12 @@
     .btn-entregar:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
     .link-view { color: var(--orange); font-size: 12px; font-weight: 600; text-decoration: none; }
     .link-view:hover { text-decoration: underline; }
+    .entrega-upload-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem; }
+    .btn-upload-cld { padding: 0.6rem 1.25rem; background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: 'Montserrat', sans-serif; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn-upload-cld:hover { box-shadow: 0 4px 12px rgba(247,148,29,0.3); }
+    .btn-link-sep { color: var(--muted); font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .btn-link-send { padding: 0.6rem 1rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: var(--muted); border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: 'Montserrat', sans-serif; }
+    .btn-link-send:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
 
     /* Feedback */
     .feedback-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
@@ -373,7 +380,7 @@
       <section class="tab-content" id="tab-entregas" role="tabpanel" aria-labelledby="tab-entregas">
         <div class="s-head">
           <h3>Entregas</h3>
-          <p>Cole o link do arquivo (Google Drive, etc.) e clique em Entregar para registrar sua produção.</p>
+          <p>Envie o arquivo diretamente (PDF, Word, PowerPoint, Excel) ou cole o link do Google Drive para registrar sua entrega.</p>
         </div>
         <div class="timeline" id="entregas-list" role="list" aria-label="Linha do tempo de entregas"></div>
       </section>
@@ -408,6 +415,10 @@
     const KEY_GRUPOS    = 'pi_grupos';
     const SESSION_TEAM  = 'pi_team';
     const SESSION_ADMIN = 'pi_admin';
+
+    // ── Cloudinary ──────────────────────────────────────────────────────────
+    const CLD_CLOUD  = 'darxzoerw';
+    const CLD_PRESET = 'pi_logistica_docs';
 
     function getGrupos()       { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '[]'); }
     function saveGrupos(g)     { localStorage.setItem(KEY_GRUPOS, JSON.stringify(g)); }
@@ -590,9 +601,13 @@
                 <div class="entrega-link-row">
                   ${done && e.link ? `<a href="${e.link}" target="_blank" rel="noopener noreferrer" class="link-view">🔗 Ver arquivo entregue</a>` : ''}
                   ${!done ? `
-                    <label for="link-e${e.numero}" class="sr-only">Link do arquivo para entrega ${e.numero}</label>
-                    <input type="url" class="link-input" id="link-e${e.numero}" placeholder="Cole o link do arquivo (Google Drive, etc.)">
-                    <button class="btn-entregar" type="button" onclick="entregar(${e.numero})">📤 Entregar</button>
+                    <div class="entrega-upload-row">
+                      <button class="btn-upload-cld" type="button" onclick="uploadDocumento(${e.numero})">📎 Enviar Arquivo</button>
+                      <span class="btn-link-sep">ou cole um link</span>
+                      <label for="link-e${e.numero}" class="sr-only">Link do arquivo para entrega ${e.numero}</label>
+                      <input type="url" class="link-input" id="link-e${e.numero}" placeholder="Google Drive, etc.">
+                      <button class="btn-link-send" type="button" onclick="entregar(${e.numero})">→ Enviar link</button>
+                    </div>
                   ` : ''}
                   ${done ? `<button class="btn-entregar" style="background:rgba(255,255,255,0.1);color:var(--muted)" type="button" onclick="reEntregar(${e.numero})">↩ Reenviar</button>` : ''}
                 </div>
@@ -602,9 +617,37 @@
       }).join('');
     }
 
-    function entregar(num) {
-      const link = document.getElementById(`link-e${num}`)?.value.trim();
-      if (!link) { alert('Cole o link do arquivo antes de entregar.'); return; }
+    function uploadDocumento(num) {
+      const widget = cloudinary.createUploadWidget({
+        cloudName: CLD_CLOUD,
+        uploadPreset: CLD_PRESET,
+        resourceType: 'auto',
+        clientAllowedFormats: ['pdf','doc','docx','ppt','pptx','xls','xlsx','txt','odt','odp','ods'],
+        maxFiles: 1,
+        sources: ['local'],
+        multiple: false,
+        styles: {
+          palette: {
+            window: '#001e50', windowBorder: '#004587', tabIcon: '#F7941D',
+            menuIcons: '#F7941D', textDark: '#ffffff', textLight: '#F2F2F2',
+            link: '#F7941D', action: '#F7941D', inactiveTabIcon: '#89b0e0',
+            error: '#ff5555', inProgress: '#F7941D', complete: '#5ae09a',
+            sourceBg: '#002a5c'
+          }
+        }
+      }, (error, result) => {
+        if (error) { console.error('Upload error:', error); return; }
+        if (result && result.event === 'success') {
+          entregar(num, result.info.secure_url);
+          widget.close();
+        }
+      });
+      widget.open();
+    }
+
+    function entregar(num, uploadedUrl) {
+      const link = uploadedUrl || document.getElementById(`link-e${num}`)?.value.trim();
+      if (!link) { alert('Envie um arquivo ou cole o link antes de entregar.'); return; }
       const grupos = getGrupos();
       const idx    = grupos.findIndex(g => g.id === urlId);
       if (idx < 0) return;
