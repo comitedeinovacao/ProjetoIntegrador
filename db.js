@@ -3,6 +3,19 @@
 //  Instrução: após implantar o Apps Script, cole a URL em GAS_URL.
 // ═══════════════════════════════════════════════════════════════════
 
+/**
+ * Formata uma data ISO (ex: "2026-03-29T18:00:00Z") ou YYYY-MM-DD
+ * para exibição em pt-BR sem risco de fuso horário inverter o dia.
+ * Exemplo: formatDate("2026-03-29") → "29/03/2026"
+ */
+function formatDate(value, opts) {
+  if (!value) return '—';
+  // Se vier como YYYY-MM-DD (sem hora), adiciona T12:00 para evitar
+  // que o JavaScript interprete como meia-noite UTC (que no Brasil vira dia anterior)
+  const safe = /^\d{4}-\d{2}-\d{2}$/.test(value) ? value + 'T12:00:00' : value;
+  return new Date(safe).toLocaleDateString('pt-BR', opts || { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 const GAS_URL    = 'https://script.google.com/macros/s/AKfycbxZyUKKLobm59Egj561BFQDrlctQp9cy9t2jqxAs8AV6sJnXKyFfEOoVQJQkRNyGeOvRA/exec';
 const GAS_SECRET = 'pi_senac_2025';
 
