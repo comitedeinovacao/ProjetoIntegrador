@@ -6,6 +6,7 @@
   <title>PI Logística — Senac Araçatuba</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="db.js"></script>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
@@ -196,7 +197,9 @@
     document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('overlay').classList.contains('open')) closeModal(); });
 
+    // Renderiza com dados locais imediatamente, depois sincroniza e re-renderiza
     renderTeams();
+    cloudSync().then(synced => { if (synced) renderTeams(); });
   </script>
 </body>
 </html>
