@@ -169,6 +169,8 @@
 
     .empty-table { padding: 4rem; text-align: center; color: var(--muted); font-size: 14px; }
     .empty-table .ei { font-size: 48px; display: block; margin-bottom: 1rem; }
+    .btn-rm-task { background: none; border: none; color: #cbd5e1; font-size: 16px; cursor: pointer; padding: .3rem .5rem; border-radius: 6px; transition: .15s; line-height: 1; }
+    .btn-rm-task:hover { background: #fee2e2; color: #dc2626; }
 
     /* ── KANBAN VIEW ── */
     .kanban-board { display: flex; gap: 1rem; padding: 1.25rem; overflow-x: auto; min-height: 100%; align-items: flex-start; }
@@ -243,9 +245,10 @@
     .prog-num { font-size: 13px; font-weight: 700; color: var(--col-done); min-width: 36px; }
 
     /* Panel body (scrollable) */
-    .panel-body { flex: 1; overflow-y: auto; padding: 1rem 1.5rem 2rem; }
-    .panel-body::-webkit-scrollbar { width: 4px; }
-    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .panel-body { flex: 1; min-height: 0; overflow-y: auto; padding: 1rem 1.5rem 2rem; }
+    .panel-body::-webkit-scrollbar { width: 6px; }
+    .panel-body::-webkit-scrollbar-thumb { background: #c8d8ee; border-radius: 3px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
 
     /* Panel sections */
     .panel-section { margin-bottom: 1.5rem; }
@@ -413,6 +416,7 @@
                 <th>Status</th>
                 <th>Prioridade</th>
                 <th>Progresso</th>
+                <th><span class="sr-only">Ações</span></th>
               </tr>
             </thead>
             <tbody id="pl-tbody"></tbody>
@@ -451,7 +455,10 @@
         <textarea class="panel-title" id="panel-title" rows="1" placeholder="Nome da tarefa (O Quê?)..."
                   oninput="autoResize(this);panelSave('oQue',this.value)"></textarea>
       </div>
-      <button class="panel-close" onclick="closePanel()" aria-label="Fechar">✕</button>
+      <div style="display:flex;gap:.5rem;flex-shrink:0">
+        <button class="btn-rm-task" onclick="removeTarefa(_activeTid)" title="Excluir tarefa" style="font-size:15px;padding:.35rem .5rem" aria-label="Excluir tarefa">🗑</button>
+        <button class="panel-close" onclick="closePanel()" aria-label="Fechar">✕</button>
+      </div>
     </div>
 
     <!-- Status + Priority chips -->
@@ -713,6 +720,9 @@
                 <span class="prog-pct">${prog}%</span>
               </div>
             </td>
+            <td onclick="event.stopPropagation()">
+              <button class="btn-rm-task" onclick="removeTarefa('${t.id}')" title="Excluir tarefa" aria-label="Excluir tarefa">🗑</button>
+            </td>
           </tr>`;
       }).join('');
     }
@@ -732,7 +742,10 @@
           const resp = (t.responsaveis || []);
           return `
             <div class="kanban-card" onclick="openPanel('${t.id}')">
-              <div class="kc-name">${t.oQue || '<em style="color:var(--muted)">Sem título</em>'}</div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
+                <div class="kc-name">${t.oQue || '<em style="color:var(--muted)">Sem título</em>'}</div>
+                <button class="btn-rm-task" onclick="event.stopPropagation();removeTarefa('${t.id}')" title="Excluir tarefa" style="flex-shrink:0;margin-top:-2px">🗑</button>
+              </div>
               <div class="task-labels" style="margin-bottom:.5rem">
                 ${t.prioridade === 'urgente' ? '<span class="label-badge lb-urgente">🚨 Urgente</span>' : ''}
                 ${t.prioridade === 'media' ? '<span class="label-badge lb-media">● Média</span>' : ''}
@@ -776,6 +789,19 @@
     }
 
     function addTarefaComStatus(status) { addTarefa(status); }
+
+    function removeTarefa(tid) {
+      if (!confirm('Excluir esta tarefa? Esta ação não pode ser desfeita.')) return;
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      const planner = grupos[idx].planner;
+      if (!planner || !planner.tarefas) return;
+      planner.tarefas = planner.tarefas.filter(t => t.id !== tid);
+      saveGrupos(grupos);
+      if (_activeTid === tid) closePanel();
+      renderAll();
+    }
 
     function quickToggle(tid) {
       const grupos = getGrupos();
