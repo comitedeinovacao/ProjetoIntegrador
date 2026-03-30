@@ -600,7 +600,15 @@
     // ── Init ──────────────────────────────────────────────────────────────
     async function init() {
       if (!urlId) { alert('Equipe não especificada.'); history.back(); return; }
-      await Promise.race([cloudSync(), new Promise(r => setTimeout(r, 4000))]);
+      // Usa dados locais imediatamente se disponíveis
+      if (getGrupo()) {
+        renderAll();
+        // Sincroniza em segundo plano
+        cloudSync().then(synced => { if (synced && getGrupo()) renderAll(); });
+        return;
+      }
+      // Sem dados locais — aguarda a nuvem (até 6 s)
+      await Promise.race([cloudSync(), new Promise(r => setTimeout(r, 6000))]);
       const g = getGrupo();
       if (!g) { alert('Equipe não encontrada.'); history.back(); return; }
       renderAll();
@@ -668,7 +676,7 @@
         const membros = (g.membros || []);
 
         return `
-          <tr class="${done ? 'done' : ''}" onclick="openPanel('${t.id}')">
+          <tr class="${done ? 'done' : ''}" data-tid="${t.id}" onclick="openPanel('${t.id}')">
             <td onclick="event.stopPropagation()">
               <button class="status-circle ${done ? 'done' : doing ? 'doing' : ''}"
                       onclick="quickToggle('${t.id}')"
@@ -759,6 +767,11 @@
       grupos[idx].planner.tarefas.push(nova);
       saveGrupos(grupos);
       renderAll();
+      // Rola até a nova linha antes de abrir o painel
+      setTimeout(() => {
+        const row = document.querySelector(`[data-tid="${nova.id}"]`);
+        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       openPanel(nova.id);
     }
 
@@ -899,9 +912,11 @@
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === urlId);
       if (idx < 0) return;
-      const ti = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === _activeTid);
+      const planner = grupos[idx].planner;
+      if (!planner || !planner.tarefas) return;
+      const ti = planner.tarefas.findIndex(t => t.id === _activeTid);
       if (ti < 0) return;
-      grupos[idx].planner.tarefas[ti][field] = value;
+      planner.tarefas[ti][field] = value;
       saveGrupos(grupos);
       renderTabela(grupos[idx]);
       renderQuadro(grupos[idx]);
@@ -912,12 +927,14 @@
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === urlId);
       if (idx < 0) return;
-      const ti = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === tid);
+      const planner = grupos[idx].planner;
+      if (!planner || !planner.tarefas) return;
+      const ti = planner.tarefas.findIndex(t => t.id === tid);
       if (ti < 0) return;
-      let resp = grupos[idx].planner.tarefas[ti].responsaveis || [];
+      let resp = planner.tarefas[ti].responsaveis || [];
       if (checked && !resp.includes(nome)) resp.push(nome);
       if (!checked) resp = resp.filter(r => r !== nome);
-      grupos[idx].planner.tarefas[ti].responsaveis = resp;
+      planner.tarefas[ti].responsaveis = resp;
       saveGrupos(grupos);
       document.getElementById('panel-pills').innerHTML = resp.length
         ? resp.map(r => `<span class="panel-resp-pill">👤 ${r}</span>`).join('')
@@ -932,11 +949,14 @@
       if (!_activeTid) return;
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === urlId);
-      const ti  = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === _activeTid);
+      if (idx < 0) return;
+      const planner = grupos[idx].planner;
+      if (!planner || !planner.tarefas) return;
+      const ti = planner.tarefas.findIndex(t => t.id === _activeTid);
       if (ti < 0) return;
-      const cur  = grupos[idx].planner.tarefas[ti].status;
+      const cur  = planner.tarefas[ti].status;
       const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur) + 1) % STATUS_CYCLE.length];
-      grupos[idx].planner.tarefas[ti].status = next;
+      planner.tarefas[ti].status = next;
       saveGrupos(grupos);
       renderAll();
       populatePanel(grupos[idx]);
@@ -947,11 +967,14 @@
       if (!_activeTid) return;
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === urlId);
-      const ti  = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === _activeTid);
+      if (idx < 0) return;
+      const planner = grupos[idx].planner;
+      if (!planner || !planner.tarefas) return;
+      const ti = planner.tarefas.findIndex(t => t.id === _activeTid);
       if (ti < 0) return;
-      const cur  = grupos[idx].planner.tarefas[ti].prioridade;
+      const cur  = planner.tarefas[ti].prioridade;
       const next = PRIO_CYCLE[(PRIO_CYCLE.indexOf(cur) + 1) % PRIO_CYCLE.length];
-      grupos[idx].planner.tarefas[ti].prioridade = next;
+      planner.tarefas[ti].prioridade = next;
       saveGrupos(grupos);
       renderAll();
       populatePanel(grupos[idx]);
@@ -967,15 +990,18 @@
       if (!texto || !_activeTid) return;
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === urlId);
-      const ti  = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === _activeTid);
+      if (idx < 0) return;
+      const planner = grupos[idx].planner;
+      if (!planner || !planner.tarefas) return;
+      const ti = planner.tarefas.findIndex(t => t.id === _activeTid);
       if (ti < 0) return;
-      if (!grupos[idx].planner.tarefas[ti].comentarios) grupos[idx].planner.tarefas[ti].comentarios = [];
-      grupos[idx].planner.tarefas[ti].comentarios.push({
-        id: gerarId(), autor: grupos[idx].nome, texto, data: new Date().toISOString()
+      if (!planner.tarefas[ti].comentarios) planner.tarefas[ti].comentarios = [];
+      planner.tarefas[ti].comentarios.push({
+        id: gerarId(), autor: grupos[idx].nome || 'Equipe', texto, data: new Date().toISOString()
       });
       saveGrupos(grupos);
       document.getElementById('comment-text').value = '';
-      renderPanelComments(grupos[idx].planner.tarefas[ti]);
+      renderPanelComments(planner.tarefas[ti]);
     }
 
     // ── Attachments ───────────────────────────────────────────────────────
@@ -990,15 +1016,18 @@
         if (!error && result && result.event === 'success') {
           const grupos = getGrupos();
           const idx = grupos.findIndex(g => g.id === urlId);
-          const ti  = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === _activeTid);
+          if (idx < 0) return;
+          const planner = grupos[idx].planner;
+          if (!planner || !planner.tarefas) return;
+          const ti = planner.tarefas.findIndex(t => t.id === _activeTid);
           if (ti < 0) return;
-          if (!grupos[idx].planner.tarefas[ti].anexos) grupos[idx].planner.tarefas[ti].anexos = [];
-          grupos[idx].planner.tarefas[ti].anexos.push({
+          if (!planner.tarefas[ti].anexos) planner.tarefas[ti].anexos = [];
+          planner.tarefas[ti].anexos.push({
             id: gerarId(), nome: result.info.original_filename + '.' + result.info.format,
             url: result.info.secure_url, data: new Date().toISOString()
           });
           saveGrupos(grupos);
-          renderPanelAnexos(grupos[idx].planner.tarefas[ti]);
+          renderPanelAnexos(planner.tarefas[ti]);
           widget.close();
         }
       });
@@ -1008,11 +1037,14 @@
     function removeAnexo(tid, i) {
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === urlId);
-      const ti  = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === tid);
+      if (idx < 0) return;
+      const planner = grupos[idx].planner;
+      if (!planner || !planner.tarefas) return;
+      const ti = planner.tarefas.findIndex(t => t.id === tid);
       if (ti < 0) return;
-      grupos[idx].planner.tarefas[ti].anexos.splice(i, 1);
+      planner.tarefas[ti].anexos.splice(i, 1);
       saveGrupos(grupos);
-      renderPanelAnexos(grupos[idx].planner.tarefas[ti]);
+      renderPanelAnexos(planner.tarefas[ti]);
     }
 
     // ── Sidebar planner fields ────────────────────────────────────────────

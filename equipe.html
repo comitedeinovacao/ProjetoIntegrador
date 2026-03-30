@@ -498,19 +498,39 @@
     async function init() {
       if (!urlId) { window.location.href = 'index.html'; return; }
 
-      // Sincroniza com a nuvem (aguarda até 4 segundos antes de usar dados locais)
-      await Promise.race([cloudSync(), new Promise(r => setTimeout(r, 4000))]);
-
+      // Usa dados locais imediatamente (sem esperar a nuvem)
       const grupos = getGrupos();
       const grupo  = grupos.find(g => g.id === urlId);
-      if (!grupo)  { alert('Equipe não encontrada.'); window.location.href = 'index.html'; return; }
+
+      if (grupo) {
+        // Dados locais disponíveis — inicia a página agora
+        document.getElementById('auth-team-name').textContent = `Equipe: ${grupo.nome}`;
+        if (isAdmin()) { boot(grupo); } else {
+          const sess = getTeamSession();
+          if (sess && sess.id === urlId) { boot(grupo); }
+          else {
+            document.getElementById('auth-gate').classList.add('open');
+            setTimeout(() => document.getElementById('auth-senha').focus(), 100);
+          }
+        }
+        // Sincroniza em segundo plano e atualiza se necessário
+        cloudSync().then(synced => { if (synced) { const g2 = getGrupos().find(g => g.id === urlId); if (g2) renderAll(g2); } });
+        return;
+      }
+
+      // Sem dados locais — aguarda a nuvem (até 6 s)
+      await Promise.race([cloudSync(), new Promise(r => setTimeout(r, 6000))]);
+
+      const grupos2 = getGrupos();
+      const grupo2  = grupos2.find(g => g.id === urlId);
+      if (!grupo2) { alert('Equipe não encontrada.'); window.location.href = 'index.html'; return; }
 
       // Set auth gate label
-      document.getElementById('auth-team-name').textContent = `Equipe: ${grupo.nome}`;
+      document.getElementById('auth-team-name').textContent = `Equipe: ${grupo2.nome}`;
 
-      if (isAdmin()) { boot(grupo); return; }
+      if (isAdmin()) { boot(grupo2); return; }
       const sess = getTeamSession();
-      if (sess && sess.id === urlId) { boot(grupo); return; }
+      if (sess && sess.id === urlId) { boot(grupo2); return; }
       // Show gate
       document.getElementById('auth-gate').classList.add('open');
       setTimeout(() => document.getElementById('auth-senha').focus(), 100);
