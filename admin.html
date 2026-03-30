@@ -6,6 +6,7 @@
   <title>Painel do Docente — PI Logística</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="db.js"></script>
   <style>
     /* Page-specific styles */
     .page-header { padding: 3rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(247,148,29,0.15); }
@@ -287,7 +288,7 @@
 
   <!-- Modal: Equipe -->
   <div class="overlay" id="team-modal" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
-    <div class="modal">
+    <div class="modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
       <button class="modal-close" type="button" onclick="closeTeamModal()" aria-label="Fechar modal">
         <span aria-hidden="true">✕</span>
       </button>
@@ -305,7 +306,38 @@
           <label for="team-senha" class="form-label">Senha de Acesso</label>
           <input type="password" class="field-input" id="team-senha" placeholder="Senha para a equipe" required>
         </div>
-        <button class="btn-action" onclick="saveTeam()" style="width:100%;margin-top:0.5rem" type="button">Salvar Equipe</button>
+
+        <!-- Membros -->
+        <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.08)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+            <span style="font-size:14px;font-weight:700">👥 Integrantes</span>
+            <span id="tm-counter" style="font-size:12px;color:var(--muted)">0 / 30</span>
+          </div>
+
+          <!-- Lista de membros já adicionados -->
+          <div id="tm-member-list" style="margin-bottom:1rem"></div>
+
+          <!-- Formulário para novo membro -->
+          <div id="tm-add-form">
+            <div class="form-grid" style="margin-bottom:0.5rem">
+              <div>
+                <label for="tm-nome" class="form-label">Nome completo *</label>
+                <input type="text" class="field-input" id="tm-nome" placeholder="Nome do aluno">
+              </div>
+              <div>
+                <label for="tm-email" class="form-label">E-mail</label>
+                <input type="email" class="field-input" id="tm-email" placeholder="email@aluno.com"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();addModalMember();}">
+              </div>
+            </div>
+            <button class="btn-action" type="button" onclick="addModalMember()"
+                    style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--text);box-shadow:none;width:100%">
+              + Adicionar Integrante
+            </button>
+          </div>
+        </div>
+
+        <button class="btn-action" onclick="saveTeam()" style="width:100%;margin-top:1.25rem" type="button">✅ Salvar Equipe</button>
       </div>
     </div>
   </div>
@@ -323,8 +355,7 @@
         <input type="text" class="field-input" id="member-nome" placeholder="Nome completo">
         <input type="email" class="field-input" id="member-email" placeholder="E-mail">
       </div>
-      <input type="tel" class="field-input" id="member-telefone" placeholder="WhatsApp (opcional)" style="margin-bottom:0.75rem">
-      <button class="btn-action" onclick="addMember()" style="width:100%" type="button">+ Adicionar Membro</button>
+      <button class="btn-action" onclick="addMember()" style="width:100%;margin-bottom:0.5rem" type="button">+ Adicionar Membro</button>
     </div>
   </div>
 
@@ -424,7 +455,7 @@
     const DEFAULT_ADMIN_PASSWORD = 'admin123';
 
     function getConfig() { return JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}'); }
-    function saveConfig(c) { localStorage.setItem(KEY_CONFIG, JSON.stringify(c)); }
+    function saveConfig(c) { localStorage.setItem(KEY_CONFIG, JSON.stringify(c)); cloudSave(KEY_CONFIG); }
 
     // Initialize admin password if not set
     if (!localStorage.getItem(KEY_ADMIN)) {
@@ -432,11 +463,11 @@
     }
 
     function getGrupos() { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '[]'); }
-    function saveGrupos(g) { localStorage.setItem(KEY_GRUPOS, JSON.stringify(g)); }
+    function saveGrupos(g) { localStorage.setItem(KEY_GRUPOS, JSON.stringify(g)); cloudSave(KEY_GRUPOS); }
     function getMat() { return JSON.parse(localStorage.getItem(KEY_MAT) || 'null'); }
-    function saveMat(m) { localStorage.setItem(KEY_MAT, JSON.stringify(m)); }
+    function saveMat(m) { localStorage.setItem(KEY_MAT, JSON.stringify(m)); cloudSave(KEY_MAT); }
     function getFC() { return JSON.parse(localStorage.getItem(KEY_FC) || '[]'); }
-    function saveFC(f) { localStorage.setItem(KEY_FC, JSON.stringify(f)); }
+    function saveFC(f) { localStorage.setItem(KEY_FC, JSON.stringify(f)); cloudSave(KEY_FC); }
 
     // ── Auth ─────────────────────────────────────────────────────────────
     function authAdmin() {
@@ -457,7 +488,7 @@
       }
     }
 
-    function checkAdminAuth() {
+    async function checkAdminAuth() {
       if (sessionStorage.getItem(SESSION_ADMIN) === 'true') {
         document.getElementById('auth-gate').style.display = 'none';
         document.getElementById('main-nav').style.display = 'flex';
@@ -465,6 +496,9 @@
         document.getElementById('main-footer').style.display = 'grid';
         document.getElementById('main-copy').style.display = 'block';
         renderAll();
+        // Sincroniza com a nuvem e re-renderiza se houver dados novos
+        const synced = await cloudSync();
+        if (synced) renderAll();
       } else {
         setTimeout(() => document.getElementById('admin-senha').focus(), 100);
       }
@@ -566,6 +600,9 @@
       }).join('');
     }
 
+    let _modalMembros = [];
+    const MAX_MEMBROS = 30;
+
     function openTeamModal(id = null) {
       _editingTeamId = id;
       const grupo = id ? getGrupos().find(g => g.id === id) : null;
@@ -573,6 +610,11 @@
       document.getElementById('team-nome').value = grupo?.nome || '';
       document.getElementById('team-tema').value = grupo?.tema || '';
       document.getElementById('team-senha').value = grupo?.senha || '';
+      _modalMembros = grupo ? JSON.parse(JSON.stringify(grupo.membros || [])) : [];
+      renderModalMemberList();
+      document.getElementById('tm-nome').value = '';
+      document.getElementById('tm-email').value = '';
+      document.getElementById('tm-telefone').value = '';
       document.getElementById('team-modal').classList.add('open');
       setTimeout(() => document.getElementById('team-nome').focus(), 100);
     }
@@ -580,6 +622,50 @@
     function closeTeamModal() {
       document.getElementById('team-modal').classList.remove('open');
       _editingTeamId = null;
+      _modalMembros = [];
+    }
+
+    function renderModalMemberList() {
+      const list = document.getElementById('tm-member-list');
+      const counter = document.getElementById('tm-counter');
+      const addForm = document.getElementById('tm-add-form');
+      counter.textContent = `${_modalMembros.length} / ${MAX_MEMBROS}`;
+      counter.style.color = _modalMembros.length >= MAX_MEMBROS ? '#ff8888' : 'var(--muted)';
+      addForm.style.display = _modalMembros.length >= MAX_MEMBROS ? 'none' : 'block';
+      if (_modalMembros.length === 0) {
+        list.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:0.75rem 0;border:1px dashed rgba(255,255,255,0.1);border-radius:8px;margin-bottom:0.5rem">Nenhum integrante adicionado ainda.</div>';
+        return;
+      }
+      list.innerHTML = `
+        <div style="background:rgba(0,40,80,0.4);border-radius:10px;overflow:hidden;margin-bottom:0.75rem">
+          ${_modalMembros.map((m, i) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.65rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;${i===_modalMembros.length-1?'border-bottom:none':''}">
+              <div>
+                <span style="font-weight:600">👤 ${m.nome}</span>
+                ${m.email ? `<span style="color:var(--muted);font-size:11px;margin-left:0.5rem">${m.email}</span>` : ''}
+              </div>
+              <button type="button" onclick="removeModalMember(${i})"
+                      style="background:none;border:none;color:rgba(255,100,100,0.6);font-size:16px;cursor:pointer;padding:0.2rem 0.4rem;line-height:1"
+                      aria-label="Remover ${m.nome}">✕</button>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    function addModalMember() {
+      const nome = document.getElementById('tm-nome').value.trim();
+      const email = document.getElementById('tm-email').value.trim();
+      if (!nome) { document.getElementById('tm-nome').focus(); return; }
+      if (_modalMembros.length >= MAX_MEMBROS) { alert(`Limite de ${MAX_MEMBROS} integrantes atingido.`); return; }
+      _modalMembros.push({ nome, email });
+      document.getElementById('tm-nome').value = '';
+      document.getElementById('tm-email').value = '';
+      renderModalMemberList();
+      document.getElementById('tm-nome').focus();
+    }
+
+    function removeModalMember(i) {
+      _modalMembros.splice(i, 1);
+      renderModalMemberList();
     }
 
     function saveTeam() {
@@ -595,6 +681,7 @@
           grupos[idx].nome = nome;
           grupos[idx].tema = tema;
           grupos[idx].senha = senha;
+          grupos[idx].membros = JSON.parse(JSON.stringify(_modalMembros));
         }
       } else {
         grupos.push({
@@ -602,7 +689,7 @@
           nome,
           tema,
           senha,
-          membros: [],
+          membros: JSON.parse(JSON.stringify(_modalMembros)),
           entregas: [
             { numero: 1, status: 'pendente', link: '' },
             { numero: 2, status: 'bloqueado', link: '' },
@@ -699,7 +786,7 @@
         <div class="member-item">
           <div class="member-info">
             <span class="member-name">${m.nome}</span>
-            <span class="member-contact">${m.email || ''} ${m.telefone ? '· ' + m.telefone : ''}</span>
+            <span class="member-contact">${m.email || ''}</span>
           </div>
           <button class="btn-icon danger" onclick="removeMember(${i})" title="Remover" aria-label="Remover ${m.nome}">🗑</button>
         </div>
@@ -709,19 +796,18 @@
     function addMember() {
       const nome = document.getElementById('member-nome').value.trim();
       const email = document.getElementById('member-email').value.trim();
-      const telefone = document.getElementById('member-telefone').value.trim();
       if (!nome) { alert('Digite o nome do membro.'); return; }
 
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === _currentTeamId);
       if (idx < 0) return;
       if (!grupos[idx].membros) grupos[idx].membros = [];
-      grupos[idx].membros.push({ nome, email, telefone });
+      if (grupos[idx].membros.length >= MAX_MEMBROS) { alert(`Limite de ${MAX_MEMBROS} integrantes atingido.`); return; }
+      grupos[idx].membros.push({ nome, email });
       saveGrupos(grupos);
 
       document.getElementById('member-nome').value = '';
       document.getElementById('member-email').value = '';
-      document.getElementById('member-telefone').value = '';
       renderMemberList();
       renderStats();
     }
