@@ -151,7 +151,7 @@
     .planner-table tbody td { padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; vertical-align: middle; }
     .planner-table tbody tr:nth-child(odd) td { background: rgba(255,255,255,0.02); }
     .planner-table tbody tr:hover td { background: rgba(247,148,29,0.04); }
-    .pt-input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; padding: 0.3rem 0.4rem; border-radius: 5px; }
+    .pt-input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; padding: 0.3rem 0.4rem; border-radius: 5px; resize: vertical; min-height: 36px; line-height: 1.5; }
     .pt-input:focus { outline: none; background: rgba(255,255,255,0.07); }
     .pt-input::placeholder { color: rgba(242,242,242,0.22); }
     .pt-date { width: 110px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); font-size: 12px; font-family: 'Montserrat', sans-serif; padding: 0.3rem 0.5rem; }
@@ -249,8 +249,7 @@
     <!-- Tabs -->
     <div class="tab-bar" role="tablist" aria-label="Abas do painel">
       <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-visao" onclick="showTab('visao')">📊 Visão Geral</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-planner" onclick="showTab('planner')">📌 Planner</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-plano" onclick="showTab('plano')">📋 Plano 5W2H</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-planner" onclick="showTab('planner')">📋 Planner 5W2H</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-gut" onclick="showTab('gut')">🔺 Matriz GUT</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-entregas" onclick="showTab('entregas')">📤 Entregas</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback" onclick="showTab('feedback')">💬 Feedback</button>
@@ -311,87 +310,41 @@
 
         </div>
 
-        <!-- Planner de Tarefas (estilo MS Planner) -->
+        <!-- Membros da Equipe -->
+        <div class="planner-header" style="margin-top:0.5rem">
+          <h4>👥 Membros da Equipe</h4>
+        </div>
+        <div id="planner-membros" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2rem"></div>
+
+        <!-- Matriz 5W2H de Tarefas -->
         <div class="planner-header">
-          <h4>Tarefas do Projeto</h4>
+          <h4>Matriz 5W2H — Tarefas do Projeto</h4>
           <button class="btn-action btn-sm" type="button" onclick="addTarefa()">+ Nova Tarefa</button>
         </div>
 
         <div class="planner-wrap">
-          <table class="planner-table" id="planner-table" aria-label="Planner de tarefas">
+          <table class="planner-table" id="planner-table" aria-label="Matriz 5W2H de tarefas">
             <thead>
               <tr>
-                <th scope="col" style="width:30%">Nome da Tarefa</th>
-                <th scope="col" style="width:22%">Responsáveis</th>
-                <th scope="col">Início</th>
-                <th scope="col">Conclusão</th>
+                <th scope="col">O QUÊ? (What)</th>
+                <th scope="col">POR QUÊ? (Why)</th>
+                <th scope="col">QUEM? (Who)</th>
+                <th scope="col">ONDE? (Where)</th>
+                <th scope="col">INÍCIO (When)</th>
+                <th scope="col">CONCLUSÃO (When)</th>
+                <th scope="col">COMO? (How)</th>
+                <th scope="col">QUANTO? (How Much)</th>
                 <th scope="col">Status</th>
                 <th scope="col">Prioridade</th>
-                <th scope="col" style="width:36px"></th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody id="planner-tbody">
-              <tr><td colspan="7" class="planner-empty">Nenhuma tarefa ainda. Clique em "+ Nova Tarefa" para começar.</td></tr>
+              <tr><td colspan="11" class="planner-empty">Nenhuma tarefa ainda. Clique em "+ Nova Tarefa" para começar.</td></tr>
             </tbody>
           </table>
         </div>
         <div class="auto-save-msg" id="planner-save-msg" aria-live="polite">💾 Todas as alterações são salvas automaticamente.</div>
-      </section>
-
-      <!-- PLANO 5W2H -->
-      <section class="tab-content" id="tab-plano" role="tabpanel" aria-labelledby="tab-plano">
-        <div class="s-head">
-          <h3>Plano de Ação — 5W2H</h3>
-          <p>Responda as 7 perguntas para construir o plano do seu projeto. Salvo automaticamente.</p>
-        </div>
-
-        <div class="id-grid">
-          <div>
-            <label class="id-label" for="p-tema">Tema Gerador</label>
-            <input type="text" class="field-input" id="p-tema" placeholder="Descreva o tema do projeto..." oninput="autoSave()">
-          </div>
-          <div>
-            <label class="id-label" for="p-data">Data</label>
-            <input type="date" class="field-input" id="p-data" oninput="autoSave()">
-          </div>
-        </div>
-
-        <div class="field-block">
-          <div class="field-label"><span class="field-badge badge-5w">WHAT — O QUÊ?</span></div>
-          <label for="p-what" class="sr-only">O que - descrição do problema</label>
-          <textarea class="field-input field-textarea" id="p-what" placeholder="Qual problema logístico seu grupo vai resolver?" oninput="autoSave()"></textarea>
-        </div>
-        <div class="field-block">
-          <div class="field-label"><span class="field-badge badge-5w">WHY — POR QUÊ?</span></div>
-          <label for="p-why" class="sr-only">Por que - justificativa</label>
-          <textarea class="field-input field-textarea" id="p-why" placeholder="Por que este problema precisa ser resolvido?" oninput="autoSave()"></textarea>
-        </div>
-        <div class="field-block">
-          <div class="field-label"><span class="field-badge badge-5w">WHO — QUEM?</span></div>
-          <label for="p-who" class="sr-only">Quem - responsáveis</label>
-          <textarea class="field-input field-textarea" id="p-who" placeholder="Quem é responsável por cada tarefa?" oninput="autoSave()"></textarea>
-        </div>
-        <div class="field-block">
-          <div class="field-label"><span class="field-badge badge-5w">WHERE — ONDE?</span></div>
-          <label for="p-where" class="sr-only">Onde - local de execução</label>
-          <textarea class="field-input field-textarea" id="p-where" placeholder="Onde o projeto será executado?" oninput="autoSave()"></textarea>
-        </div>
-        <div class="field-block">
-          <div class="field-label"><span class="field-badge badge-5w">WHEN — QUANDO?</span></div>
-          <label for="p-when" class="sr-only">Quando - cronograma</label>
-          <textarea class="field-input field-textarea" id="p-when" placeholder="Qual o cronograma de entregas?" oninput="autoSave()"></textarea>
-        </div>
-        <div class="field-block">
-          <div class="field-label"><span class="field-badge badge-2h">HOW — COMO?</span></div>
-          <label for="p-how" class="sr-only">Como - metodologia</label>
-          <textarea class="field-input field-textarea" id="p-how" placeholder="Como o grupo vai executar o projeto?" oninput="autoSave()"></textarea>
-        </div>
-        <div class="field-block">
-          <div class="field-label"><span class="field-badge badge-2h">HOW MUCH — QUANTO?</span></div>
-          <label for="p-howmuch" class="sr-only">Quanto - recursos necessários</label>
-          <textarea class="field-input field-textarea" id="p-howmuch" placeholder="Quais recursos são necessários?" oninput="autoSave()"></textarea>
-        </div>
-        <div class="auto-save-msg" id="save-msg" aria-live="polite">💾 Todas as alterações são salvas automaticamente.</div>
       </section>
 
       <!-- MATRIZ GUT -->
@@ -535,7 +488,6 @@
       renderOverview(grupo);
       renderMembers(grupo);
       renderPlanner(grupo);
-      renderPlano(grupo);
       renderGUT(grupo);
       renderEntregas(grupo);
       renderFeedback(grupo);
@@ -577,35 +529,6 @@
           <td>${m.email || '—'}</td>
           <td>${m.telefone ? `<a href="https://wa.me/${m.telefone.replace(/\D/g,'')}" target="_blank" rel="noopener noreferrer" style="color:var(--orange);text-decoration:none">📞 ${m.telefone}</a>` : '—'}</td>
         </tr>`).join('');
-    }
-
-    function renderPlano(grupo) {
-      const p = grupo.plano5w2h || {};
-      ['what','why','who','where','when','how','howmuch','tema','data'].forEach(k => {
-        const el = document.getElementById('p-' + k);
-        if (el) el.value = p[k] || '';
-      });
-    }
-
-    // ── Auto-save (debounced) ─────────────────────────────────────────────
-    let _saveTimer = null;
-    function autoSave() {
-      clearTimeout(_saveTimer);
-      document.getElementById('save-msg').textContent = '💾 Salvando…';
-      _saveTimer = setTimeout(() => {
-        const grupos = getGrupos();
-        const idx    = grupos.findIndex(g => g.id === urlId);
-        if (idx < 0) return;
-        if (!grupos[idx].plano5w2h) grupos[idx].plano5w2h = {};
-        ['what','why','who','where','when','how','howmuch','tema','data'].forEach(k => {
-          const el = document.getElementById('p-' + k);
-          if (el) grupos[idx].plano5w2h[k] = el.value;
-        });
-        grupos[idx].tema = document.getElementById('p-tema').value || grupos[idx].tema;
-        saveGrupos(grupos);
-        renderHeader(grupos[idx]);
-        document.getElementById('save-msg').textContent = '✅ Salvo automaticamente.';
-      }, 900);
     }
 
     // ── Matriz GUT ──────────────────────────────────────────────────────
@@ -744,7 +667,18 @@
       // Card 4 — Soluções
       renderSolucoes(pl.solucoes || ['']);
 
-      // Tabela de tarefas
+      // Membros da equipe
+      const membros = grupo.membros || [];
+      const memDiv  = document.getElementById('planner-membros');
+      if (membros.length === 0) {
+        memDiv.innerHTML = '<span style="color:var(--muted);font-size:13px">Nenhum membro cadastrado. O docente adiciona membros pelo Painel do Docente.</span>';
+      } else {
+        memDiv.innerHTML = membros.map(m =>
+          `<span class="member-tag" title="${m.email||''}">👤 ${m.nome}</span>`
+        ).join('');
+      }
+
+      // Tabela 5W2H de tarefas
       renderTarefas(grupo);
     }
 
@@ -819,8 +753,10 @@
       if (!grupos[idx].planner) grupos[idx].planner = {};
       if (!grupos[idx].planner.tarefas) grupos[idx].planner.tarefas = [];
       grupos[idx].planner.tarefas.push({
-        id: gerarId(), titulo: '', responsaveis: [],
-        dataInicio: '', dataConclusao: '',
+        id: gerarId(),
+        oQue: '', porQue: '', responsaveis: [],
+        onde: '', dataInicio: '', dataConclusao: '',
+        como: '', quanto: '',
         status: 'pendente', prioridade: 'media'
       });
       saveGrupos(grupos);
@@ -887,34 +823,42 @@
       const membros = grupo.membros || [];
       const tbody   = document.getElementById('planner-tbody');
       if (tarefas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="planner-empty">Nenhuma tarefa ainda. Clique em "+ Nova Tarefa" para começar.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="planner-empty">Nenhuma tarefa ainda. Clique em "+ Nova Tarefa" para começar.</td></tr>';
         return;
       }
       tbody.innerHTML = tarefas.map(t => {
-        const resp    = t.responsaveis || [];
-        const [sCls, sLbl] = STATUS_INFO[t.status]  || STATUS_INFO.pendente;
-        const [pCls, pLbl] = PRIO_INFO[t.prioridade] || PRIO_INFO.media;
+        const resp      = t.responsaveis || [];
         const pillsHtml = resp.length
           ? resp.map(r => `<span class="resp-pill">${r}</span>`).join('')
           : '<span style="color:var(--muted);font-size:11px">—</span>';
-        const checkboxes = membros.map(m => `
-          <label>
-            <input type="checkbox" value="${m.nome}" ${resp.includes(m.nome)?'checked':''}
-                   onchange="toggleResponsavel('${t.id}','${m.nome}')">
-            ${m.nome}
-          </label>`).join('');
+        const checkboxes = membros.length
+          ? membros.map(m => `
+              <label>
+                <input type="checkbox" value="${m.nome}" ${resp.includes(m.nome)?'checked':''}
+                       onchange="toggleResponsavel('${t.id}','${m.nome}')">
+                ${m.nome}
+              </label>`).join('')
+          : '<span style="font-size:12px;color:var(--muted)">Sem membros cadastrados</span>';
         return `
           <tr>
             <td>
-              <input class="pt-input" type="text" placeholder="Nome da tarefa..." value="${(t.titulo||'').replace(/"/g,'&quot;')}"
-                     onchange="saveTarefaField('${t.id}','titulo',this.value)">
+              <textarea class="pt-input" rows="2" placeholder="Descreva a tarefa/ação..."
+                        onchange="saveTarefaField('${t.id}','oQue',this.value)">${(t.oQue||'').replace(/</g,'&lt;')}</textarea>
+            </td>
+            <td>
+              <textarea class="pt-input" rows="2" placeholder="Justificativa..."
+                        onchange="saveTarefaField('${t.id}','porQue',this.value)">${(t.porQue||'').replace(/</g,'&lt;')}</textarea>
             </td>
             <td>
               <div class="assign-wrap">
                 <div class="resp-pills" id="pills-${t.id}">${pillsHtml}</div>
                 <button class="assign-btn" type="button" onclick="toggleDrop('${t.id}')">✏️ Atribuir</button>
-                <div class="assign-drop" id="drop-${t.id}">${checkboxes || '<span style="font-size:12px;color:var(--muted)">Sem membros cadastrados</span>'}</div>
+                <div class="assign-drop" id="drop-${t.id}">${checkboxes}</div>
               </div>
+            </td>
+            <td>
+              <input class="pt-input" type="text" placeholder="Local..." value="${(t.onde||'').replace(/"/g,'&quot;')}"
+                     onchange="saveTarefaField('${t.id}','onde',this.value)">
             </td>
             <td>
               <input class="pt-date" type="date" value="${t.dataInicio||''}"
@@ -923,6 +867,14 @@
             <td>
               <input class="pt-date" type="date" value="${t.dataConclusao||''}"
                      onchange="saveTarefaField('${t.id}','dataConclusao',this.value)">
+            </td>
+            <td>
+              <textarea class="pt-input" rows="2" placeholder="Como será feito..."
+                        onchange="saveTarefaField('${t.id}','como',this.value)">${(t.como||'').replace(/</g,'&lt;')}</textarea>
+            </td>
+            <td>
+              <input class="pt-input" type="text" placeholder="R$ / recursos..." value="${(t.quanto||'').replace(/"/g,'&quot;')}"
+                     onchange="saveTarefaField('${t.id}','quanto',this.value)">
             </td>
             <td>
               <select class="pt-sel" onchange="saveTarefaField('${t.id}','status',this.value)">
