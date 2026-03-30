@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel da Equipe — PI Logística</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Page-specific styles */
+    .page { padding-top: 68px; min-height: 100vh; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Team Header */
+    .team-header { padding: 2.5rem 1.5rem 0; max-width: 1000px; margin: 0 auto; }
+    .team-hrow { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .team-name-big { font-size: clamp(22px, 4vw, 34px); font-weight: 900; }
+    .team-name-big .grad { background: linear-gradient(135deg, var(--orange), var(--orange-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .team-tema { font-size: 14px; color: var(--muted); margin-top: 0.3rem; line-height: 1.6; }
+    .btn-logout { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: var(--muted); padding: 0.5rem 1rem; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; font-family: 'Montserrat', sans-serif; }
+    .btn-logout:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+    .btn-logout:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+    /* Progress Bar */
+    .progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-bottom: 1.5rem; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--orange-light)); border-radius: 2px; transition: width 0.5s ease; }
+
+    /* Members Strip */
+    .members-strip { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0; }
+    .member-tag { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 0.3rem 0.9rem; font-size: 12px; font-weight: 600; }
+
+    /* Tab Navigation */
+    .tab-bar { display: flex; gap: 0.25rem; padding: 1.25rem 1.5rem 0; max-width: 1000px; margin: 0 auto; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 0.65rem 1.1rem; font-size: 13px; font-weight: 700; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap; transition: all 0.2s; position: relative; bottom: -1px; border-bottom: 2px solid transparent; font-family: 'Montserrat', sans-serif; }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); background: rgba(247,148,29,0.06); }
+    .tab-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+    /* Tab Content */
+    .tab-content { display: none; padding: 2rem 0 3rem; }
+    .tab-content.active { display: block; }
+
+    /* Forms */
+    .s-head { margin-bottom: 1.5rem; }
+    .s-head h3 { font-size: 18px; font-weight: 800; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .s-head h3::before { content: ''; display: block; width: 4px; height: 1em; background: var(--orange); border-radius: 2px; }
+    .s-head p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .field-block { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid var(--orange); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .field-label { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+    .field-badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .badge-5w { background: rgba(247,148,29,0.2); color: var(--orange); }
+    .badge-2h { background: rgba(0,69,135,0.4); color: #90baff; }
+    .field-input { width: 100%; padding: 0.8rem 0.9rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--text); font-size: 14px; font-family: 'Montserrat', sans-serif; transition: border-color 0.2s; }
+    .field-input:focus { outline: none; border-color: var(--orange); }
+    .field-input::placeholder { color: rgba(242,242,242,0.25); }
+    .field-textarea { resize: vertical; min-height: 90px; line-height: 1.65; }
+    .id-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    @media (max-width: 600px) { .id-grid { grid-template-columns: 1fr; } }
+    .id-label { font-size: 12px; font-weight: 700; color: var(--orange); margin-bottom: 0.4rem; }
+    .auto-save-msg { font-size: 11px; color: var(--muted); text-align: right; margin-top: 0.4rem; }
+    .btn-action { padding: 0.85rem 2rem; background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Montserrat', sans-serif; }
+    .btn-action:hover { box-shadow: 0 6px 20px rgba(247,148,29,0.4); transform: translateY(-1px); }
+    .btn-action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+    /* Matriz GUT */
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    th { background: rgba(0,40,80,0.7); color: var(--text); padding: 0.85rem 1rem; text-align: left; font-size: 13px; font-weight: 700; }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+    tr:nth-child(odd) td { background: rgba(255,255,255,0.02); }
+    tr.prioritaria td { background: rgba(247,148,29,0.15); font-weight: 700; color: var(--orange); }
+    .sel { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: var(--text); padding: 0.4rem 0.5rem; font-size: 13px; font-family: 'Montserrat', sans-serif; width: 100%; }
+    .sel:focus { outline: none; border-color: var(--orange); }
+    .gut-result { font-weight: 700; color: var(--orange); }
+
+    /* Entregas */
+    .timeline { display: flex; flex-direction: column; gap: 1.25rem; padding-left: 48px; position: relative; }
+    .timeline::before { content: ''; position: absolute; left: 16px; top: 0; bottom: 0; width: 2px; background: rgba(247,148,29,0.25); }
+    .tl-item { position: relative; }
+    .tl-dot { position: absolute; left: -40px; top: 0; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--orange); background: rgba(247,148,29,0.2); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .tl-dot.locked { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); }
+    .entrega-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; }
+    .entrega-card.locked { opacity: 0.55; }
+    .entrega-title { font-size: 15px; font-weight: 700; margin-bottom: 0.25rem; }
+    .entrega-prazo { font-size: 12px; color: var(--muted); margin-bottom: 0.75rem; }
+    .entrega-status { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 11px; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; margin-bottom: 0.75rem; }
+    .status-pendente { background: rgba(247,148,29,0.15); color: var(--orange); border: 1px solid rgba(247,148,29,0.3); }
+    .status-entregue { background: rgba(50,200,100,0.15); color: #5ae09a; border: 1px solid rgba(50,200,100,0.3); }
+    .status-bloqueado { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+    .entrega-link-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    .link-input { flex: 1; min-width: 180px; padding: 0.6rem 0.85rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); font-size: 12px; font-family: 'Montserrat', sans-serif; }
+    .link-input:focus { outline: none; border-color: var(--orange); }
+    .link-input::placeholder { color: rgba(242,242,242,0.22); }
+    .btn-entregar { padding: 0.6rem 1.25rem; background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: 'Montserrat', sans-serif; }
+    .btn-entregar:hover { box-shadow: 0 4px 12px rgba(247,148,29,0.3); }
+    .btn-entregar:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .link-view { color: var(--orange); font-size: 12px; font-weight: 600; text-decoration: none; }
+    .link-view:hover { text-decoration: underline; }
+
+    /* Feedback */
+    .feedback-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .feedback-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid var(--orange); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .fb-header { background: rgba(0,40,80,0.5); margin: -1.5rem -1.5rem 1rem; padding: 0.85rem 1.5rem; border-radius: 9px 9px 0 0; font-size: 14px; font-weight: 700; }
+    .fb-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
+    .fb-row:last-of-type { border-bottom: none; }
+    .fb-badge { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .fb-A { background: rgba(50,200,100,0.2); color: #5ae09a; }
+    .fb-PA { background: rgba(247,148,29,0.2); color: var(--orange); }
+    .fb-NA { background: rgba(255,100,100,0.2); color: #ff8888; }
+    .fb-orient { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; margin-top: 0.75rem; font-size: 13px; color: rgba(242,242,242,0.8); line-height: 1.7; }
+
+    /* Overview */
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .ov-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; text-align: center; }
+    .ov-val { font-size: 28px; font-weight: 900; color: var(--orange); }
+    .ov-label { font-size: 12px; color: var(--muted); margin-top: 0.25rem; }
+    .members-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .members-table th { background: rgba(0,40,80,0.6); color: var(--text); padding: 0.75rem 1rem; font-size: 12px; font-weight: 700; text-align: left; }
+    .members-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+
+    /* Auth Gate */
+    .auth-gate { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .auth-gate.open { display: flex; }
+    .auth-modal { background: linear-gradient(135deg, #001e50, #003d6b); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; max-width: 420px; width: 100%; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .auth-modal h3 { font-size: 22px; font-weight: 800; margin-bottom: 0.4rem; }
+    .auth-modal p { color: var(--muted); font-size: 13px; margin-bottom: 1.75rem; line-height: 1.6; }
+    .error-msg { color: #ff8080; font-size: 12px; margin-bottom: 0.75rem; display: none; }
+    .error-msg.show { display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+  <nav class="nav" role="navigation" aria-label="Navegação principal">
+    <a href="index.html" class="nav-logo">PI <span>Logística</span></a>
+    <div id="nav-team-badge" class="nav-team-badge" style="display:none" aria-live="polite"></div>
+    <div class="nav-links">
+      <a href="materiais.html">Materiais</a>
+      <a href="index.html">← Equipes</a>
+    </div>
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mob-menu" role="menu" aria-label="Menu de navegação">
+    <a href="materiais.html" role="menuitem" onclick="closeMenu()">Materiais</a>
+    <a href="index.html" role="menuitem" onclick="closeMenu()">← Início</a>
+  </div>
+
+  <!-- Auth Gate -->
+  <div class="auth-gate" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-modal">
+      <h3 id="auth-title">🔒 Acesso à Equipe</h3>
+      <p id="auth-team-name">Digite a senha da sua equipe para continuar.</p>
+      <div class="error-msg" id="auth-err" role="alert" aria-live="polite">Senha incorreta. Tente novamente.</div>
+      <label for="auth-senha" class="sr-only">Senha da equipe</label>
+      <input type="password" class="field-input" id="auth-senha" placeholder="Senha da equipe..."
+             onkeydown="if(event.key==='Enter')authCheck()" style="margin-bottom:1rem;width:100%" autocomplete="current-password">
+      <button class="btn-action" onclick="authCheck()" style="width:100%;justify-content:center">Entrar →</button>
+      <div style="text-align:center;margin-top:1rem">
+        <a href="index.html" style="color:var(--muted);font-size:12px;text-decoration:none">← Voltar para início</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="page" id="main-content" style="display:none">
+    <!-- Team Header -->
+    <div class="team-header">
+      <div class="team-hrow">
+        <div>
+          <h1 class="team-name-big">Equipe: <span class="grad" id="th-nome">—</span></h1>
+          <div class="team-tema" id="th-tema"></div>
+        </div>
+        <button class="btn-logout" onclick="logout()" type="button">Sair da equipe</button>
+      </div>
+      <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso das entregas"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="members-strip" id="members-strip" aria-label="Integrantes da equipe"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar" role="tablist" aria-label="Abas do painel">
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-visao" onclick="showTab('visao')">📊 Visão Geral</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-plano" onclick="showTab('plano')">📋 Plano 5W2H</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-gut" onclick="showTab('gut')">🔺 Matriz GUT</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-entregas" onclick="showTab('entregas')">📤 Entregas</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback" onclick="showTab('feedback')">💬 Feedback</button>
+    </div>
+
+    <div class="container">
+
+      <!-- VISÃO GERAL -->
+      <section class="tab-content active" id="tab-visao" role="tabpanel" aria-labelledby="tab-visao">
+        <div class="overview-grid" id="ov-grid"></div>
+        <div class="s-head"><h3>Integrantes</h3></div>
+        <div class="table-wrap">
+          <table class="members-table" id="mem-table" aria-label="Tabela de integrantes">
+            <thead><tr><th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">WhatsApp</th></tr></thead>
+            <tbody id="mem-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PLANO 5W2H -->
+      <section class="tab-content" id="tab-plano" role="tabpanel" aria-labelledby="tab-plano">
+        <div class="s-head">
+          <h3>Plano de Ação — 5W2H</h3>
+          <p>Responda as 7 perguntas para construir o plano do seu projeto. Salvo automaticamente.</p>
+        </div>
+
+        <div class="id-grid">
+          <div>
+            <label class="id-label" for="p-tema">Tema Gerador</label>
+            <input type="text" class="field-input" id="p-tema" placeholder="Descreva o tema do projeto..." oninput="autoSave()">
+          </div>
+          <div>
+            <label class="id-label" for="p-data">Data</label>
+            <input type="date" class="field-input" id="p-data" oninput="autoSave()">
+          </div>
+        </div>
+
+        <div class="field-block">
+          <div class="field-label"><span class="field-badge badge-5w">WHAT — O QUÊ?</span></div>
+          <label for="p-what" class="sr-only">O que - descrição do problema</label>
+          <textarea class="field-input field-textarea" id="p-what" placeholder="Qual problema logístico seu grupo vai resolver?" oninput="autoSave()"></textarea>
+        </div>
+        <div class="field-block">
+          <div class="field-label"><span class="field-badge badge-5w">WHY — POR QUÊ?</span></div>
+          <label for="p-why" class="sr-only">Por que - justificativa</label>
+          <textarea class="field-input field-textarea" id="p-why" placeholder="Por que este problema precisa ser resolvido?" oninput="autoSave()"></textarea>
+        </div>
+        <div class="field-block">
+          <div class="field-label"><span class="field-badge badge-5w">WHO — QUEM?</span></div>
+          <label for="p-who" class="sr-only">Quem - responsáveis</label>
+          <textarea class="field-input field-textarea" id="p-who" placeholder="Quem é responsável por cada tarefa?" oninput="autoSave()"></textarea>
+        </div>
+        <div class="field-block">
+          <div class="field-label"><span class="field-badge badge-5w">WHERE — ONDE?</span></div>
+          <label for="p-where" class="sr-only">Onde - local de execução</label>
+          <textarea class="field-input field-textarea" id="p-where" placeholder="Onde o projeto será executado?" oninput="autoSave()"></textarea>
+        </div>
+        <div class="field-block">
+          <div class="field-label"><span class="field-badge badge-5w">WHEN — QUANDO?</span></div>
+          <label for="p-when" class="sr-only">Quando - cronograma</label>
+          <textarea class="field-input field-textarea" id="p-when" placeholder="Qual o cronograma de entregas?" oninput="autoSave()"></textarea>
+        </div>
+        <div class="field-block">
+          <div class="field-label"><span class="field-badge badge-2h">HOW — COMO?</span></div>
+          <label for="p-how" class="sr-only">Como - metodologia</label>
+          <textarea class="field-input field-textarea" id="p-how" placeholder="Como o grupo vai executar o projeto?" oninput="autoSave()"></textarea>
+        </div>
+        <div class="field-block">
+          <div class="field-label"><span class="field-badge badge-2h">HOW MUCH — QUANTO?</span></div>
+          <label for="p-howmuch" class="sr-only">Quanto - recursos necessários</label>
+          <textarea class="field-input field-textarea" id="p-howmuch" placeholder="Quais recursos são necessários?" oninput="autoSave()"></textarea>
+        </div>
+        <div class="auto-save-msg" id="save-msg" aria-live="polite">💾 Todas as alterações são salvas automaticamente.</div>
+      </section>
+
+      <!-- MATRIZ GUT -->
+      <section class="tab-content" id="tab-gut" role="tabpanel" aria-labelledby="tab-gut">
+        <div class="s-head">
+          <h3>Matriz GUT — Priorização</h3>
+          <p>Avalie Gravidade × Urgência × Tendência (1–5). O maior valor indica o problema prioritário.</p>
+        </div>
+        <div class="table-wrap">
+          <table id="gut-table" aria-label="Tabela da Matriz GUT">
+            <thead><tr><th scope="col">Problema</th><th scope="col">G (1-5)</th><th scope="col">U (1-5)</th><th scope="col">T (1-5)</th><th scope="col">G×U×T</th><th scope="col">Prioridade</th></tr></thead>
+            <tbody id="gut-tbody"></tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table aria-label="Problema prioritário"><tbody>
+            <tr class="prioritaria">
+              <td style="font-weight:700">🏆 Problema Prioritário:</td>
+              <td id="gut-prio" style="text-align:right;font-weight:700">Nenhum selecionado</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- ENTREGAS -->
+      <section class="tab-content" id="tab-entregas" role="tabpanel" aria-labelledby="tab-entregas">
+        <div class="s-head">
+          <h3>Entregas</h3>
+          <p>Cole o link do arquivo (Google Drive, etc.) e clique em Entregar para registrar sua produção.</p>
+        </div>
+        <div class="timeline" id="entregas-list" role="list" aria-label="Linha do tempo de entregas"></div>
+      </section>
+
+      <!-- FEEDBACK -->
+      <section class="tab-content" id="tab-feedback" role="tabpanel" aria-labelledby="tab-feedback">
+        <div class="s-head">
+          <h3>Feedback do Docente</h3>
+          <p>Acompanhe as avaliações por entrega. Apenas o docente pode registrar feedback.</p>
+        </div>
+        <div id="feedback-list">
+          <div class="feedback-empty" role="status">Nenhum feedback registrado ainda. Continue com as entregas!</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer role="contentinfo">
+    <div class="f-logo">SENAC</div>
+    <div class="f-center">
+      <div style="font-weight:700">Técnico em Logística · UC12 — Projeto Integrador</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:2px">Jean Carlos Macedo · Senac Araçatuba</div>
+    </div>
+    <div class="f-right">
+      <a href="mailto:jean.cmmacedo@senacsp.edu.br" style="color:inherit;text-decoration:none">jean.cmmacedo@senacsp.edu.br</a>
+    </div>
+  </footer>
+  <div class="f-copy">© Senac São Paulo · Material educacional interno · 2025</div>
+
+  <script>
+    const KEY_GRUPOS    = 'pi_grupos';
+    const SESSION_TEAM  = 'pi_team';
+    const SESSION_ADMIN = 'pi_admin';
+
+    function getGrupos()       { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '[]'); }
+    function saveGrupos(g)     { localStorage.setItem(KEY_GRUPOS, JSON.stringify(g)); }
+    function isAdmin()         { return sessionStorage.getItem(SESSION_ADMIN) === 'true'; }
+    function getTeamSession()  { try { return JSON.parse(sessionStorage.getItem(SESSION_TEAM)); } catch { return null; } }
+
+    // ── URL param ───────────────────────────────────────────────────────
+    const urlId = new URLSearchParams(window.location.search).get('id');
+
+    // ── Nav ─────────────────────────────────────────────────────────────
+    function toggleMenu() {
+      const h = document.getElementById('ham');
+      const m = document.getElementById('mob-menu');
+      const isOpen = h.classList.toggle('open');
+      m.classList.toggle('open');
+      h.setAttribute('aria-expanded', isOpen);
+      h.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+    }
+    function closeMenu() {
+      const h = document.getElementById('ham');
+      h.classList.remove('open');
+      document.getElementById('mob-menu').classList.remove('open');
+      h.setAttribute('aria-expanded', 'false');
+      h.setAttribute('aria-label', 'Abrir menu');
+    }
+
+    // ── Auth ─────────────────────────────────────────────────────────────
+    function authCheck() {
+      const grupos = getGrupos();
+      const grupo  = grupos.find(g => g.id === urlId);
+      if (!grupo) { alert('Equipe não encontrada.'); window.location.href = 'index.html'; return; }
+      const senha = document.getElementById('auth-senha').value.trim();
+      if (senha === grupo.senha) {
+        sessionStorage.setItem(SESSION_TEAM, JSON.stringify({ id: grupo.id, nome: grupo.nome }));
+        boot(grupo);
+      } else {
+        document.getElementById('auth-err').classList.add('show');
+        document.getElementById('auth-senha').value = '';
+        document.getElementById('auth-senha').focus();
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem(SESSION_TEAM);
+      window.location.href = 'index.html';
+    }
+
+    function boot(grupo) {
+      document.getElementById('auth-gate').classList.remove('open');
+      document.getElementById('main-content').style.display = 'block';
+      const badge = document.getElementById('nav-team-badge');
+      badge.textContent = grupo.nome;
+      badge.style.display = 'inline-block';
+      renderAll(grupo);
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────
+    function init() {
+      if (!urlId) { window.location.href = 'index.html'; return; }
+      const grupos = getGrupos();
+      const grupo  = grupos.find(g => g.id === urlId);
+      if (!grupo)  { alert('Equipe não encontrada.'); window.location.href = 'index.html'; return; }
+
+      // Set auth gate label
+      document.getElementById('auth-team-name').textContent = `Equipe: ${grupo.nome}`;
+
+      if (isAdmin()) { boot(grupo); return; }
+      const sess = getTeamSession();
+      if (sess && sess.id === urlId) { boot(grupo); return; }
+      // Show gate
+      document.getElementById('auth-gate').classList.add('open');
+      setTimeout(() => document.getElementById('auth-senha').focus(), 100);
+    }
+
+    // ── Render all ────────────────────────────────────────────────────────
+    function renderAll(grupo) {
+      renderHeader(grupo);
+      renderOverview(grupo);
+      renderMembers(grupo);
+      renderPlano(grupo);
+      renderGUT(grupo);
+      renderEntregas(grupo);
+      renderFeedback(grupo);
+    }
+
+    function getGrupoFresh() { return getGrupos().find(g => g.id === urlId); }
+
+    function renderHeader(grupo) {
+      document.getElementById('th-nome').textContent = grupo.nome;
+      if (grupo.tema) document.getElementById('th-tema').textContent = '📋 ' + grupo.tema;
+      const entregues = (grupo.entregas || []).filter(e => e.status === 'entregue').length;
+      const pct = Math.round(entregues / 4 * 100);
+      const fill = document.getElementById('progress-fill');
+      fill.style.width = pct + '%';
+      fill.parentElement.setAttribute('aria-valuenow', pct);
+      const strip = document.getElementById('members-strip');
+      strip.innerHTML = (grupo.membros || []).map(m => `<span class="member-tag">👤 ${m.nome}</span>`).join('');
+    }
+
+    function renderOverview(grupo) {
+      const entregues = (grupo.entregas || []).filter(e => e.status === 'entregue').length;
+      const membros   = (grupo.membros || []).length;
+      const feedbacks = (grupo.feedback || []).length;
+      const planoOk   = (grupo.plano5w2h && grupo.plano5w2h.what) ? '✅' : '—';
+      document.getElementById('ov-grid').innerHTML = `
+        <div class="ov-card"><div class="ov-val">${membros}</div><div class="ov-label">Integrantes</div></div>
+        <div class="ov-card"><div class="ov-val">${entregues}/4</div><div class="ov-label">Entregas feitas</div></div>
+        <div class="ov-card"><div class="ov-val">${feedbacks}</div><div class="ov-label">Feedbacks recebidos</div></div>
+        <div class="ov-card"><div class="ov-val">${planoOk}</div><div class="ov-label">Plano 5W2H</div></div>`;
+    }
+
+    function renderMembers(grupo) {
+      const tbody = document.getElementById('mem-tbody');
+      const mems  = grupo.membros || [];
+      if (mems.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Nenhum integrante cadastrado.</td></tr>'; return; }
+      tbody.innerHTML = mems.map(m => `
+        <tr>
+          <td>${m.nome}</td>
+          <td>${m.email || '—'}</td>
+          <td>${m.telefone ? `<a href="https://wa.me/${m.telefone.replace(/\D/g,'')}" target="_blank" rel="noopener noreferrer" style="color:var(--orange);text-decoration:none">📞 ${m.telefone}</a>` : '—'}</td>
+        </tr>`).join('');
+    }
+
+    function renderPlano(grupo) {
+      const p = grupo.plano5w2h || {};
+      ['what','why','who','where','when','how','howmuch','tema','data'].forEach(k => {
+        const el = document.getElementById('p-' + k);
+        if (el) el.value = p[k] || '';
+      });
+    }
+
+    // ── Auto-save (debounced) ─────────────────────────────────────────────
+    let _saveTimer = null;
+    function autoSave() {
+      clearTimeout(_saveTimer);
+      document.getElementById('save-msg').textContent = '💾 Salvando…';
+      _saveTimer = setTimeout(() => {
+        const grupos = getGrupos();
+        const idx    = grupos.findIndex(g => g.id === urlId);
+        if (idx < 0) return;
+        if (!grupos[idx].plano5w2h) grupos[idx].plano5w2h = {};
+        ['what','why','who','where','when','how','howmuch','tema','data'].forEach(k => {
+          const el = document.getElementById('p-' + k);
+          if (el) grupos[idx].plano5w2h[k] = el.value;
+        });
+        grupos[idx].tema = document.getElementById('p-tema').value || grupos[idx].tema;
+        saveGrupos(grupos);
+        renderHeader(grupos[idx]);
+        document.getElementById('save-msg').textContent = '✅ Salvo automaticamente.';
+      }, 900);
+    }
+
+    // ── Matriz GUT ──────────────────────────────────────────────────────
+    function renderGUT(grupo) {
+      const rows = grupo.gut || Array.from({length:5}, () => ({problema:'', g:1, u:1, t:1}));
+      const tbody = document.getElementById('gut-tbody');
+      tbody.innerHTML = rows.map((r, i) => `
+        <tr>
+          <td><label for="gut-p${i}" class="sr-only">Problema ${i+1}</label><input type="text" class="sel" id="gut-p${i}" style="min-width:150px" value="${r.problema || ''}" placeholder="Descreva o problema" onchange="saveGUT(${i},'problema',this.value)"></td>
+          <td><label for="gut-g${i}" class="sr-only">Gravidade ${i+1}</label><select class="sel" id="gut-g${i}" onchange="saveGUT(${i},'g',this.value)">${[1,2,3,4,5].map(v=>`<option ${r.g==v?'selected':''}>${v}</option>`).join('')}</select></td>
+          <td><label for="gut-u${i}" class="sr-only">Urgência ${i+1}</label><select class="sel" id="gut-u${i}" onchange="saveGUT(${i},'u',this.value)">${[1,2,3,4,5].map(v=>`<option ${r.u==v?'selected':''}>${v}</option>`).join('')}</select></td>
+          <td><label for="gut-t${i}" class="sr-only">Tendência ${i+1}</label><select class="sel" id="gut-t${i}" onchange="saveGUT(${i},'t',this.value)">${[1,2,3,4,5].map(v=>`<option ${r.t==v?'selected':''}>${v}</option>`).join('')}</select></td>
+          <td class="gut-result">${r.g * r.u * r.t || '—'}</td>
+          <td>${r.g * r.u * r.t >= 27 ? '🎯 Alta' : r.g * r.u * r.t >= 8 ? '⚠️ Média' : '📌 Baixa'}</td>
+        </tr>`).join('');
+      updateGUTPrio(rows);
+    }
+
+    function saveGUT(i, field, val) {
+      const grupos = getGrupos();
+      const idx    = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      if (!grupos[idx].gut) grupos[idx].gut = Array.from({length:5}, () => ({problema:'',g:1,u:1,t:1}));
+      grupos[idx].gut[i][field] = field === 'problema' ? val : parseInt(val);
+      saveGrupos(grupos);
+      renderGUT(grupos[idx]);
+    }
+
+    function updateGUTPrio(rows) {
+      let max = 0, prio = '';
+      rows.forEach(r => { const v = r.g * r.u * r.t; if (v > max) { max = v; prio = r.problema || 'Sem nome'; } });
+      document.getElementById('gut-prio').textContent = max > 0 ? `${prio} (Pontuação: ${max})` : 'Nenhum selecionado';
+    }
+
+    // ── Entregas ─────────────────────────────────────────────────────────
+    const ENTREGA_DEFS = [
+      { n: 1, titulo: 'Plano de Ação 5W2H',           prazo: 'Semana 3' },
+      { n: 2, titulo: 'Matriz GUT + Diagnóstico',      prazo: 'Semana 5' },
+      { n: 3, titulo: 'Relatório de Desenvolvimento',  prazo: 'Semana 8' },
+      { n: 4, titulo: 'Apresentação Final',             prazo: 'Semana 10' },
+    ];
+    const ENTREGA_ICONS = ['📋','🔺','📊','🏁'];
+
+    function renderEntregas(grupo) {
+      const entregas = grupo.entregas || ENTREGA_DEFS.map((d,i) => ({ numero: d.n, status: i === 0 ? 'pendente' : 'bloqueado', link: '' }));
+      const list = document.getElementById('entregas-list');
+      list.innerHTML = entregas.map((e, i) => {
+        const def    = ENTREGA_DEFS[i];
+        const locked = e.status === 'bloqueado';
+        const done   = e.status === 'entregue';
+        return `
+          <div class="tl-item" role="listitem">
+            <div class="tl-dot ${locked ? 'locked' : ''}" aria-hidden="true">${ENTREGA_ICONS[i]}</div>
+            <div class="entrega-card ${locked ? 'locked' : ''}">
+              <div class="entrega-title">ENTREGA ${def.n} — ${def.titulo}</div>
+              <div class="entrega-prazo">Prazo: ${def.prazo}</div>
+              <span class="entrega-status status-${e.status}">${e.status === 'pendente' ? '🟡 Pendente' : e.status === 'entregue' ? '✅ Entregue' : '🔒 Bloqueado'}</span>
+              ${!locked ? `
+                <div class="entrega-link-row">
+                  ${done && e.link ? `<a href="${e.link}" target="_blank" rel="noopener noreferrer" class="link-view">🔗 Ver arquivo entregue</a>` : ''}
+                  ${!done ? `
+                    <label for="link-e${e.numero}" class="sr-only">Link do arquivo para entrega ${e.numero}</label>
+                    <input type="url" class="link-input" id="link-e${e.numero}" placeholder="Cole o link do arquivo (Google Drive, etc.)">
+                    <button class="btn-entregar" type="button" onclick="entregar(${e.numero})">📤 Entregar</button>
+                  ` : ''}
+                  ${done ? `<button class="btn-entregar" style="background:rgba(255,255,255,0.1);color:var(--muted)" type="button" onclick="reEntregar(${e.numero})">↩ Reenviar</button>` : ''}
+                </div>
+              ` : `<div style="font-size:12px;color:var(--muted)">Disponível após a entrega anterior.</div>`}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function entregar(num) {
+      const link = document.getElementById(`link-e${num}`)?.value.trim();
+      if (!link) { alert('Cole o link do arquivo antes de entregar.'); return; }
+      const grupos = getGrupos();
+      const idx    = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      if (!grupos[idx].entregas) grupos[idx].entregas = ENTREGA_DEFS.map((d,i) => ({ numero: d.n, status: i===0?'pendente':'bloqueado', link: '' }));
+      const ei = grupos[idx].entregas.findIndex(e => e.numero === num);
+      if (ei >= 0) { grupos[idx].entregas[ei].status = 'entregue'; grupos[idx].entregas[ei].link = link; grupos[idx].entregas[ei].data = new Date().toISOString(); }
+      // Unlock next
+      const next = grupos[idx].entregas.findIndex(e => e.numero === num + 1);
+      if (next >= 0 && grupos[idx].entregas[next].status === 'bloqueado') grupos[idx].entregas[next].status = 'pendente';
+      saveGrupos(grupos);
+      renderEntregas(grupos[idx]);
+      renderHeader(grupos[idx]);
+      renderOverview(grupos[idx]);
+    }
+
+    function reEntregar(num) {
+      const grupos = getGrupos();
+      const idx    = grupos.findIndex(g => g.id === urlId);
+      const ei     = (grupos[idx].entregas || []).findIndex(e => e.numero === num);
+      if (ei >= 0) { grupos[idx].entregas[ei].status = 'pendente'; grupos[idx].entregas[ei].link = ''; }
+      saveGrupos(grupos);
+      renderEntregas(grupos[idx]);
+    }
+
+    // ── Feedback ──────────────────────────────────────────────────────────
+    function renderFeedback(grupo) {
+      const fbs  = grupo.feedback || [];
+      const list = document.getElementById('feedback-list');
+      if (fbs.length === 0) { list.innerHTML = '<div class="feedback-empty" role="status">Nenhum feedback registrado ainda. Continue com as entregas!</div>'; return; }
+      const mMap = { A: 'fb-A', PA: 'fb-PA', NA: 'fb-NA' };
+      list.innerHTML = fbs.map(f => `
+        <article class="feedback-card">
+          <div class="fb-header">Entrega ${f.entrega} — ${ENTREGA_DEFS[f.entrega-1]?.titulo || ''}</div>
+          <div class="fb-row"><span>Menção geral:</span><span class="fb-badge ${mMap[f.mencao] || ''}">${f.mencao}</span></div>
+          ${(f.indicadores || []).map(ind => `<div class="fb-row"><span>${ind.nome}</span><span class="fb-badge ${mMap[ind.mencao]||''}">${ind.mencao}</span></div>`).join('')}
+          ${f.orientacoes ? `<div class="fb-orient"><strong>Orientações:</strong><br>${f.orientacoes}</div>` : ''}
+        </article>`).join('');
+    }
+
+    // ── Tabs ──────────────────────────────────────────────────────────────
+    function showTab(name) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      document.getElementById('tab-' + name).classList.add('active');
+      event.currentTarget.classList.add('active');
+      event.currentTarget.setAttribute('aria-selected', 'true');
+    }
+
+    // ── ESC to close auth modal ───────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('auth-gate').classList.contains('open')) {
+        // Don't close auth modal - user must authenticate or go back
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materiais — PI Logística</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Page-specific styles */
+    .page-header { padding: 3rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(247,148,29,0.15); }
+    .page-header h1 { font-size: clamp(22px, 4vw, 36px); font-weight: 900; margin-bottom: 0.5rem; }
+    .page-header h1 span { background: linear-gradient(135deg, var(--orange), var(--orange-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .page-header p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    /* Tab Navigation */
+    .tab-bar { display: flex; gap: 0.25rem; padding: 1.25rem 1.5rem 0; max-width: 1100px; margin: 0 auto; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 0.65rem 1.25rem; font-size: 13px; font-weight: 700; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap; transition: all 0.2s; position: relative; bottom: -1px; border-bottom: 2px solid transparent; }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); background: rgba(247,148,29,0.06); }
+    .tab-btn:focus-visible { outline-offset: 2px; }
+
+    /* Tab Content */
+    .tab-content { display: none; padding: 2.5rem 0; }
+    .tab-content.active { display: block; }
+
+    /* Cards Grid */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+    .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; transition: all 0.3s; }
+    .card:hover { border-color: rgba(247,148,29,0.35); transform: translateY(-3px); background: rgba(255,255,255,0.07); }
+    .card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .card-locked { opacity: 0.55; cursor: default; }
+    .card-locked:hover { transform: none; border-color: rgba(255,255,255,0.08); background: var(--glass); }
+    .card-icon { font-size: 28px; margin-bottom: 0.75rem; }
+    .card-title { font-size: 15px; font-weight: 700; margin-bottom: 0.35rem; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-bottom: 1rem; line-height: 1.6; }
+    .badge { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 0.75rem; }
+    .badge-blue { background: rgba(0,69,135,0.5); border: 1px solid rgba(0,69,135,0.8); color: #90baff; }
+    .badge-orange { background: rgba(247,148,29,0.15); border: 1px solid rgba(247,148,29,0.4); color: var(--orange); }
+    .badge-gray { background: rgba(255,255,255,0.08); color: var(--muted); }
+    .btn-card { display: block; width: 100%; padding: 0.65rem; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+    .btn-card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .btn-card-primary { background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; }
+    .btn-card-primary:hover { box-shadow: 0 4px 14px rgba(247,148,29,0.35); }
+    .btn-card-secondary { background: rgba(0,69,135,0.4); border: 1px solid rgba(0,69,135,0.7); color: #90baff; }
+    .btn-card-secondary:hover { background: rgba(0,69,135,0.6); }
+    .btn-card-disabled { background: rgba(255,255,255,0.06); color: var(--muted); cursor: not-allowed; }
+
+    /* Section Header */
+    .s-head { margin-bottom: 1.5rem; }
+    .s-head h3 { font-size: 18px; font-weight: 800; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .s-head h3::before { content: ''; display: block; width: 4px; height: 1em; background: var(--orange); border-radius: 2px; }
+    .s-head p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    /* Feedback Coletivo */
+    .fc-list { display: flex; flex-direction: column; gap: 1rem; }
+    .fc-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid var(--orange); border-radius: 12px; padding: 1.5rem; }
+    .fc-card.important { border-left-color: #ff6b6b; background: rgba(255,107,107,0.06); }
+    .fc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; gap: 1rem; flex-wrap: wrap; }
+    .fc-title { font-size: 15px; font-weight: 700; }
+    .fc-date { font-size: 11px; color: var(--muted); }
+    .fc-body { font-size: 13px; color: rgba(242,242,242,0.8); line-height: 1.75; white-space: pre-wrap; }
+    .fc-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+
+    /* Espaço de Trocas */
+    .troca-form { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .troca-form h4 { font-size: 15px; font-weight: 700; margin-bottom: 1rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .field-input { width: 100%; padding: 0.75rem 0.9rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; transition: border-color 0.2s; }
+    .field-input:focus { outline: none; border-color: var(--orange); }
+    .field-input::placeholder { color: rgba(242,242,242,0.28); }
+    .field-textarea { resize: vertical; min-height: 80px; }
+    .btn-send { padding: 0.75rem 1.75rem; background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+    .btn-send:hover { box-shadow: 0 4px 14px rgba(247,148,29,0.35); }
+    .btn-send:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .troca-list { display: flex; flex-direction: column; gap: 0.85rem; }
+    .troca-item { background: var(--glass); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1.1rem 1.25rem; }
+    .troca-meta { font-size: 11px; color: var(--muted); margin-bottom: 0.4rem; }
+    .troca-autor { font-weight: 700; color: var(--orange); }
+    .troca-msg { font-size: 13px; color: rgba(242,242,242,0.85); line-height: 1.65; }
+    @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+  <nav class="nav" role="navigation" aria-label="Navegação principal">
+    <a href="index.html" class="nav-logo">PI <span>Logística</span></a>
+    <div class="nav-links">
+      <a href="index.html">Início</a>
+      <a href="materiais.html" class="nav-active" aria-current="page">Materiais</a>
+      <a href="admin.html" class="nav-btn">🔑 Admin</a>
+    </div>
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mob-menu" role="menu" aria-label="Menu de navegação">
+    <a href="index.html" role="menuitem" onclick="closeMenu()">Início</a>
+    <a href="materiais.html" role="menuitem" onclick="closeMenu()">Materiais</a>
+    <a href="admin.html" role="menuitem" onclick="closeMenu()">🔑 Admin</a>
+  </div>
+
+  <div class="page" id="main-content">
+    <header class="page-header" role="banner">
+      <h1>📚 Materiais de <span>Apoio</span></h1>
+      <p>Slides das aulas, vídeos, comunicados do docente e espaço de trocas entre as equipes.</p>
+    </header>
+
+    <div class="tab-bar" role="tablist" aria-label="Abas de conteúdo">
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-slides" onclick="showTab('slides')">🖥 Slides</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-videos" onclick="showTab('videos')">▶ Vídeos</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback" onclick="showTab('feedback')">💬 Feedback Coletivo</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-trocas" onclick="showTab('trocas')">🔄 Espaço de Trocas</button>
+    </div>
+
+    <div class="container">
+
+      <!-- TAB: SLIDES -->
+      <section class="tab-content active" id="tab-slides" role="tabpanel" aria-labelledby="tab-slides">
+        <div class="s-head">
+          <h2>Slides das Aulas</h2>
+          <p>Materiais disponibilizados pelo docente para cada aula do PI.</p>
+        </div>
+        <div class="cards-grid" id="slides-grid" role="list" aria-label="Lista de slides">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- TAB: VÍDEOS -->
+      <section class="tab-content" id="tab-videos" role="tabpanel" aria-labelledby="tab-videos">
+        <div class="s-head">
+          <h2>Vídeos de Apoio</h2>
+          <p>Conteúdo audiovisual para complementar os estudos do Projeto Integrador.</p>
+        </div>
+        <div class="cards-grid" id="videos-grid" role="list" aria-label="Lista de vídeos">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- TAB: FEEDBACK COLETIVO -->
+      <section class="tab-content" id="tab-feedback" role="tabpanel" aria-labelledby="tab-feedback">
+        <div class="s-head">
+          <h2>Feedback Coletivo</h2>
+          <p>Comunicados, orientações e avisos do docente para todas as equipes.</p>
+        </div>
+        <div class="fc-list" id="fc-list" role="list" aria-label="Lista de feedbacks">
+          <div class="fc-empty" role="status">Nenhum comunicado publicado ainda. Aguarde orientações do docente.</div>
+        </div>
+      </section>
+
+      <!-- TAB: TROCAS -->
+      <section class="tab-content" id="tab-trocas" role="tabpanel" aria-labelledby="tab-trocas">
+        <div class="s-head">
+          <h2>Espaço de Trocas</h2>
+          <p>Compartilhe dúvidas, descobertas e ideias com as outras equipes.</p>
+        </div>
+        <form class="troca-form" onsubmit="publicarTroca(event)">
+          <h3>✏️ Publicar mensagem</h3>
+          <div class="field-row">
+            <label for="troca-autor" class="sr-only">Seu nome (opcional)</label>
+            <input type="text" class="field-input" id="troca-autor" placeholder="Seu nome (opcional)">
+            <label for="troca-grupo" class="sr-only">Sua equipe (opcional)</label>
+            <input type="text" class="field-input" id="troca-grupo" placeholder="Sua equipe (opcional)">
+          </div>
+          <label for="troca-msg" class="sr-only">Mensagem</label>
+          <textarea class="field-input field-textarea" id="troca-msg" placeholder="Escreva sua mensagem, dúvida ou descoberta..." required style="margin-bottom:0.75rem"></textarea>
+          <button type="submit" class="btn-send">📤 Publicar</button>
+        </form>
+        <div class="troca-list" id="trocas-list" role="list" aria-label="Lista de mensagens">
+          <div class="fc-empty" role="status">Nenhuma mensagem ainda. Seja o primeiro a compartilhar!</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer role="contentinfo">
+    <div class="f-logo">SENAC</div>
+    <div class="f-center">
+      <div style="font-weight:700">Técnico em Logística · UC12 — Projeto Integrador</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:2px">Jean Carlos Macedo · Senac Araçatuba</div>
+    </div>
+    <div class="f-right">
+      <a href="mailto:jean.cmmacedo@senacsp.edu.br" style="color:inherit;text-decoration:none">jean.cmmacedo@senacsp.edu.br</a>
+    </div>
+  </footer>
+  <div class="f-copy">© Senac São Paulo · Material educacional interno · 2025</div>
+
+  <script>
+    const KEY_MAT = 'pi_materiais';
+    const KEY_FC  = 'pi_feedback_coletivo';
+    const KEY_TR  = 'pi_trocas';
+
+    function getMat()    { return JSON.parse(localStorage.getItem(KEY_MAT) || 'null'); }
+    function getFC()     { return JSON.parse(localStorage.getItem(KEY_FC)  || '[]'); }
+    function getTrocas() { return JSON.parse(localStorage.getItem(KEY_TR)  || '[]'); }
+
+    // ── Nav ─────────────────────────────────────────────────────────────
+    function toggleMenu() {
+      const h = document.getElementById('ham');
+      const m = document.getElementById('mob-menu');
+      const isOpen = h.classList.toggle('open');
+      m.classList.toggle('open');
+      h.setAttribute('aria-expanded', isOpen);
+      h.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+    }
+    function closeMenu() {
+      const h = document.getElementById('ham');
+      h.classList.remove('open');
+      document.getElementById('mob-menu').classList.remove('open');
+      h.setAttribute('aria-expanded', 'false');
+      h.setAttribute('aria-label', 'Abrir menu');
+    }
+
+    // ── Tabs ────────────────────────────────────────────────────────────
+    function showTab(name) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      const activeTab = document.getElementById('tab-' + name);
+      activeTab.classList.add('active');
+      event.currentTarget.classList.add('active');
+      event.currentTarget.setAttribute('aria-selected', 'true');
+      if (name === 'feedback') renderFC();
+      if (name === 'trocas') renderTrocas();
+    }
+
+    // ── Default materials ───────────────────────────────────────────────
+    const DEFAULT_SLIDES = [
+      { id: 's1', titulo: 'Aula Inaugural', descricao: 'Conceito, Etapas e Plano de Ação', badge: 'PI — Introdução', link: '', disponivel: true },
+      { id: 's2', titulo: 'Aula 02', descricao: 'Tema Gerador e Problematização', badge: 'Em breve', link: '', disponivel: false },
+      { id: 's3', titulo: 'Aula 03', descricao: 'Desenvolvimento e Monitoramento', badge: 'Em breve', link: '', disponivel: false },
+    ];
+    const DEFAULT_VIDEOS = [
+      { id: 'v1', titulo: 'O que é Projeto Integrador?', descricao: 'Canal Senac · ~8 min', link: '', disponivel: true },
+      { id: 'v2', titulo: 'Metodologia de Projetos na Prática', descricao: 'Canal Sebrae · ~12 min', link: '', disponivel: true },
+      { id: 'v3', titulo: 'Como fazer um Plano de Ação 5W2H', descricao: 'Canal FGV Online · ~10 min', link: '', disponivel: true },
+    ];
+
+    function renderSlides() {
+      const mat = getMat();
+      const slides = (mat && mat.slides && mat.slides.length > 0) ? mat.slides : DEFAULT_SLIDES;
+      document.getElementById('slides-grid').innerHTML = slides.map(s => `
+        <div class="card ${!s.disponivel ? 'card-locked' : ''}" role="listitem">
+          <div class="card-icon" aria-hidden="true">🖥</div>
+          <div class="card-title">${s.titulo}</div>
+          <div class="card-sub">${s.descricao}</div>
+          <span class="badge ${s.disponivel ? 'badge-blue' : 'badge-gray'}">${s.badge || (s.disponivel ? 'Disponível' : 'Em breve')}</span>
+          ${s.disponivel && s.link
+            ? `<a href="${s.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-primary">📥 Acessar Slides</a>`
+            : s.disponivel
+            ? `<button class="btn-card btn-card-primary" onclick="alert('Link não configurado. Solicite ao docente.')">📥 Acessar Slides</button>`
+            : `<button class="btn-card btn-card-disabled" disabled>🔒 Em breve</button>`}
+        </div>`).join('');
+    }
+
+    function renderVideos() {
+      const mat = getMat();
+      const videos = (mat && mat.videos && mat.videos.length > 0) ? mat.videos : DEFAULT_VIDEOS;
+      document.getElementById('videos-grid').innerHTML = videos.map(v => `
+        <div class="card ${!v.disponivel ? 'card-locked' : ''}" role="listitem">
+          <div class="card-icon" aria-hidden="true">▶️</div>
+          <div class="card-title">${v.titulo}</div>
+          <div class="card-sub">${v.descricao}</div>
+          <span class="badge ${v.disponivel ? 'badge-orange' : 'badge-gray'}">${v.disponivel ? 'Disponível' : 'Em breve'}</span>
+          ${v.disponivel && v.link
+            ? `<a href="${v.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-secondary">▶ Assistir</a>`
+            : v.disponivel
+            ? `<button class="btn-card btn-card-secondary" onclick="alert('Link não configurado. Solicite ao docente.')">▶ Assistir</button>`
+            : `<button class="btn-card btn-card-disabled" disabled>🔒 Em breve</button>`}
+        </div>`).join('');
+    }
+
+    function renderFC() {
+      const items = getFC();
+      const el = document.getElementById('fc-list');
+      if (items.length === 0) {
+        el.innerHTML = '<div class="fc-empty" role="status">Nenhum comunicado publicado ainda. Aguarde orientações do docente.</div>';
+        return;
+      }
+      el.innerHTML = items.slice().reverse().map(i => `
+        <article class="fc-card ${i.importante ? 'important' : ''}">
+          <div class="fc-header">
+            <span class="fc-title">${i.importante ? '🚨 ' : '📌 '}${i.titulo}</span>
+            <time class="fc-date" datetime="${i.data}">${new Date(i.data).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'})}</time>
+          </div>
+          <div class="fc-body">${i.conteudo}</div>
+        </article>`).join('');
+    }
+
+    function renderTrocas() {
+      const items = getTrocas();
+      const el = document.getElementById('trocas-list');
+      if (items.length === 0) {
+        el.innerHTML = '<div class="fc-empty" role="status">Nenhuma mensagem ainda. Seja o primeiro a compartilhar!</div>';
+        return;
+      }
+      el.innerHTML = items.slice().reverse().map(t => `
+        <article class="troca-item">
+          <div class="troca-meta">
+            <span class="troca-autor">${t.autor || 'Anônimo'}</span>
+            ${t.grupo ? ` · <strong>${t.grupo}</strong>` : ''}
+            · <time datetime="${t.data}">${new Date(t.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} ${new Date(t.data).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</time>
+          </div>
+          <div class="troca-msg">${t.msg}</div>
+        </article>`).join('');
+    }
+
+    function publicarTroca(e) {
+      e.preventDefault();
+      const msg = document.getElementById('troca-msg').value.trim();
+      if (!msg) { alert('Escreva uma mensagem antes de publicar.'); return; }
+      const trocas = getTrocas();
+      trocas.push({
+        id: 'tr_' + Date.now(),
+        autor: document.getElementById('troca-autor').value.trim() || 'Anônimo',
+        grupo: document.getElementById('troca-grupo').value.trim(),
+        msg,
+        data: new Date().toISOString()
+      });
+      localStorage.setItem(KEY_TR, JSON.stringify(trocas));
+      document.getElementById('troca-autor').value = '';
+      document.getElementById('troca-grupo').value = '';
+      document.getElementById('troca-msg').value = '';
+      renderTrocas();
+    }
+
+    renderSlides();
+    renderVideos();
+  </script>
+</body>
+</html>

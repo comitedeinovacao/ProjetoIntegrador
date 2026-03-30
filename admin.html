@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Docente — PI Logística</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Page-specific styles */
+    .page-header { padding: 3rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(247,148,29,0.15); }
+    .page-header h1 { font-size: clamp(22px, 4vw, 36px); font-weight: 900; margin-bottom: 0.5rem; }
+    .page-header h1 span { background: linear-gradient(135deg, var(--orange), var(--orange-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .page-header p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    /* Tab Navigation */
+    .tab-bar { display: flex; gap: 0.25rem; padding: 1.25rem 1.5rem 0; max-width: 1200px; margin: 0 auto; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 0.65rem 1.25rem; font-size: 13px; font-weight: 700; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap; transition: all 0.2s; position: relative; bottom: -1px; border-bottom: 2px solid transparent; font-family: 'Montserrat', sans-serif; }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); background: rgba(247,148,29,0.06); }
+    .tab-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+    /* Tab Content */
+    .tab-content { display: none; padding: 2.5rem 0; }
+    .tab-content.active { display: block; }
+
+    /* Section Header */
+    .s-head { margin-bottom: 1.5rem; }
+    .s-head h3 { font-size: 18px; font-weight: 800; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .s-head h3::before { content: ''; display: block; width: 4px; height: 1em; background: var(--orange); border-radius: 2px; }
+    .s-head p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    /* Cards */
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+    .admin-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; transition: all 0.3s; }
+    .admin-card:hover { border-color: rgba(247,148,29,0.25); }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .card-title { font-size: 16px; font-weight: 700; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 0.25rem; }
+    .card-actions { display: flex; gap: 0.5rem; }
+    .btn-icon { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem; cursor: pointer; transition: all 0.2s; color: var(--muted); font-size: 14px; }
+    .btn-icon:hover { background: rgba(247,148,29,0.15); border-color: var(--orange); color: var(--orange); }
+    .btn-icon:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .btn-icon.danger:hover { background: rgba(255,100,100,0.15); border-color: #ff6b6b; color: #ff6b6b; }
+
+    /* Members List */
+    .member-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+    .member-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px; }
+    .member-item:hover { background: rgba(255,255,255,0.06); }
+    .member-info { display: flex; flex-direction: column; gap: 0.15rem; }
+    .member-name { font-weight: 600; }
+    .member-contact { font-size: 11px; color: var(--muted); }
+
+    /* Forms */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    .field-input { width: 100%; padding: 0.75rem 0.9rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; transition: border-color 0.2s; }
+    .field-input:focus { outline: none; border-color: var(--orange); }
+    .field-input::placeholder { color: rgba(242,242,242,0.28); }
+    .field-textarea { resize: vertical; min-height: 80px; }
+    .btn-action { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+    .btn-action:hover { box-shadow: 0 4px 14px rgba(247,148,29,0.35); }
+    .btn-action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+    .btn-sm { padding: 0.5rem 1rem; font-size: 12px; }
+
+    /* Modal */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .overlay.open { display: flex; }
+    .modal { background: linear-gradient(135deg, #001e50, #003d6b); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; position: relative; animation: fadeIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .modal-close { position: absolute; top: 1rem; right: 1.2rem; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s; line-height: 1; }
+    .modal-close:hover { color: var(--text); }
+    .modal-close:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 1rem; }
+    .modal-body { display: flex; flex-direction: column; gap: 0.75rem; }
+    .form-label { font-size: 12px; font-weight: 700; color: var(--orange); margin-bottom: 0.25rem; display: block; }
+    .form-row { display: flex; gap: 0.75rem; align-items: flex-end; }
+    .form-row > * { flex: 1; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 900; color: var(--orange); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .empty-state-icon { font-size: 48px; margin-bottom: 1rem; }
+    .empty-state h4 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+
+    /* Badge */
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-success { background: rgba(50,200,100,0.2); color: #5ae09a; }
+    .badge-warning { background: rgba(247,148,29,0.2); color: var(--orange); }
+    .badge-info { background: rgba(0,69,135,0.4); color: #90baff; }
+
+    /* Feedback Form */
+    .feedback-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+    @media (max-width: 500px) { .feedback-grid { grid-template-columns: 1fr; } }
+    .fb-select { padding: 0.5rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; }
+    .fb-select:focus { outline: none; border-color: var(--orange); }
+
+    /* Auth Gate */
+    .auth-gate { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .auth-modal { background: linear-gradient(135deg, #001e50, #003d6b); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; max-width: 420px; width: 100%; animation: fadeIn 0.25s ease; }
+    .auth-modal h3 { font-size: 22px; font-weight: 800; margin-bottom: 0.5rem; }
+    .auth-modal p { color: var(--muted); font-size: 13px; margin-bottom: 1.75rem; line-height: 1.6; }
+    .error-msg { color: #ff8080; font-size: 12px; margin-bottom: 0.75rem; display: none; }
+    .error-msg.show { display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+  <!-- Auth Gate -->
+  <div class="auth-gate" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-modal">
+      <h3 id="auth-title">🔐 Painel do Docente</h3>
+      <p>Este painel é exclusivo para o docente responsável. Digite a senha de administrador para continuar.</p>
+      <div class="error-msg" id="auth-err" role="alert" aria-live="polite">Senha incorreta. Tente novamente.</div>
+      <label for="admin-senha" class="sr-only">Senha de administrador</label>
+      <input type="password" class="field-input" id="admin-senha" placeholder="Senha de administrador..."
+             onkeydown="if(event.key==='Enter')authAdmin()" style="margin-bottom:1rem" autocomplete="current-password">
+      <button class="btn-action" onclick="authAdmin()" style="width:100%">Entrar</button>
+      <div style="text-align:center;margin-top:1rem">
+        <a href="index.html" style="color:var(--muted);font-size:12px;text-decoration:none">← Voltar para início</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <nav class="nav" role="navigation" aria-label="Navegação principal" id="main-nav" style="display:none">
+    <a href="index.html" class="nav-logo">PI <span>Logística</span></a>
+    <div class="nav-links">
+      <a href="index.html">Início</a>
+      <a href="materiais.html">Materiais</a>
+      <a href="admin.html" class="nav-active" aria-current="page">🔑 Admin</a>
+    </div>
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mob-menu" role="menu" aria-label="Menu de navegação">
+    <a href="index.html" role="menuitem" onclick="closeMenu()">Início</a>
+    <a href="materiais.html" role="menuitem" onclick="closeMenu()">Materiais</a>
+    <a href="admin.html" role="menuitem" onclick="closeMenu()">🔑 Admin</a>
+  </div>
+
+  <div class="page" id="main-content" style="display:none">
+    <header class="page-header" role="banner">
+      <h1>🔑 Painel do <span>Docente</span></h1>
+      <p>Gerencie equipes, cadastre membros, registre feedbacks e configure materiais.</p>
+    </header>
+
+    <div class="tab-bar" role="tablist" aria-label="Abas de administração">
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-equipes" onclick="showTab('equipes')">👥 Equipes</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-materiais" onclick="showTab('materiais')">📚 Materiais</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback" onclick="showTab('feedback')">💬 Feedback Coletivo</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-config" onclick="showTab('config')">⚙️ Configurações</button>
+    </div>
+
+    <div class="container">
+
+      <!-- TAB: EQUIPES -->
+      <section class="tab-content active" id="tab-equipes" role="tabpanel" aria-labelledby="tab-equipes">
+        <div class="stats-grid" id="stats-grid"></div>
+
+        <div class="s-head">
+          <h3>Equipes Cadastradas</h3>
+          <p>Gerencie as equipes, membros e senhas de acesso.</p>
+        </div>
+
+        <div style="margin-bottom:1.5rem">
+          <button class="btn-action" onclick="openTeamModal()" type="button">+ Nova Equipe</button>
+        </div>
+
+        <div class="admin-grid" id="teams-grid">
+          <div class="empty-state" role="status">
+            <div class="empty-state-icon" aria-hidden="true">👥</div>
+            <h4>Nenhuma equipe cadastrada</h4>
+            <p>Clique em "Nova Equipe" para começar.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: MATERIAIS -->
+      <section class="tab-content" id="tab-materiais" role="tabpanel" aria-labelledby="tab-materiais">
+        <div class="s-head">
+          <h3>Slides das Aulas</h3>
+          <p>Adicione links para os slides de cada aula do Projeto Integrador.</p>
+        </div>
+
+        <div class="admin-grid" id="slides-grid" style="margin-bottom:2rem"></div>
+
+        <div class="s-head">
+          <h3>Vídeos de Apoio</h3>
+          <p>Adicione links para vídeos complementares.</p>
+        </div>
+
+        <div class="admin-grid" id="videos-grid"></div>
+      </section>
+
+      <!-- TAB: FEEDBACK COLETIVO -->
+      <section class="tab-content" id="tab-feedback" role="tabpanel" aria-labelledby="tab-feedback">
+        <div class="s-head">
+          <h3>Feedback Coletivo</h3>
+          <p>Publique comunicados e orientações para todas as equipes.</p>
+        </div>
+
+        <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem">
+          <h4 style="font-size:15px;font-weight:700;margin-bottom:1rem">✏️ Novo Comunicado</h4>
+          <form onsubmit="addFeedbackColetivo(event)">
+            <div style="margin-bottom:0.75rem">
+              <label for="fc-titulo" class="form-label">Título</label>
+              <input type="text" class="field-input" id="fc-titulo" placeholder="Ex: Prazo de entrega estendido" required>
+            </div>
+            <div style="margin-bottom:0.75rem">
+              <label for="fc-conteudo" class="form-label">Conteúdo</label>
+              <textarea class="field-input field-textarea" id="fc-conteudo" placeholder="Digite o comunicado..." required></textarea>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+              <label style="display:flex;align-items:center;gap:0.5rem;font-size:13px;cursor:pointer">
+                <input type="checkbox" id="fc-importante" style="accent-color:var(--orange)">
+                <span>Marcar como importante</span>
+              </label>
+            </div>
+            <button type="submit" class="btn-action">📤 Publicar</button>
+          </form>
+        </div>
+
+        <div class="s-head">
+          <h3>Comunicados Publicados</h3>
+        </div>
+        <div id="fc-list" style="display:flex;flex-direction:column;gap:1rem"></div>
+      </section>
+
+      <!-- TAB: CONFIGURAÇÕES -->
+      <section class="tab-content" id="tab-config" role="tabpanel" aria-labelledby="tab-config">
+        <div class="s-head">
+          <h3>Configurações</h3>
+          <p>Configure a senha de administrador e outras opções do sistema.</p>
+        </div>
+
+        <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;max-width:500px">
+          <h4 style="font-size:15px;font-weight:700;margin-bottom:1rem">🔐 Alterar Senha de Administrador</h4>
+          <form onsubmit="changeAdminPassword(event)">
+            <div style="margin-bottom:0.75rem">
+              <label for="new-password" class="form-label">Nova Senha</label>
+              <input type="password" class="field-input" id="new-password" placeholder="Digite a nova senha" required>
+            </div>
+            <div style="margin-bottom:1rem">
+              <label for="confirm-password" class="form-label">Confirmar Senha</label>
+              <input type="password" class="field-input" id="confirm-password" placeholder="Confirme a nova senha" required>
+            </div>
+            <button type="submit" class="btn-action">Salvar Nova Senha</button>
+          </form>
+        </div>
+
+        <div style="margin-top:2rem;background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.3);border-radius:14px;padding:1.5rem;max-width:500px">
+          <h4 style="font-size:15px;font-weight:700;margin-bottom:0.5rem;color:#ff8888">⚠️ Zona de Perigo</h4>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Essa ação irá apagar todos os dados (equipes, membros, feedbacks). Não pode ser desfeita.</p>
+          <button class="btn-action" style="background:rgba(255,100,100,0.2);border:1px solid rgba(255,100,100,0.5)" onclick="resetAllData()" type="button">🗑 Resetar Todos os Dados</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Modal: Equipe -->
+  <div class="overlay" id="team-modal" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
+    <div class="modal">
+      <button class="modal-close" type="button" onclick="closeTeamModal()" aria-label="Fechar modal">
+        <span aria-hidden="true">✕</span>
+      </button>
+      <h3 id="team-modal-title">Nova Equipe</h3>
+      <div class="modal-body">
+        <div>
+          <label for="team-nome" class="form-label">Nome da Equipe</label>
+          <input type="text" class="field-input" id="team-nome" placeholder="Ex: Equipe Logística Total" required>
+        </div>
+        <div>
+          <label for="team-tema" class="form-label">Tema do Projeto (opcional)</label>
+          <input type="text" class="field-input" id="team-tema" placeholder="Ex: Otimização de entregas">
+        </div>
+        <div>
+          <label for="team-senha" class="form-label">Senha de Acesso</label>
+          <input type="password" class="field-input" id="team-senha" placeholder="Senha para a equipe" required>
+        </div>
+        <button class="btn-action" onclick="saveTeam()" style="width:100%;margin-top:0.5rem" type="button">Salvar Equipe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Membros -->
+  <div class="overlay" id="member-modal" role="dialog" aria-modal="true" aria-labelledby="member-modal-title">
+    <div class="modal">
+      <button class="modal-close" type="button" onclick="closeMemberModal()" aria-label="Fechar modal">
+        <span aria-hidden="true">✕</span>
+      </button>
+      <h3 id="member-modal-title">Gerenciar Membros</h3>
+      <div id="member-list" style="margin-bottom:1rem"></div>
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:0.5rem">Adicionar Membro</h4>
+      <div class="form-grid">
+        <input type="text" class="field-input" id="member-nome" placeholder="Nome completo">
+        <input type="email" class="field-input" id="member-email" placeholder="E-mail">
+      </div>
+      <input type="tel" class="field-input" id="member-telefone" placeholder="WhatsApp (opcional)" style="margin-bottom:0.75rem">
+      <button class="btn-action" onclick="addMember()" style="width:100%" type="button">+ Adicionar Membro</button>
+    </div>
+  </div>
+
+  <!-- Modal: Feedback Individual -->
+  <div class="overlay" id="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+    <div class="modal">
+      <button class="modal-close" type="button" onclick="closeFeedbackModal()" aria-label="Fechar modal">
+        <span aria-hidden="true">✕</span>
+      </button>
+      <h3 id="feedback-modal-title">Feedback para Equipe</h3>
+      <div class="modal-body">
+        <div>
+          <label for="fb-entrega" class="form-label">Entrega</label>
+          <select class="fb-select" id="fb-entrega" style="width:100%">
+            <option value="1">Entrega 1 — Plano 5W2H</option>
+            <option value="2">Entrega 2 — Matriz GUT</option>
+            <option value="3">Entrega 3 — Relatório</option>
+            <option value="4">Entrega 4 — Apresentação</option>
+          </select>
+        </div>
+        <div>
+          <label for="fb-mencao" class="form-label">Menção Geral</label>
+          <select class="fb-select" id="fb-mencao" style="width:100%">
+            <option value="A">A — Atendeu plenamente</option>
+            <option value="PA">PA — Atendeu parcialmente</option>
+            <option value="NA">NA — Não atendeu</option>
+          </select>
+        </div>
+        <div>
+          <label for="fb-orientacoes" class="form-label">Orientações (opcional)</label>
+          <textarea class="field-input field-textarea" id="fb-orientacoes" placeholder="Orientações para a equipe..."></textarea>
+        </div>
+        <button class="btn-action" onclick="saveFeedback()" style="width:100%" type="button">Salvar Feedback</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Materiais -->
+  <div class="overlay" id="material-modal" role="dialog" aria-modal="true" aria-labelledby="material-modal-title">
+    <div class="modal">
+      <button class="modal-close" type="button" onclick="closeMaterialModal()" aria-label="Fechar modal">
+        <span aria-hidden="true">✕</span>
+      </button>
+      <h3 id="material-modal-title">Adicionar Material</h3>
+      <div class="modal-body">
+        <div>
+          <label for="mat-titulo" class="form-label">Título</label>
+          <input type="text" class="field-input" id="mat-titulo" placeholder="Ex: Aula Inaugural">
+        </div>
+        <div>
+          <label for="mat-desc" class="form-label">Descrição</label>
+          <input type="text" class="field-input" id="mat-desc" placeholder="Ex: Introdução ao PI">
+        </div>
+        <div>
+          <label for="mat-link" class="form-label">Link</label>
+          <input type="url" class="field-input" id="mat-link" placeholder="https://...">
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <input type="checkbox" id="mat-disponivel" checked style="accent-color:var(--orange)">
+          <label for="mat-disponivel" style="font-size:13px">Disponível para os alunos</label>
+        </div>
+        <button class="btn-action" onclick="saveMaterial()" style="width:100%;margin-top:0.5rem" type="button">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer role="contentinfo" id="main-footer" style="display:none">
+    <div class="f-logo">SENAC</div>
+    <div class="f-center">
+      <div style="font-weight:700">Técnico em Logística · UC12 — Projeto Integrador</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:2px">Jean Carlos Macedo · Senac Araçatuba</div>
+    </div>
+    <div class="f-right">
+      <a href="mailto:jean.cmmacedo@senacsp.edu.br" style="color:inherit;text-decoration:none">jean.cmmacedo@senacsp.edu.br</a>
+    </div>
+  </footer>
+  <div class="f-copy" id="main-copy" style="display:none">© Senac São Paulo · Material educacional interno · 2025</div>
+
+  <script>
+    const KEY_GRUPOS = 'pi_grupos';
+    const KEY_MAT = 'pi_materiais';
+    const KEY_FC = 'pi_feedback_coletivo';
+    const KEY_ADMIN = 'pi_admin_password';
+    const SESSION_ADMIN = 'pi_admin';
+    const DEFAULT_ADMIN_PASSWORD = 'admin123';
+
+    // Initialize admin password if not set
+    if (!localStorage.getItem(KEY_ADMIN)) {
+      localStorage.setItem(KEY_ADMIN, DEFAULT_ADMIN_PASSWORD);
+    }
+
+    function getGrupos() { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '[]'); }
+    function saveGrupos(g) { localStorage.setItem(KEY_GRUPOS, JSON.stringify(g)); }
+    function getMat() { return JSON.parse(localStorage.getItem(KEY_MAT) || 'null'); }
+    function saveMat(m) { localStorage.setItem(KEY_MAT, JSON.stringify(m)); }
+    function getFC() { return JSON.parse(localStorage.getItem(KEY_FC) || '[]'); }
+    function saveFC(f) { localStorage.setItem(KEY_FC, JSON.stringify(f)); }
+
+    // ── Auth ─────────────────────────────────────────────────────────────
+    function authAdmin() {
+      const senha = document.getElementById('admin-senha').value.trim();
+      const adminPass = localStorage.getItem(KEY_ADMIN) || DEFAULT_ADMIN_PASSWORD;
+      if (senha === adminPass) {
+        sessionStorage.setItem(SESSION_ADMIN, 'true');
+        document.getElementById('auth-gate').style.display = 'none';
+        document.getElementById('main-nav').style.display = 'flex';
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('main-footer').style.display = 'grid';
+        document.getElementById('main-copy').style.display = 'block';
+        renderAll();
+      } else {
+        document.getElementById('auth-err').classList.add('show');
+        document.getElementById('admin-senha').value = '';
+        document.getElementById('admin-senha').focus();
+      }
+    }
+
+    function checkAdminAuth() {
+      if (sessionStorage.getItem(SESSION_ADMIN) === 'true') {
+        document.getElementById('auth-gate').style.display = 'none';
+        document.getElementById('main-nav').style.display = 'flex';
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('main-footer').style.display = 'grid';
+        document.getElementById('main-copy').style.display = 'block';
+        renderAll();
+      } else {
+        setTimeout(() => document.getElementById('admin-senha').focus(), 100);
+      }
+    }
+
+    // ── Nav ─────────────────────────────────────────────────────────────
+    function toggleMenu() {
+      const h = document.getElementById('ham');
+      const m = document.getElementById('mob-menu');
+      const isOpen = h.classList.toggle('open');
+      m.classList.toggle('open');
+      h.setAttribute('aria-expanded', isOpen);
+      h.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+    }
+    function closeMenu() {
+      const h = document.getElementById('ham');
+      h.classList.remove('open');
+      document.getElementById('mob-menu').classList.remove('open');
+      h.setAttribute('aria-expanded', 'false');
+      h.setAttribute('aria-label', 'Abrir menu');
+    }
+
+    // ── Tabs ────────────────────────────────────────────────────────────
+    function showTab(name) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      document.getElementById('tab-' + name).classList.add('active');
+      event.currentTarget.classList.add('active');
+      event.currentTarget.setAttribute('aria-selected', 'true');
+    }
+
+    // ── Render All ───────────────────────────────────────────────────────
+    function renderAll() {
+      renderStats();
+      renderTeams();
+      renderMaterials();
+      renderFCList();
+    }
+
+    // ── Stats ────────────────────────────────────────────────────────────
+    function renderStats() {
+      const grupos = getGrupos();
+      const totalMembros = grupos.reduce((acc, g) => acc + (g.membros || []).length, 0);
+      const totalEntregas = grupos.reduce((acc, g) => acc + (g.entregas || []).filter(e => e.status === 'entregue').length, 0);
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${grupos.length}</div><div class="stat-label">Equipes</div></div>
+        <div class="stat-card"><div class="stat-value">${totalMembros}</div><div class="stat-label">Integrantes</div></div>
+        <div class="stat-card"><div class="stat-value">${totalEntregas}</div><div class="stat-label">Entregas</div></div>
+        <div class="stat-card"><div class="stat-value">${getFC().length}</div><div class="stat-label">Comunicados</div></div>`;
+    }
+
+    // ── Teams ───────────────────────────────────────────────────────────
+    let _editingTeamId = null;
+
+    function renderTeams() {
+      const grupos = getGrupos();
+      const grid = document.getElementById('teams-grid');
+      if (grupos.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" role="status">
+            <div class="empty-state-icon" aria-hidden="true">👥</div>
+            <h4>Nenhuma equipe cadastrada</h4>
+            <p>Clique em "Nova Equipe" para começar.</p>
+          </div>`;
+        return;
+      }
+      grid.innerHTML = grupos.map(g => {
+        const entregues = (g.entregas || []).filter(e => e.status === 'entregue').length;
+        const membros = (g.membros || []).length;
+        return `
+          <article class="admin-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">${g.nome}</div>
+                <div class="card-sub">${membros} integrante${membros !== 1 ? 's' : ''} · ${entregues}/4 entregas</div>
+              </div>
+              <div class="card-actions">
+                <button class="btn-icon" onclick="openMemberModal('${g.id}')" title="Gerenciar membros" aria-label="Gerenciar membros de ${g.nome}">👥</button>
+                <button class="btn-icon" onclick="openFeedbackModal('${g.id}')" title="Adicionar feedback" aria-label="Adicionar feedback para ${g.nome}">💬</button>
+                <button class="btn-icon" onclick="editTeam('${g.id}')" title="Editar equipe" aria-label="Editar ${g.nome}">✏️</button>
+                <button class="btn-icon danger" onclick="deleteTeam('${g.id}')" title="Excluir equipe" aria-label="Excluir ${g.nome}">🗑</button>
+              </div>
+            </div>
+            ${g.tema ? `<div style="font-size:12px;color:var(--muted);margin-bottom:0.5rem">📋 ${g.tema}</div>` : ''}
+            <div class="member-list">
+              ${(g.membros || []).slice(0, 3).map(m => `
+                <div class="member-item">
+                  <div class="member-info"><span class="member-name">${m.nome}</span><span class="member-contact">${m.email || ''}</span></div>
+                </div>
+              `).join('')}
+              ${(g.membros || []).length > 3 ? `<div style="font-size:11px;color:var(--muted);text-align:center">+${(g.membros||[]).length - 3} mais</div>` : ''}
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    function openTeamModal(id = null) {
+      _editingTeamId = id;
+      const grupo = id ? getGrupos().find(g => g.id === id) : null;
+      document.getElementById('team-modal-title').textContent = grupo ? 'Editar Equipe' : 'Nova Equipe';
+      document.getElementById('team-nome').value = grupo?.nome || '';
+      document.getElementById('team-tema').value = grupo?.tema || '';
+      document.getElementById('team-senha').value = grupo?.senha || '';
+      document.getElementById('team-modal').classList.add('open');
+      setTimeout(() => document.getElementById('team-nome').focus(), 100);
+    }
+
+    function closeTeamModal() {
+      document.getElementById('team-modal').classList.remove('open');
+      _editingTeamId = null;
+    }
+
+    function saveTeam() {
+      const nome = document.getElementById('team-nome').value.trim();
+      const tema = document.getElementById('team-tema').value.trim();
+      const senha = document.getElementById('team-senha').value.trim();
+      if (!nome || !senha) { alert('Preencha o nome e a senha da equipe.'); return; }
+
+      const grupos = getGrupos();
+      if (_editingTeamId) {
+        const idx = grupos.findIndex(g => g.id === _editingTeamId);
+        if (idx >= 0) {
+          grupos[idx].nome = nome;
+          grupos[idx].tema = tema;
+          grupos[idx].senha = senha;
+        }
+      } else {
+        grupos.push({
+          id: 'team_' + Date.now(),
+          nome,
+          tema,
+          senha,
+          membros: [],
+          entregas: [
+            { numero: 1, status: 'pendente', link: '' },
+            { numero: 2, status: 'bloqueado', link: '' },
+            { numero: 3, status: 'bloqueado', link: '' },
+            { numero: 4, status: 'bloqueado', link: '' }
+          ],
+          feedback: []
+        });
+      }
+      saveGrupos(grupos);
+      closeTeamModal();
+      renderAll();
+    }
+
+    function editTeam(id) {
+      openTeamModal(id);
+    }
+
+    function deleteTeam(id) {
+      if (!confirm('Tem certeza que deseja excluir esta equipe?')) return;
+      const grupos = getGrupos().filter(g => g.id !== id);
+      saveGrupos(grupos);
+      renderAll();
+    }
+
+    // ── Members ──────────────────────────────────────────────────────────
+    let _currentTeamId = null;
+
+    function openMemberModal(teamId) {
+      _currentTeamId = teamId;
+      const grupo = getGrupos().find(g => g.id === teamId);
+      if (!grupo) return;
+      document.getElementById('member-modal-title').textContent = `Membros — ${grupo.nome}`;
+      renderMemberList();
+      document.getElementById('member-modal').classList.add('open');
+    }
+
+    function closeMemberModal() {
+      document.getElementById('member-modal').classList.remove('open');
+      _currentTeamId = null;
+    }
+
+    function renderMemberList() {
+      const grupo = getGrupos().find(g => g.id === _currentTeamId);
+      if (!grupo) return;
+      const list = document.getElementById('member-list');
+      if (!grupo.membros || grupo.membros.length === 0) {
+        list.innerHTML = '<div style="color:var(--muted);text-align:center;padding:1rem">Nenhum membro cadastrado.</div>';
+        return;
+      }
+      list.innerHTML = grupo.membros.map((m, i) => `
+        <div class="member-item">
+          <div class="member-info">
+            <span class="member-name">${m.nome}</span>
+            <span class="member-contact">${m.email || ''} ${m.telefone ? '· ' + m.telefone : ''}</span>
+          </div>
+          <button class="btn-icon danger" onclick="removeMember(${i})" title="Remover" aria-label="Remover ${m.nome}">🗑</button>
+        </div>
+      `).join('');
+    }
+
+    function addMember() {
+      const nome = document.getElementById('member-nome').value.trim();
+      const email = document.getElementById('member-email').value.trim();
+      const telefone = document.getElementById('member-telefone').value.trim();
+      if (!nome) { alert('Digite o nome do membro.'); return; }
+
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === _currentTeamId);
+      if (idx < 0) return;
+      if (!grupos[idx].membros) grupos[idx].membros = [];
+      grupos[idx].membros.push({ nome, email, telefone });
+      saveGrupos(grupos);
+
+      document.getElementById('member-nome').value = '';
+      document.getElementById('member-email').value = '';
+      document.getElementById('member-telefone').value = '';
+      renderMemberList();
+      renderStats();
+    }
+
+    function removeMember(index) {
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === _currentTeamId);
+      if (idx < 0) return;
+      grupos[idx].membros.splice(index, 1);
+      saveGrupos(grupos);
+      renderMemberList();
+      renderStats();
+    }
+
+    // ── Feedback Individual ─────────────────────────────────────────────
+    let _feedbackTeamId = null;
+
+    function openFeedbackModal(teamId) {
+      _feedbackTeamId = teamId;
+      const grupo = getGrupos().find(g => g.id === teamId);
+      if (!grupo) return;
+      document.getElementById('feedback-modal-title').textContent = `Feedback — ${grupo.nome}`;
+      document.getElementById('fb-entrega').value = '1';
+      document.getElementById('fb-mencao').value = 'A';
+      document.getElementById('fb-orientacoes').value = '';
+      document.getElementById('feedback-modal').classList.add('open');
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedback-modal').classList.remove('open');
+      _feedbackTeamId = null;
+    }
+
+    function saveFeedback() {
+      const entrega = parseInt(document.getElementById('fb-entrega').value);
+      const mencao = document.getElementById('fb-mencao').value;
+      const orientacoes = document.getElementById('fb-orientacoes').value.trim();
+
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === _feedbackTeamId);
+      if (idx < 0) return;
+      if (!grupos[idx].feedback) grupos[idx].feedback = [];
+      grupos[idx].feedback.push({
+        entrega,
+        mencao,
+        orientacoes,
+        data: new Date().toISOString()
+      });
+      saveGrupos(grupos);
+      closeFeedbackModal();
+      alert('Feedback salvo com sucesso!');
+    }
+
+    // ── Materials ────────────────────────────────────────────────────────
+    let _materialType = 'slides';
+    let _editingMaterialId = null;
+
+    const DEFAULT_MATERIALS = {
+      slides: [
+        { id: 's1', titulo: 'Aula Inaugural', descricao: 'Conceito, Etapas e Plano de Ação', link: '', disponivel: true },
+        { id: 's2', titulo: 'Aula 02', descricao: 'Tema Gerador e Problematização', link: '', disponivel: false },
+        { id: 's3', titulo: 'Aula 03', descricao: 'Desenvolvimento e Monitoramento', link: '', disponivel: false },
+      ],
+      videos: [
+        { id: 'v1', titulo: 'O que é Projeto Integrador?', descricao: 'Canal Senac · ~8 min', link: '', disponivel: true },
+        { id: 'v2', titulo: 'Metodologia de Projetos na Prática', descricao: 'Canal Sebrae · ~12 min', link: '', disponivel: true },
+        { id: 'v3', titulo: 'Como fazer um Plano de Ação 5W2H', descricao: 'Canal FGV Online · ~10 min', link: '', disponivel: true },
+      ]
+    };
+
+    function renderMaterials() {
+      const mat = getMat();
+      const slides = (mat && mat.slides) || DEFAULT_MATERIALS.slides;
+      const videos = (mat && mat.videos) || DEFAULT_MATERIALS.videos;
+
+      document.getElementById('slides-grid').innerHTML = slides.map(s => `
+        <article class="admin-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">${s.titulo}</div>
+              <div class="card-sub">${s.descricao}</div>
+            </div>
+            <span class="badge ${s.disponivel ? 'badge-success' : 'badge-warning'}">${s.disponivel ? 'Visível' : 'Oculto'}</span>
+          </div>
+          ${s.link ? `<a href="${s.link}" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-size:12px;text-decoration:none">🔗 Abrir link</a>` : '<span style="color:var(--muted);font-size:12px">Sem link configurado</span>'}
+          <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+            <button class="btn-action btn-sm btn-secondary" onclick="editMaterial('slides','${s.id}')" type="button">Editar</button>
+          </div>
+        </article>
+      `).join('');
+
+      document.getElementById('videos-grid').innerHTML = videos.map(v => `
+        <article class="admin-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">${v.titulo}</div>
+              <div class="card-sub">${v.descricao}</div>
+            </div>
+            <span class="badge ${v.disponivel ? 'badge-success' : 'badge-warning'}">${v.disponivel ? 'Visível' : 'Oculto'}</span>
+          </div>
+          ${v.link ? `<a href="${v.link}" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-size:12px;text-decoration:none">🔗 Abrir link</a>` : '<span style="color:var(--muted);font-size:12px">Sem link configurado</span>'}
+          <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+            <button class="btn-action btn-sm btn-secondary" onclick="editMaterial('videos','${v.id}')" type="button">Editar</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function editMaterial(type, id) {
+      _materialType = type;
+      _editingMaterialId = id;
+      const mat = getMat();
+      const list = type === 'slides' ? ((mat && mat.slides) || DEFAULT_MATERIALS.slides) : ((mat && mat.videos) || DEFAULT_MATERIALS.videos);
+      const item = list.find(i => i.id === id);
+      if (!item) return;
+
+      document.getElementById('material-modal-title').textContent = type === 'slides' ? 'Editar Slide' : 'Editar Vídeo';
+      document.getElementById('mat-titulo').value = item.titulo;
+      document.getElementById('mat-desc').value = item.descricao;
+      document.getElementById('mat-link').value = item.link || '';
+      document.getElementById('mat-disponivel').checked = item.disponivel;
+      document.getElementById('material-modal').classList.add('open');
+    }
+
+    function closeMaterialModal() {
+      document.getElementById('material-modal').classList.remove('open');
+      _editingMaterialId = null;
+      _materialType = 'slides';
+    }
+
+    function saveMaterial() {
+      const titulo = document.getElementById('mat-titulo').value.trim();
+      const descricao = document.getElementById('mat-desc').value.trim();
+      const link = document.getElementById('mat-link').value.trim();
+      const disponivel = document.getElementById('mat-disponivel').checked;
+
+      const mat = getMat() || { slides: DEFAULT_MATERIALS.slides, videos: DEFAULT_MATERIALS.videos };
+      const list = _materialType === 'slides' ? mat.slides : mat.videos;
+      const idx = list.findIndex(i => i.id === _editingMaterialId);
+      if (idx >= 0) {
+        list[idx].titulo = titulo;
+        list[idx].descricao = descricao;
+        list[idx].link = link;
+        list[idx].disponivel = disponivel;
+      }
+      saveMat(mat);
+      closeMaterialModal();
+      renderMaterials();
+    }
+
+    // ── Feedback Coletivo ────────────────────────────────────────────────
+    function renderFCList() {
+      const items = getFC();
+      const el = document.getElementById('fc-list');
+      if (items.length === 0) {
+        el.innerHTML = '<div class="empty-state" role="status"><div class="empty-state-icon" aria-hidden="true">💬</div><h4>Nenhum comunicado</h4><p>Publique orientações para todas as equipes.</p></div>';
+        return;
+      }
+      el.innerHTML = items.slice().reverse().map((i, idx) => `
+        <article class="admin-card" style="border-left:3px solid ${i.importante ? '#ff6b6b' : 'var(--orange)'}">
+          <div class="card-header">
+            <div>
+              <div class="card-title">${i.importante ? '🚨 ' : ''}${i.titulo}</div>
+              <div class="card-sub">${new Date(i.data).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'})}</div>
+            </div>
+            <button class="btn-icon danger" onclick="deleteFC(${items.length - 1 - idx})" title="Excluir" aria-label="Excluir comunicado">🗑</button>
+          </div>
+          <div style="font-size:13px;color:rgba(242,242,242,0.8);line-height:1.7;white-space:pre-wrap">${i.conteudo}</div>
+        </article>
+      `).join('');
+    }
+
+    function addFeedbackColetivo(e) {
+      e.preventDefault();
+      const titulo = document.getElementById('fc-titulo').value.trim();
+      const conteudo = document.getElementById('fc-conteudo').value.trim();
+      const importante = document.getElementById('fc-importante').checked;
+      if (!titulo || !conteudo) { alert('Preencha título e conteúdo.'); return; }
+
+      const fc = getFC();
+      fc.push({ id: 'fc_' + Date.now(), titulo, conteudo, importante, data: new Date().toISOString() });
+      saveFC(fc);
+
+      document.getElementById('fc-titulo').value = '';
+      document.getElementById('fc-conteudo').value = '';
+      document.getElementById('fc-importante').checked = false;
+      renderFCList();
+      renderStats();
+    }
+
+    function deleteFC(index) {
+      if (!confirm('Excluir este comunicado?')) return;
+      const fc = getFC();
+      fc.splice(index, 1);
+      saveFC(fc);
+      renderFCList();
+      renderStats();
+    }
+
+    // ── Settings ─────────────────────────────────────────────────────────
+    function changeAdminPassword(e) {
+      e.preventDefault();
+      const newPass = document.getElementById('new-password').value.trim();
+      const confirmPass = document.getElementById('confirm-password').value.trim();
+      if (!newPass) { alert('Digite a nova senha.'); return; }
+      if (newPass !== confirmPass) { alert('As senhas não conferem.'); return; }
+      localStorage.setItem(KEY_ADMIN, newPass);
+      alert('Senha alterada com sucesso!');
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-password').value = '';
+    }
+
+    function resetAllData() {
+      if (!confirm('Tem certeza que deseja apagar TODOS os dados? Esta ação não pode ser desfeita.')) return;
+      if (!confirm('Confirme novamente: todos os dados serão perdidos.')) return;
+      localStorage.removeItem(KEY_GRUPOS);
+      localStorage.removeItem(KEY_MAT);
+      localStorage.removeItem(KEY_FC);
+      renderAll();
+      alert('Dados resetados com sucesso.');
+    }
+
+    // ── Close modals on overlay click ───────────────────────────────────
+    document.querySelectorAll('.overlay').forEach(overlay => {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) {
+          overlay.classList.remove('open');
+        }
+      });
+    });
+
+    // ESC to close modals
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+      }
+    });
+
+    // ── Init ─────────────────────────────────────────────────────────────
+    checkAdminAuth();
+  </script>
+</body>
+</html>
