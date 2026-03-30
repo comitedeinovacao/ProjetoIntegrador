@@ -248,6 +248,18 @@
           <p>Configure a senha de administrador e outras opções do sistema.</p>
         </div>
 
+        <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--orange);border-radius:14px;padding:1.5rem;max-width:600px;margin-bottom:1.5rem">
+          <h4 style="font-size:15px;font-weight:700;margin-bottom:0.4rem">🎯 Tema Gerador da Turma</h4>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6">Este tema aparece como referência em somente leitura no Planner de todas as equipes.</p>
+          <div style="margin-bottom:0.75rem">
+            <label for="tema-gerador-input" class="form-label">Tema Gerador</label>
+            <input type="text" class="field-input" id="tema-gerador-input"
+                   placeholder="Ex: Sustentabilidade na Cadeia de Suprimentos">
+          </div>
+          <button class="btn-action" onclick="saveTemaGerador()" type="button">💾 Salvar Tema Gerador</button>
+          <div id="tema-gerador-msg" style="font-size:12px;color:#5ae09a;margin-top:0.6rem;display:none">✅ Tema salvo com sucesso.</div>
+        </div>
+
         <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;max-width:500px">
           <h4 style="font-size:15px;font-weight:700;margin-bottom:1rem">🔐 Alterar Senha de Administrador</h4>
           <form onsubmit="changeAdminPassword(event)">
@@ -393,11 +405,15 @@
 
   <script>
     const KEY_GRUPOS = 'pi_grupos';
-    const KEY_MAT = 'pi_materiais';
-    const KEY_FC = 'pi_feedback_coletivo';
-    const KEY_ADMIN = 'pi_admin_password';
+    const KEY_MAT    = 'pi_materiais';
+    const KEY_FC     = 'pi_feedback_coletivo';
+    const KEY_ADMIN  = 'pi_admin_password';
+    const KEY_CONFIG = 'pi_config';
     const SESSION_ADMIN = 'pi_admin';
     const DEFAULT_ADMIN_PASSWORD = 'admin123';
+
+    function getConfig() { return JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}'); }
+    function saveConfig(c) { localStorage.setItem(KEY_CONFIG, JSON.stringify(c)); }
 
     // Initialize admin password if not set
     if (!localStorage.getItem(KEY_ADMIN)) {
@@ -478,6 +494,7 @@
       renderTeams();
       renderMaterials();
       renderFCList();
+      loadTemaGerador();
     }
 
     // ── Stats ────────────────────────────────────────────────────────────
@@ -851,6 +868,21 @@
     }
 
     // ── Settings ─────────────────────────────────────────────────────────
+    function saveTemaGerador() {
+      const val = document.getElementById('tema-gerador-input').value.trim();
+      const cfg = getConfig();
+      cfg.temaGerador = val;
+      saveConfig(cfg);
+      const msg = document.getElementById('tema-gerador-msg');
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    }
+
+    function loadTemaGerador() {
+      const cfg = getConfig();
+      if (cfg.temaGerador) document.getElementById('tema-gerador-input').value = cfg.temaGerador;
+    }
+
     function changeAdminPassword(e) {
       e.preventDefault();
       const newPass = document.getElementById('new-password').value.trim();

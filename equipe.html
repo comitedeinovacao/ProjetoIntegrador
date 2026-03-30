@@ -119,6 +119,69 @@
     .members-table th { background: rgba(0,40,80,0.6); color: var(--text); padding: 0.75rem 1rem; font-size: 12px; font-weight: 700; text-align: left; }
     .members-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
 
+    /* ── PLANNER ──────────────────────────────────────────────────── */
+    /* Definition Cards */
+    .def-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .def-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-top: 3px solid var(--orange); border-radius: 12px; padding: 1.25rem; }
+    .def-card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--orange); margin-bottom: 0.5rem; }
+    .def-card-title { font-size: 13px; font-weight: 600; margin-bottom: 0.6rem; }
+    .def-card-readonly { font-size: 14px; color: var(--muted); line-height: 1.5; }
+    .def-card textarea, .def-card input[type="text"] { width: 100%; padding: 0.7rem 0.85rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; resize: vertical; min-height: 70px; transition: border-color 0.2s; }
+    .def-card textarea:focus, .def-card input[type="text"]:focus { outline: none; border-color: var(--orange); }
+    .def-card textarea::placeholder, .def-card input[type="text"]::placeholder { color: rgba(242,242,242,0.25); }
+
+    /* Solutions list */
+    .sol-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .sol-item { display: flex; gap: 0.5rem; align-items: center; }
+    .sol-item input { flex: 1; padding: 0.55rem 0.75rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 7px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; }
+    .sol-item input:focus { outline: none; border-color: var(--orange); }
+    .sol-item input::placeholder { color: rgba(242,242,242,0.25); }
+    .sol-remove { background: none; border: none; color: rgba(255,100,100,0.6); font-size: 16px; cursor: pointer; padding: 0.25rem; line-height: 1; flex-shrink: 0; }
+    .sol-remove:hover { color: #ff6b6b; }
+    .btn-add-sol { background: none; border: 1px dashed rgba(247,148,29,0.4); color: var(--orange); font-size: 12px; font-weight: 600; padding: 0.45rem 0.9rem; border-radius: 7px; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.2s; }
+    .btn-add-sol:hover { background: rgba(247,148,29,0.08); border-color: var(--orange); }
+
+    /* Planner Task Table */
+    .planner-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem; }
+    .planner-header h4 { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
+    .planner-header h4::before { content: ''; display: block; width: 4px; height: 1em; background: var(--orange); border-radius: 2px; }
+    .planner-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1rem; }
+    .planner-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    .planner-table thead th { background: rgba(0,40,80,0.7); color: var(--text); padding: 0.85rem 1rem; text-align: left; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .planner-table tbody td { padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; vertical-align: middle; }
+    .planner-table tbody tr:nth-child(odd) td { background: rgba(255,255,255,0.02); }
+    .planner-table tbody tr:hover td { background: rgba(247,148,29,0.04); }
+    .pt-input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; padding: 0.3rem 0.4rem; border-radius: 5px; }
+    .pt-input:focus { outline: none; background: rgba(255,255,255,0.07); }
+    .pt-input::placeholder { color: rgba(242,242,242,0.22); }
+    .pt-date { width: 110px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); font-size: 12px; font-family: 'Montserrat', sans-serif; padding: 0.3rem 0.5rem; }
+    .pt-date:focus { outline: none; border-color: var(--orange); }
+    .pt-sel { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); font-size: 12px; font-family: 'Montserrat', sans-serif; padding: 0.3rem 0.5rem; }
+    .pt-sel:focus { outline: none; border-color: var(--orange); }
+    .status-badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.65rem; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .s-pendente  { background: rgba(247,148,29,0.15); color: var(--orange); }
+    .s-andamento { background: rgba(100,150,255,0.15); color: #90baff; }
+    .s-concluida { background: rgba(50,200,100,0.15); color: #5ae09a; }
+    .prio-badge { padding: 0.2rem 0.55rem; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .p-baixa   { background: rgba(255,255,255,0.08); color: var(--muted); }
+    .p-media   { background: rgba(247,148,29,0.15); color: var(--orange); }
+    .p-urgente { background: rgba(255,100,100,0.2); color: #ff8888; }
+    .resp-pills { display: flex; flex-wrap: wrap; gap: 0.3rem; min-width: 120px; }
+    .resp-pill  { background: rgba(0,69,135,0.45); border: 1px solid rgba(100,160,255,0.25); color: #90baff; font-size: 11px; font-weight: 600; padding: 0.18rem 0.55rem; border-radius: 20px; }
+    .btn-rm-row { background: none; border: none; color: rgba(255,100,100,0.5); font-size: 16px; cursor: pointer; padding: 0.25rem; }
+    .btn-rm-row:hover { color: #ff6b6b; }
+    .planner-empty { text-align: center; padding: 2.5rem; color: var(--muted); font-size: 13px; }
+
+    /* Assign members popover */
+    .assign-wrap { position: relative; }
+    .assign-btn  { background: rgba(0,69,135,0.35); border: 1px solid rgba(100,160,255,0.2); border-radius: 7px; padding: 0.3rem 0.65rem; font-size: 12px; font-weight: 600; color: #90baff; cursor: pointer; font-family: 'Montserrat', sans-serif; white-space: nowrap; }
+    .assign-btn:hover { background: rgba(0,69,135,0.55); }
+    .assign-drop { position: absolute; top: calc(100% + 4px); left: 0; background: #002a5c; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.5rem; z-index: 200; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+    .assign-drop.open { display: block; }
+    .assign-drop label { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.5rem; font-size: 12px; cursor: pointer; border-radius: 6px; }
+    .assign-drop label:hover { background: rgba(255,255,255,0.07); }
+    .assign-drop input[type="checkbox"] { accent-color: var(--orange); }
+
     /* Auth Gate */
     .auth-gate { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 1rem; }
     .auth-gate.open { display: flex; }
@@ -186,6 +249,7 @@
     <!-- Tabs -->
     <div class="tab-bar" role="tablist" aria-label="Abas do painel">
       <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-visao" onclick="showTab('visao')">📊 Visão Geral</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-planner" onclick="showTab('planner')">📌 Planner</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-plano" onclick="showTab('plano')">📋 Plano 5W2H</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-gut" onclick="showTab('gut')">🔺 Matriz GUT</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-entregas" onclick="showTab('entregas')">📤 Entregas</button>
@@ -204,6 +268,74 @@
             <tbody id="mem-tbody"></tbody>
           </table>
         </div>
+      </section>
+
+      <!-- PLANNER -->
+      <section class="tab-content" id="tab-planner" role="tabpanel" aria-labelledby="tab-planner">
+        <div class="s-head">
+          <h3>Planner do Projeto Integrador</h3>
+          <p>Defina o projeto da sua equipe e gerencie as tarefas com responsáveis, prazos e status.</p>
+        </div>
+
+        <!-- Definição do Projeto (4 cards) -->
+        <div class="def-cards" id="def-cards">
+
+          <!-- Card 1: Tema Gerador (somente leitura, definido pelo docente) -->
+          <div class="def-card">
+            <div class="def-card-label">🎯 Tema Gerador</div>
+            <div class="def-card-title">Tema padrão da turma (definido pelo docente)</div>
+            <div class="def-card-readonly" id="dc-tema-gerador">—</div>
+          </div>
+
+          <!-- Card 2: Tema do Projeto Integrador -->
+          <div class="def-card">
+            <div class="def-card-label">📘 Tema do Projeto Integrador</div>
+            <div class="def-card-title">Qual é o tema específico do projeto da sua equipe?</div>
+            <textarea id="dc-tema-pi" placeholder="Descreva o tema do Projeto Integrador da equipe..." oninput="savePlanner()"></textarea>
+          </div>
+
+          <!-- Card 3: Pergunta Norteadora -->
+          <div class="def-card">
+            <div class="def-card-label">❓ Pergunta Norteadora</div>
+            <div class="def-card-title">Qual é o problema a ser investigado?</div>
+            <textarea id="dc-pergunta" placeholder="Ex: Como otimizar o processo de armazenagem para reduzir perdas em 20%?" oninput="savePlanner()"></textarea>
+          </div>
+
+          <!-- Card 4: Possíveis Soluções -->
+          <div class="def-card">
+            <div class="def-card-label">💡 Possíveis Soluções</div>
+            <div class="def-card-title">Quais soluções a equipe está considerando?</div>
+            <div class="sol-list" id="sol-list"></div>
+            <button class="btn-add-sol" type="button" onclick="addSolucao()">+ Adicionar solução</button>
+          </div>
+
+        </div>
+
+        <!-- Planner de Tarefas (estilo MS Planner) -->
+        <div class="planner-header">
+          <h4>Tarefas do Projeto</h4>
+          <button class="btn-action btn-sm" type="button" onclick="addTarefa()">+ Nova Tarefa</button>
+        </div>
+
+        <div class="planner-wrap">
+          <table class="planner-table" id="planner-table" aria-label="Planner de tarefas">
+            <thead>
+              <tr>
+                <th scope="col" style="width:30%">Nome da Tarefa</th>
+                <th scope="col" style="width:22%">Responsáveis</th>
+                <th scope="col">Início</th>
+                <th scope="col">Conclusão</th>
+                <th scope="col">Status</th>
+                <th scope="col">Prioridade</th>
+                <th scope="col" style="width:36px"></th>
+              </tr>
+            </thead>
+            <tbody id="planner-tbody">
+              <tr><td colspan="7" class="planner-empty">Nenhuma tarefa ainda. Clique em "+ Nova Tarefa" para começar.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="auto-save-msg" id="planner-save-msg" aria-live="polite">💾 Todas as alterações são salvas automaticamente.</div>
       </section>
 
       <!-- PLANO 5W2H -->
@@ -402,6 +534,7 @@
       renderHeader(grupo);
       renderOverview(grupo);
       renderMembers(grupo);
+      renderPlanner(grupo);
       renderPlano(grupo);
       renderGUT(grupo);
       renderEntregas(grupo);
@@ -586,6 +719,230 @@
           ${(f.indicadores || []).map(ind => `<div class="fb-row"><span>${ind.nome}</span><span class="fb-badge ${mMap[ind.mencao]||''}">${ind.mencao}</span></div>`).join('')}
           ${f.orientacoes ? `<div class="fb-orient"><strong>Orientações:</strong><br>${f.orientacoes}</div>` : ''}
         </article>`).join('');
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // PLANNER
+    // ══════════════════════════════════════════════════════════════════════
+    const KEY_CONFIG = 'pi_config';
+    function getConfig() { return JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}'); }
+
+    function renderPlanner(grupo) {
+      const pl = grupo.planner || {};
+
+      // Card 1 — Tema Gerador (leitura, vem do config global ou do grupo)
+      const cfg = getConfig();
+      const temaGerador = cfg.temaGerador || grupo.temaGerador || '—';
+      document.getElementById('dc-tema-gerador').textContent = temaGerador;
+
+      // Card 2 — Tema do PI
+      document.getElementById('dc-tema-pi').value = pl.temaProjeto || '';
+
+      // Card 3 — Pergunta Norteadora
+      document.getElementById('dc-pergunta').value = pl.perguntaNorteadora || '';
+
+      // Card 4 — Soluções
+      renderSolucoes(pl.solucoes || ['']);
+
+      // Tabela de tarefas
+      renderTarefas(grupo);
+    }
+
+    function renderSolucoes(solucoes) {
+      const list = document.getElementById('sol-list');
+      list.innerHTML = solucoes.map((s, i) => `
+        <div class="sol-item">
+          <input type="text" placeholder="Descreva a solução..." value="${s.replace(/"/g,'&quot;')}"
+                 oninput="updateSolucao(${i}, this.value)">
+          ${solucoes.length > 1
+            ? `<button class="sol-remove" type="button" onclick="removeSolucao(${i})" aria-label="Remover solução">✕</button>`
+            : ''}
+        </div>`).join('');
+    }
+
+    function addSolucao() {
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      if (!grupos[idx].planner) grupos[idx].planner = {};
+      if (!grupos[idx].planner.solucoes) grupos[idx].planner.solucoes = [''];
+      grupos[idx].planner.solucoes.push('');
+      saveGrupos(grupos);
+      renderSolucoes(grupos[idx].planner.solucoes);
+    }
+
+    function removeSolucao(i) {
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      grupos[idx].planner.solucoes.splice(i, 1);
+      saveGrupos(grupos);
+      renderSolucoes(grupos[idx].planner.solucoes);
+    }
+
+    function updateSolucao(i, val) {
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      if (!grupos[idx].planner) grupos[idx].planner = {};
+      if (!grupos[idx].planner.solucoes) grupos[idx].planner.solucoes = [];
+      grupos[idx].planner.solucoes[i] = val;
+      saveGrupos(grupos);
+    }
+
+    // ── Save planner cards (debounced) ────────────────────────────────────
+    let _plannerTimer = null;
+    function savePlanner() {
+      clearTimeout(_plannerTimer);
+      document.getElementById('planner-save-msg').textContent = '💾 Salvando…';
+      _plannerTimer = setTimeout(() => {
+        const grupos = getGrupos();
+        const idx = grupos.findIndex(g => g.id === urlId);
+        if (idx < 0) return;
+        if (!grupos[idx].planner) grupos[idx].planner = {};
+        grupos[idx].planner.temaProjeto       = document.getElementById('dc-tema-pi').value;
+        grupos[idx].planner.perguntaNorteadora = document.getElementById('dc-pergunta').value;
+        saveGrupos(grupos);
+        document.getElementById('planner-save-msg').textContent = '✅ Salvo automaticamente.';
+      }, 800);
+    }
+
+    // ── Tasks ─────────────────────────────────────────────────────────────
+    function gerarId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    }
+
+    function addTarefa() {
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      if (!grupos[idx].planner) grupos[idx].planner = {};
+      if (!grupos[idx].planner.tarefas) grupos[idx].planner.tarefas = [];
+      grupos[idx].planner.tarefas.push({
+        id: gerarId(), titulo: '', responsaveis: [],
+        dataInicio: '', dataConclusao: '',
+        status: 'pendente', prioridade: 'media'
+      });
+      saveGrupos(grupos);
+      renderTarefas(grupos[idx]);
+    }
+
+    function removeTarefa(tid) {
+      if (!confirm('Remover esta tarefa?')) return;
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      grupos[idx].planner.tarefas = (grupos[idx].planner.tarefas || []).filter(t => t.id !== tid);
+      saveGrupos(grupos);
+      renderTarefas(grupos[idx]);
+    }
+
+    function saveTarefaField(tid, field, value) {
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      const ti = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === tid);
+      if (ti < 0) return;
+      grupos[idx].planner.tarefas[ti][field] = value;
+      saveGrupos(grupos);
+      if (field === 'status' || field === 'prioridade') renderTarefas(grupos[idx]);
+    }
+
+    function toggleResponsavel(tid, membNome) {
+      const grupos = getGrupos();
+      const idx = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      const ti = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === tid);
+      if (ti < 0) return;
+      const resp = grupos[idx].planner.tarefas[ti].responsaveis || [];
+      const pos  = resp.indexOf(membNome);
+      if (pos >= 0) resp.splice(pos, 1); else resp.push(membNome);
+      grupos[idx].planner.tarefas[ti].responsaveis = resp;
+      saveGrupos(grupos);
+      // Update pills + checkboxes without full re-render
+      const pills = document.getElementById('pills-' + tid);
+      if (pills) pills.innerHTML = resp.map(r => `<span class="resp-pill">${r}</span>`).join('') || '<span style="color:var(--muted);font-size:11px">—</span>';
+      document.querySelectorAll(`#drop-${tid} input[type=checkbox]`).forEach(cb => {
+        cb.checked = resp.includes(cb.value);
+      });
+    }
+
+    function toggleDrop(tid) {
+      document.querySelectorAll('.assign-drop').forEach(d => { if (d.id !== 'drop-' + tid) d.classList.remove('open'); });
+      document.getElementById('drop-' + tid).classList.toggle('open');
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.assign-wrap')) {
+        document.querySelectorAll('.assign-drop').forEach(d => d.classList.remove('open'));
+      }
+    });
+
+    const STATUS_INFO  = { pendente: ['s-pendente','🟡 Pendente'], em_andamento: ['s-andamento','🔵 Em andamento'], concluida: ['s-concluida','✅ Concluída'] };
+    const PRIO_INFO    = { baixa: ['p-baixa','Baixa'], media: ['p-media','● Média'], urgente: ['p-urgente','🚨 Urgente'] };
+
+    function renderTarefas(grupo) {
+      const tarefas = (grupo.planner || {}).tarefas || [];
+      const membros = grupo.membros || [];
+      const tbody   = document.getElementById('planner-tbody');
+      if (tarefas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="planner-empty">Nenhuma tarefa ainda. Clique em "+ Nova Tarefa" para começar.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = tarefas.map(t => {
+        const resp    = t.responsaveis || [];
+        const [sCls, sLbl] = STATUS_INFO[t.status]  || STATUS_INFO.pendente;
+        const [pCls, pLbl] = PRIO_INFO[t.prioridade] || PRIO_INFO.media;
+        const pillsHtml = resp.length
+          ? resp.map(r => `<span class="resp-pill">${r}</span>`).join('')
+          : '<span style="color:var(--muted);font-size:11px">—</span>';
+        const checkboxes = membros.map(m => `
+          <label>
+            <input type="checkbox" value="${m.nome}" ${resp.includes(m.nome)?'checked':''}
+                   onchange="toggleResponsavel('${t.id}','${m.nome}')">
+            ${m.nome}
+          </label>`).join('');
+        return `
+          <tr>
+            <td>
+              <input class="pt-input" type="text" placeholder="Nome da tarefa..." value="${(t.titulo||'').replace(/"/g,'&quot;')}"
+                     onchange="saveTarefaField('${t.id}','titulo',this.value)">
+            </td>
+            <td>
+              <div class="assign-wrap">
+                <div class="resp-pills" id="pills-${t.id}">${pillsHtml}</div>
+                <button class="assign-btn" type="button" onclick="toggleDrop('${t.id}')">✏️ Atribuir</button>
+                <div class="assign-drop" id="drop-${t.id}">${checkboxes || '<span style="font-size:12px;color:var(--muted)">Sem membros cadastrados</span>'}</div>
+              </div>
+            </td>
+            <td>
+              <input class="pt-date" type="date" value="${t.dataInicio||''}"
+                     onchange="saveTarefaField('${t.id}','dataInicio',this.value)">
+            </td>
+            <td>
+              <input class="pt-date" type="date" value="${t.dataConclusao||''}"
+                     onchange="saveTarefaField('${t.id}','dataConclusao',this.value)">
+            </td>
+            <td>
+              <select class="pt-sel" onchange="saveTarefaField('${t.id}','status',this.value)">
+                <option value="pendente"     ${t.status==='pendente'    ?'selected':''}>🟡 Pendente</option>
+                <option value="em_andamento" ${t.status==='em_andamento'?'selected':''}>🔵 Em andamento</option>
+                <option value="concluida"    ${t.status==='concluida'   ?'selected':''}>✅ Concluída</option>
+              </select>
+            </td>
+            <td>
+              <select class="pt-sel" onchange="saveTarefaField('${t.id}','prioridade',this.value)">
+                <option value="baixa"   ${t.prioridade==='baixa'  ?'selected':''}>Baixa</option>
+                <option value="media"   ${t.prioridade==='media'  ?'selected':''}>● Média</option>
+                <option value="urgente" ${t.prioridade==='urgente'?'selected':''}>🚨 Urgente</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-rm-row" type="button" onclick="removeTarefa('${t.id}')" aria-label="Remover tarefa">✕</button>
+            </td>
+          </tr>`;
+      }).join('');
     }
 
     // ── Tabs ──────────────────────────────────────────────────────────────
