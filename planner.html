@@ -256,6 +256,8 @@
     .panel-title:focus { background: var(--surface-2); border-radius: 6px; padding: .25rem; }
     .panel-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; padding: .25rem; border-radius: 6px; transition: .15s; flex-shrink: 0; }
     .panel-close:hover { background: var(--surface-2); color: var(--text); }
+    .panel-title-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--orange); margin-bottom: .3rem; display: block; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 
     /* Panel chips row */
     .panel-chips { display: flex; gap: .5rem; flex-wrap: wrap; padding: .75rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -478,18 +480,19 @@
   </div>
 
   <!-- PANEL OVERLAY -->
-  <div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+  <div class="panel-overlay" id="panel-overlay" onclick="discardOrClose()"></div>
 
   <!-- TASK DETAIL PANEL -->
   <div class="task-panel" id="task-panel" role="dialog" aria-label="Detalhes da tarefa">
     <div class="panel-header">
       <div class="panel-title-wrap">
-        <textarea class="panel-title" id="panel-title" rows="1" placeholder="Nome da tarefa (O Quê?)..."
+        <span class="panel-title-label">📌 O QUÊ? (WHAT) — Nome da Tarefa</span>
+        <textarea class="panel-title" id="panel-title" rows="1" placeholder="Descreva a tarefa..."
                   oninput="autoResize(this);panelSave('oQue',this.value)"></textarea>
       </div>
       <div style="display:flex;gap:.5rem;flex-shrink:0">
-        <button class="btn-rm-task" onclick="removeTarefa(_activeTid)" title="Excluir tarefa" style="font-size:15px;padding:.35rem .5rem" aria-label="Excluir tarefa">🗑</button>
-        <button class="panel-close" onclick="closePanel()" aria-label="Fechar">✕</button>
+        <button class="btn-rm-task" type="button" onclick="removeTarefa(_activeTid)" title="Excluir tarefa" style="font-size:15px;padding:.35rem .5rem" aria-label="Excluir tarefa">🗑</button>
+        <button class="panel-close" type="button" onclick="discardOrClose()" aria-label="Fechar">✕</button>
       </div>
     </div>
 
@@ -591,7 +594,7 @@
     <!-- Rodapé com botão Salvar -->
     <div class="modal-footer">
       <span style="font-size:11px;color:var(--muted)">💾 Alterações salvas automaticamente</span>
-      <button class="btn-salvar" type="button" onclick="closePanel()">✅ Salvar e Fechar</button>
+      <button class="btn-salvar" type="button" onclick="saveAndClose()">✅ Salvar e Fechar</button>
     </div>
   </div>
 
@@ -603,7 +606,8 @@
 
     const urlId = new URLSearchParams(window.location.search).get('id');
     if (urlId) document.getElementById('nav-back-link').href = 'equipe.html?id=' + urlId;
-    let _activeTid = null;  // ID da tarefa aberta no painel
+    let _activeTid = null;   // ID da tarefa aberta no modal
+    let _isNewTask  = false; // true = rascunho ainda não confirmado na tabela
 
     // ── Helpers ──────────────────────────────────────────────────────────
     function getGrupos() { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '[]'); }
@@ -644,20 +648,37 @@
       catch { return url.substring(url.lastIndexOf('/') + 1) || 'arquivo'; }
     }
 
+    // Remove rascunhos deixados por sessões anteriores (browser fechado sem confirmar)
+    function cleanOrphanDrafts() {
+      const grupos = getGrupos();
+      let changed = false;
+      grupos.forEach(g => {
+        if (g.planner && g.planner.tarefas) {
+          const antes = g.planner.tarefas.length;
+          g.planner.tarefas = g.planner.tarefas.filter(t => !t._draft);
+          if (g.planner.tarefas.length !== antes) changed = true;
+        }
+      });
+      if (changed) saveGrupos(grupos);
+    }
+
     // ── Init ──────────────────────────────────────────────────────────────
     async function init() {
       if (!urlId) { alert('Equipe não especificada.'); history.back(); return; }
+      cleanOrphanDrafts();
       // Usa dados locais imediatamente se disponíveis
       if (getGrupo()) {
         renderAll();
         // Pré-inicializa o widget Cloudinary em segundo plano (elimina delay no primeiro uso)
         setTimeout(initCldWidget, 1500);
-        // Sincroniza com a nuvem em segundo plano
-        cloudSync().then(synced => { if (synced && getGrupo()) renderAll(); });
+        // Não sincroniza em background: o cloudSave já grava cada alteração na nuvem.
+        // Sincronizar em background sobrescreveria dados recém-criados que ainda não
+        // chegaram ao GAS (race condition), causando perda de informações.
         return;
       }
       // Sem dados locais — aguarda a nuvem (até 6 s)
       await Promise.race([cloudSync(), new Promise(r => setTimeout(r, 6000))]);
+      cleanOrphanDrafts();
       const g = getGrupo();
       if (!g) { alert('Equipe não encontrada.'); history.back(); return; }
       renderAll();
@@ -692,8 +713,8 @@
         ? membros.map(m => `<span class="sb-member-chip">👤 ${m.nome}</span>`).join('')
         : '<span style="font-size:12px;color:var(--muted)">Nenhum membro cadastrado.</span>';
 
-      // Stats
-      const tarefas = (pl.tarefas || []);
+      // Stats (ignora rascunhos)
+      const tarefas = (pl.tarefas || []).filter(t => !t._draft);
       document.getElementById('st-todo').textContent  = tarefas.filter(t => t.status === 'pendente').length;
       document.getElementById('st-doing').textContent = tarefas.filter(t => t.status === 'em_andamento').length;
       document.getElementById('st-done').textContent  = tarefas.filter(t => t.status === 'concluida').length;
@@ -702,11 +723,12 @@
     function renderTabela(g) {
       const q = (document.getElementById('search-input').value || '').toLowerCase();
       const tarefas = ((g.planner || {}).tarefas || [])
+        .filter(t => !t._draft) // oculta rascunhos até o usuário confirmar
         .filter(t => !q || (t.oQue || '').toLowerCase().includes(q));
 
       const tbody = document.getElementById('pl-tbody');
       if (tarefas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-table">
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-table">
           <span class="ei">📋</span>
           Nenhuma tarefa encontrada. Clique em <strong>+ Adicionar Tarefa</strong> para começar.
         </td></tr>`;
@@ -771,7 +793,7 @@
     }
 
     function renderQuadro(g) {
-      const tarefas = (g.planner || {}).tarefas || [];
+      const tarefas = ((g.planner || {}).tarefas || []).filter(t => !t._draft);
       const grupos = { pendente: [], em_andamento: [], concluida: [] };
       tarefas.forEach(t => { if (grupos[t.status]) grupos[t.status].push(t); });
 
@@ -818,17 +840,14 @@
         onde: '', dataInicio: '', dataConclusao: '',
         como: '', quanto: '', status: status || 'pendente',
         prioridade: 'media', progresso: 0,
-        comentarios: [], anexos: []
+        comentarios: [], anexos: [],
+        _draft: true  // rascunho: não aparece na tabela até "Salvar e Fechar"
       };
       grupos[idx].planner.tarefas.push(nova);
       saveGrupos(grupos);
-      renderAll();
-      // Rola até a nova linha antes de abrir o painel
-      setTimeout(() => {
-        const row = document.querySelector(`[data-tid="${nova.id}"]`);
-        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 50);
       openPanel(nova.id);
+      _isNewTask = true; // define APÓS openPanel (que zera a flag) para marcar como rascunho
+      // Não chama renderAll() — a linha só aparece após confirmação
     }
 
     function addTarefaComStatus(status) { addTarefa(status); }
@@ -862,7 +881,8 @@
 
     // ── Panel (modal centralizado) ────────────────────────────────────────
     function openPanel(tid) {
-      _activeTid = tid;
+      _activeTid  = tid;
+      _isNewTask  = false; // ao abrir tarefa existente, nunca é rascunho
       const g = getGrupo();
       if (!g) return;
       populatePanel(g);
@@ -875,16 +895,82 @@
 
     function closePanel() {
       _activeTid = null;
+      _isNewTask  = false;
       document.getElementById('task-panel').classList.remove('open');
       document.getElementById('panel-overlay').classList.remove('open');
       document.querySelectorAll('.panel-assign-drop').forEach(d => d.classList.remove('open'));
       setUploadStatus('');
     }
 
+    // Lê os valores atuais de todos os campos e grava no localStorage
+    // (necessário para campos com onchange que podem não ter disparado ainda)
+    function flushPanelInputs() {
+      if (!_activeTid) return;
+      panelSave('oQue',         document.getElementById('panel-title').value);
+      panelSave('porQue',       document.getElementById('panel-porQue').value);
+      panelSave('onde',         document.getElementById('panel-onde').value);
+      panelSave('dataInicio',   document.getElementById('panel-inicio').value);
+      panelSave('dataConclusao',document.getElementById('panel-conclusao').value);
+      panelSave('como',         document.getElementById('panel-como').value);
+      panelSave('quanto',       document.getElementById('panel-quanto').value);
+      panelSave('progresso',    parseInt(document.getElementById('panel-prog').value) || 0);
+    }
+
+    // Chamado pelo botão "Salvar e Fechar"
+    function saveAndClose() {
+      flushPanelInputs();
+      if (_isNewTask && _activeTid) {
+        // Remove a flag de rascunho para que a tarefa apareça na tabela
+        const grupos = getGrupos();
+        const idx = grupos.findIndex(g => g.id === urlId);
+        if (idx >= 0) {
+          const planner = grupos[idx].planner;
+          if (planner && planner.tarefas) {
+            const ti = planner.tarefas.findIndex(t => t.id === _activeTid);
+            if (ti >= 0) {
+              delete planner.tarefas[ti]._draft;
+              saveGrupos(grupos);
+            }
+          }
+        }
+      }
+      const savedTid = _activeTid; // captura antes de closePanel() zerar
+      closePanel();
+      renderAll();
+      // Rola até a linha recém-confirmada
+      setTimeout(() => {
+        const row = document.querySelector(`[data-tid="${savedTid}"]`);
+        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
+    }
+
+    // Chamado pelo botão ✕ e pelo overlay: descarta rascunho se for tarefa nova
+    function discardOrClose() {
+      if (_isNewTask && _activeTid) {
+        // Descarta: remove o rascunho do localStorage sem mostrar na tabela
+        const grupos = getGrupos();
+        const idx = grupos.findIndex(g => g.id === urlId);
+        if (idx >= 0) {
+          const planner = grupos[idx].planner;
+          if (planner && planner.tarefas) {
+            planner.tarefas = planner.tarefas.filter(t => t.id !== _activeTid);
+            saveGrupos(grupos);
+          }
+        }
+      }
+      closePanel();
+    }
+
     function populatePanel(g) {
       const t = ((g.planner || {}).tarefas || []).find(t => t.id === _activeTid);
       if (!t) return;
       const membros = g.membros || [];
+
+      // Texto do rodapé varia conforme novo/existente
+      const footerHint = document.querySelector('.modal-footer span');
+      if (footerHint) footerHint.textContent = t._draft
+        ? '✏️ Nova tarefa — preencha os campos e clique em Salvar'
+        : '💾 Alterações salvas automaticamente';
 
       // Title
       const titleEl = document.getElementById('panel-title');
