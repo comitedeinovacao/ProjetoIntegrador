@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="db.js"></script>
-  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
   <style>
     /* Page-specific styles */
     .page { padding-top: 68px; min-height: 100vh; }
@@ -117,6 +116,12 @@
     .fb-PA { background: #fff4e5; color: #c87000; border: 1px solid #ffd080; }
     .fb-NA { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
     .fb-orient { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-top: 0.75rem; font-size: 13px; color: var(--text); line-height: 1.7; }
+    .feedback-card.processo { border-left-color: #6366f1; }
+    .fb-header.processo { background: #4f46e5; }
+    .fb-header.atencao  { background: #d97706; }
+    .fb-header.critico  { background: #dc2626; }
+    .fb-proc-assunto { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .fb-proc-date { font-size: 11px; color: var(--muted); margin-top: 0.75rem; }
 
     /* Overview */
     .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
@@ -243,6 +248,9 @@
   </style>
 </head>
 <body>
+  <input type="file" id="cld-file-input" style="display:none"
+         accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.odt,.odp,.ods,.jpg,.jpeg,.png"
+         onchange="handleFileSelected(this)">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
   <nav class="nav" role="navigation" aria-label="Navegação principal">
     <a href="index.html" class="nav-logo">PI <span>Logística</span></a>
@@ -408,7 +416,7 @@
       <section class="tab-content" id="tab-feedback" role="tabpanel" aria-labelledby="tab-feedback">
         <div class="s-head">
           <h3>Feedback do Docente</h3>
-          <p>Acompanhe as avaliações por entrega. Apenas o docente pode registrar feedback.</p>
+          <p>Acompanhe as orientações do docente sobre entregas e processo de aprendizagem.</p>
         </div>
         <div id="feedback-list">
           <div class="feedback-empty" role="status">Nenhum feedback registrado ainda. Continue com as entregas!</div>
@@ -659,32 +667,57 @@
       }).join('');
     }
 
+    let _uploadNum = null;
+
     function uploadDocumento(num) {
-      const widget = cloudinary.createUploadWidget({
-        cloudName: CLD_CLOUD,
-        uploadPreset: CLD_PRESET,
-        resourceType: 'auto',
-        clientAllowedFormats: ['pdf','doc','docx','ppt','pptx','xls','xlsx','txt','odt','odp','ods'],
-        maxFiles: 1,
-        sources: ['local'],
-        multiple: false,
-        styles: {
-          palette: {
-            window: '#001e50', windowBorder: '#004587', tabIcon: '#F7941D',
-            menuIcons: '#F7941D', textDark: '#ffffff', textLight: '#F2F2F2',
-            link: '#F7941D', action: '#F7941D', inactiveTabIcon: '#89b0e0',
-            error: '#ff5555', inProgress: '#F7941D', complete: '#5ae09a',
-            sourceBg: '#002a5c'
+      _uploadNum = num;
+      const input = document.getElementById('cld-file-input');
+      if (input) { input.value = ''; input.click(); }
+    }
+
+    function handleFileSelected(input) {
+      const file = input.files && input.files[0];
+      if (!file || _uploadNum === null) return;
+      const num = _uploadNum;
+      _uploadNum = null;
+
+      const btn = document.querySelector(`.btn-upload-cld[onclick="uploadDocumento(${num})"]`);
+      if (btn) { btn.textContent = '⏳ 0%'; btn.disabled = true; }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLD_PRESET);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CLD_CLOUD + '/auto/upload');
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable && btn) {
+          btn.textContent = '⏳ ' + Math.round(e.loaded / e.total * 100) + '%';
+        }
+      };
+
+      xhr.onload = function() {
+        if (btn) { btn.textContent = '📎 Enviar Arquivo'; btn.disabled = false; }
+        if (xhr.status === 200) {
+          let info;
+          try { info = JSON.parse(xhr.responseText); } catch(e) { info = null; }
+          if (info && !info.error) {
+            entregar(num, info.secure_url);
+          } else {
+            alert('Erro ao enviar arquivo. Tente novamente.');
           }
+        } else {
+          alert('Erro ao enviar arquivo. Tente novamente.');
         }
-      }, (error, result) => {
-        if (error) { console.error('Upload error:', error); return; }
-        if (result && result.event === 'success') {
-          entregar(num, result.info.secure_url);
-          widget.close();
-        }
-      });
-      widget.open();
+      };
+
+      xhr.onerror = function() {
+        if (btn) { btn.textContent = '📎 Enviar Arquivo'; btn.disabled = false; }
+        alert('Falha de conexão. Tente novamente.');
+      };
+
+      xhr.send(formData);
     }
 
     function entregar(num, uploadedUrl) {
@@ -718,15 +751,38 @@
     function renderFeedback(grupo) {
       const fbs  = grupo.feedback || [];
       const list = document.getElementById('feedback-list');
-      if (fbs.length === 0) { list.innerHTML = '<div class="feedback-empty" role="status">Nenhum feedback registrado ainda. Continue com as entregas!</div>'; return; }
+      if (fbs.length === 0) {
+        list.innerHTML = '<div class="feedback-empty" role="status">Nenhum feedback registrado ainda.</div>';
+        return;
+      }
       const mMap = { A: 'fb-A', PA: 'fb-PA', NA: 'fb-NA' };
-      list.innerHTML = fbs.map(f => `
-        <article class="feedback-card">
-          <div class="fb-header">Entrega ${f.entrega} — ${ENTREGA_DEFS[f.entrega-1]?.titulo || ''}</div>
-          <div class="fb-row"><span>Menção geral:</span><span class="fb-badge ${mMap[f.mencao] || ''}">${f.mencao}</span></div>
-          ${(f.indicadores || []).map(ind => `<div class="fb-row"><span>${ind.nome}</span><span class="fb-badge ${mMap[ind.mencao]||''}">${ind.mencao}</span></div>`).join('')}
-          ${f.orientacoes ? `<div class="fb-orient"><strong>Orientações:</strong><br>${f.orientacoes}</div>` : ''}
-        </article>`).join('');
+      const prioLabel = { informativo: 'ℹ️ Informativo', atencao: '⚠️ Atenção', critico: '🚨 Crítico' };
+      const prioClass = { informativo: '', atencao: 'atencao', critico: 'critico' };
+
+      // mais recentes primeiro
+      list.innerHTML = [...fbs].reverse().map(f => {
+        const dataFmt = f.data ? new Date(f.data).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' }) : '';
+
+        if (!f.tipo || f.tipo === 'entrega') {
+          return `
+            <article class="feedback-card">
+              <div class="fb-header">📋 Entrega ${f.entrega} — ${ENTREGA_DEFS[(f.entrega||1)-1]?.titulo || ''}</div>
+              <div class="fb-row"><span>Menção geral:</span><span class="fb-badge ${mMap[f.mencao] || ''}">${f.mencao}</span></div>
+              ${(f.indicadores || []).map(ind => `<div class="fb-row"><span>${ind.nome}</span><span class="fb-badge ${mMap[ind.mencao]||''}">${ind.mencao}</span></div>`).join('')}
+              ${f.orientacoes ? `<div class="fb-orient"><strong>Orientações:</strong><br>${f.orientacoes}</div>` : ''}
+              ${dataFmt ? `<div class="fb-proc-date">${dataFmt}</div>` : ''}
+            </article>`;
+        } else {
+          const pc = prioClass[f.prioridade] || '';
+          return `
+            <article class="feedback-card processo">
+              <div class="fb-header processo ${pc}">🔄 Processo de Aprendizagem${f.assunto ? ' — ' + f.assunto : ''}</div>
+              <div class="fb-row"><span>Prioridade:</span><span>${prioLabel[f.prioridade] || f.prioridade}</span></div>
+              ${f.orientacoes ? `<div class="fb-orient"><strong>Orientações:</strong><br>${f.orientacoes}</div>` : ''}
+              ${dataFmt ? `<div class="fb-proc-date">${dataFmt}</div>` : ''}
+            </article>`;
+        }
+      }).join('');
     }
 
     // ══════════════════════════════════════════════════════════════════════

@@ -70,14 +70,22 @@
     /* Modal */
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 1rem; }
     .overlay.open { display: flex; }
-    .modal { background: linear-gradient(135deg, #001e50, #003d6b); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; position: relative; animation: fadeIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    .modal { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; position: relative; animation: fadeIn 0.2s ease; max-height: 90vh; overflow-y: auto; color: #1a202c; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    .modal-close { position: absolute; top: 1rem; right: 1.2rem; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s; line-height: 1; }
-    .modal-close:hover { color: var(--text); }
+    .modal-close { position: absolute; top: 1rem; right: 1.2rem; background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; transition: color 0.2s; line-height: 1; }
+    .modal-close:hover { color: #1a202c; }
     .modal-close:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-    .modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 1rem; }
+    .modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 1rem; color: #1a202c; }
     .modal-body { display: flex; flex-direction: column; gap: 0.75rem; }
     .form-label { font-size: 12px; font-weight: 700; color: var(--orange); margin-bottom: 0.25rem; display: block; }
+    .modal .field-input { background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1a202c; }
+    .modal .field-input:focus { border-color: var(--orange); background: #fff; }
+    .modal .field-input::placeholder { color: #94a3b8; }
+    .modal .member-item { background: #f1f5f9; color: #1a202c; }
+    .modal .member-item:hover { background: #e2e8f0; }
+    .modal .member-contact { color: #64748b; }
+    .modal .btn-secondary { background: #f1f5f9; border-color: #cbd5e1; color: #1a202c; }
+    .modal .btn-secondary:hover { background: #e2e8f0; }
     .form-row { display: flex; gap: 0.75rem; align-items: flex-end; }
     .form-row > * { flex: 1; }
 
@@ -101,14 +109,23 @@
     /* Feedback Form */
     .feedback-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
     @media (max-width: 500px) { .feedback-grid { grid-template-columns: 1fr; } }
-    .fb-select { padding: 0.5rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; }
+    .fb-select { padding: 0.5rem; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; color: #1a202c; font-size: 13px; font-family: 'Montserrat', sans-serif; }
     .fb-select:focus { outline: none; border-color: var(--orange); }
+    /* Tipo de feedback (pills) */
+    .fb-type-row { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; }
+    .fb-type-btn { flex: 1; padding: 0.6rem 0.75rem; font-size: 13px; font-weight: 700; border: 1.5px solid #cbd5e1; border-radius: 9px; background: #f8fafc; color: #64748b; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all .18s; }
+    .fb-type-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .fb-section { display: none; flex-direction: column; gap: 0.75rem; }
+    .fb-section.visible { display: flex; }
 
     /* Auth Gate */
     .auth-gate { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-    .auth-modal { background: linear-gradient(135deg, #001e50, #003d6b); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; max-width: 420px; width: 100%; animation: fadeIn 0.25s ease; }
-    .auth-modal h3 { font-size: 22px; font-weight: 800; margin-bottom: 0.5rem; }
-    .auth-modal p { color: var(--muted); font-size: 13px; margin-bottom: 1.75rem; line-height: 1.6; }
+    .auth-modal { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; max-width: 420px; width: 100%; animation: fadeIn 0.25s ease; color: #1a202c; }
+    .auth-modal h3 { font-size: 22px; font-weight: 800; margin-bottom: 0.5rem; color: #1a202c; }
+    .auth-modal p { color: #64748b; font-size: 13px; margin-bottom: 1.75rem; line-height: 1.6; }
+    .auth-modal .field-input { background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1a202c; }
+    .auth-modal .field-input:focus { border-color: var(--orange); background: #fff; }
+    .auth-modal .field-input::placeholder { color: #94a3b8; }
     .error-msg { color: #ff8080; font-size: 12px; margin-bottom: 0.75rem; display: none; }
     .error-msg.show { display: block; }
 
@@ -367,28 +384,67 @@
       </button>
       <h3 id="feedback-modal-title">Feedback para Equipe</h3>
       <div class="modal-body">
+
+        <!-- Seletor de tipo -->
         <div>
-          <label for="fb-entrega" class="form-label">Entrega</label>
-          <select class="fb-select" id="fb-entrega" style="width:100%">
-            <option value="1">Entrega 1 — Plano 5W2H</option>
-            <option value="2">Entrega 2 — Matriz GUT</option>
-            <option value="3">Entrega 3 — Relatório</option>
-            <option value="4">Entrega 4 — Apresentação</option>
-          </select>
+          <label class="form-label">Tipo de Feedback</label>
+          <div class="fb-type-row">
+            <button class="fb-type-btn active" id="fb-type-entrega" type="button"
+                    onclick="setFbType('entrega')">📋 Entrega</button>
+            <button class="fb-type-btn" id="fb-type-processo" type="button"
+                    onclick="setFbType('processo')">🔄 Processo de Aprendizagem</button>
+          </div>
         </div>
-        <div>
-          <label for="fb-mencao" class="form-label">Menção Geral</label>
-          <select class="fb-select" id="fb-mencao" style="width:100%">
-            <option value="A">A — Atendeu plenamente</option>
-            <option value="PA">PA — Atendeu parcialmente</option>
-            <option value="NA">NA — Não atendeu</option>
-          </select>
+
+        <!-- Seção: Entrega -->
+        <div class="fb-section visible" id="fb-sec-entrega">
+          <div>
+            <label for="fb-entrega" class="form-label">Entrega</label>
+            <select class="fb-select" id="fb-entrega" style="width:100%">
+              <option value="1">Entrega 1 — Plano 5W2H</option>
+              <option value="2">Entrega 2 — Matriz GUT</option>
+              <option value="3">Entrega 3 — Relatório</option>
+              <option value="4">Entrega 4 — Apresentação</option>
+            </select>
+          </div>
+          <div>
+            <label for="fb-mencao" class="form-label">Menção Geral</label>
+            <select class="fb-select" id="fb-mencao" style="width:100%">
+              <option value="A">A — Atendeu plenamente</option>
+              <option value="PA">PA — Atendeu parcialmente</option>
+              <option value="NA">NA — Não atendeu</option>
+            </select>
+          </div>
+          <div>
+            <label for="fb-orientacoes" class="form-label">Orientações (opcional)</label>
+            <textarea class="field-input field-textarea" id="fb-orientacoes"
+                      placeholder="Descreva pontos de melhoria, elogios ou próximos passos..."></textarea>
+          </div>
         </div>
-        <div>
-          <label for="fb-orientacoes" class="form-label">Orientações (opcional)</label>
-          <textarea class="field-input field-textarea" id="fb-orientacoes" placeholder="Orientações para a equipe..."></textarea>
+
+        <!-- Seção: Processo -->
+        <div class="fb-section" id="fb-sec-processo">
+          <div>
+            <label for="fb-assunto" class="form-label">Assunto</label>
+            <input type="text" class="field-input" id="fb-assunto"
+                   placeholder="Ex: Engajamento da equipe, Gestão do tempo...">
+          </div>
+          <div>
+            <label for="fb-processo-texto" class="form-label">Orientações / Observações</label>
+            <textarea class="field-input field-textarea" id="fb-processo-texto" style="min-height:110px"
+                      placeholder="Descreva observações sobre o processo de aprendizagem, pontos de atenção, elogios ou sugestões de melhoria..."></textarea>
+          </div>
+          <div>
+            <label for="fb-prioridade" class="form-label">Prioridade</label>
+            <select class="fb-select" id="fb-prioridade" style="width:100%">
+              <option value="informativo">ℹ️ Informativo</option>
+              <option value="atencao">⚠️ Atenção</option>
+              <option value="critico">🚨 Crítico</option>
+            </select>
+          </div>
         </div>
-        <button class="btn-action" onclick="saveFeedback()" style="width:100%" type="button">Salvar Feedback</button>
+
+        <button class="btn-action" onclick="saveFeedback()" style="width:100%;margin-top:0.25rem" type="button">Salvar Feedback</button>
       </div>
     </div>
   </div>
@@ -824,15 +880,29 @@
 
     // ── Feedback Individual ─────────────────────────────────────────────
     let _feedbackTeamId = null;
+    let _fbType = 'entrega';
+
+    function setFbType(tipo) {
+      _fbType = tipo;
+      document.getElementById('fb-type-entrega').classList.toggle('active', tipo === 'entrega');
+      document.getElementById('fb-type-processo').classList.toggle('active', tipo === 'processo');
+      document.getElementById('fb-sec-entrega').classList.toggle('visible', tipo === 'entrega');
+      document.getElementById('fb-sec-processo').classList.toggle('visible', tipo === 'processo');
+    }
 
     function openFeedbackModal(teamId) {
       _feedbackTeamId = teamId;
       const grupo = getGrupos().find(g => g.id === teamId);
       if (!grupo) return;
-      document.getElementById('feedback-modal-title').textContent = `Feedback — ${grupo.nome}`;
+      document.getElementById('feedback-modal-title').textContent = `💬 Feedback — ${grupo.nome}`;
+      // Reset para tipo "entrega"
+      setFbType('entrega');
       document.getElementById('fb-entrega').value = '1';
       document.getElementById('fb-mencao').value = 'A';
       document.getElementById('fb-orientacoes').value = '';
+      document.getElementById('fb-assunto').value = '';
+      document.getElementById('fb-processo-texto').value = '';
+      document.getElementById('fb-prioridade').value = 'informativo';
       document.getElementById('feedback-modal').classList.add('open');
     }
 
@@ -842,20 +912,32 @@
     }
 
     function saveFeedback() {
-      const entrega = parseInt(document.getElementById('fb-entrega').value);
-      const mencao = document.getElementById('fb-mencao').value;
-      const orientacoes = document.getElementById('fb-orientacoes').value.trim();
-
       const grupos = getGrupos();
       const idx = grupos.findIndex(g => g.id === _feedbackTeamId);
       if (idx < 0) return;
       if (!grupos[idx].feedback) grupos[idx].feedback = [];
-      grupos[idx].feedback.push({
-        entrega,
-        mencao,
-        orientacoes,
-        data: new Date().toISOString()
-      });
+
+      if (_fbType === 'entrega') {
+        const orientacoes = document.getElementById('fb-orientacoes').value.trim();
+        grupos[idx].feedback.push({
+          tipo: 'entrega',
+          entrega: parseInt(document.getElementById('fb-entrega').value),
+          mencao: document.getElementById('fb-mencao').value,
+          orientacoes,
+          data: new Date().toISOString()
+        });
+      } else {
+        const texto = document.getElementById('fb-processo-texto').value.trim();
+        if (!texto) { alert('Escreva as orientações antes de salvar.'); return; }
+        grupos[idx].feedback.push({
+          tipo: 'processo',
+          assunto: document.getElementById('fb-assunto').value.trim(),
+          orientacoes: texto,
+          prioridade: document.getElementById('fb-prioridade').value,
+          data: new Date().toISOString()
+        });
+      }
+
       saveGrupos(grupos);
       closeFeedbackModal();
       alert('Feedback salvo com sucesso!');
