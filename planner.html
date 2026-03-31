@@ -198,18 +198,50 @@
     .btn-kanban-add { width: 100%; padding: .5rem; background: none; border: 1px dashed var(--border); color: var(--muted); border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; }
     .btn-kanban-add:hover { border-color: var(--orange); color: var(--orange); background: rgba(247,148,29,.04); }
 
-    /* ── DETAIL PANEL ── */
-    .panel-overlay { position: fixed; inset: 0; background: rgba(20,40,80,.25); z-index: 800; display: none; top: 52px; }
-    .panel-overlay.open { display: block; }
+    /* ── MODAL CENTRALIZADO ── */
+    .panel-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,25,55,.55);
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+      z-index: 1000; opacity: 0; pointer-events: none;
+      transition: opacity .2s ease;
+    }
+    .panel-overlay.open { opacity: 1; pointer-events: auto; }
 
     .task-panel {
-      position: fixed; top: 52px; right: 0; bottom: 0; width: 480px;
-      background: var(--surface); border-left: 1px solid var(--border);
-      box-shadow: var(--shadow-lg); z-index: 900;
-      transform: translateX(100%); transition: transform .25s ease;
-      display: flex; flex-direction: column; overflow: hidden;
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -48%) scale(.96);
+      opacity: 0; pointer-events: none;
+      width: min(800px, 96vw); max-height: 88vh;
+      background: var(--surface); border-radius: 18px;
+      box-shadow: 0 24px 72px rgba(10,25,55,.24);
+      z-index: 1100; display: flex; flex-direction: column;
+      transition: transform .22s ease, opacity .22s ease;
     }
-    .task-panel.open { transform: translateX(0); }
+    .task-panel.open {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1; pointer-events: auto;
+    }
+
+    /* Rodapé do modal */
+    .modal-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .85rem 1.5rem; border-top: 1px solid var(--border);
+      background: var(--surface-2); border-radius: 0 0 18px 18px; flex-shrink: 0;
+    }
+    .btn-salvar {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--navy); color: #fff; border: none; border-radius: 9px;
+      padding: .65rem 1.4rem; font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: 'Montserrat', sans-serif; transition: background .2s;
+    }
+    .btn-salvar:hover { background: #003472; }
+
+    /* Status do upload */
+    .upload-status { font-size: 12px; font-weight: 600; margin-top: .5rem; min-height: 18px; transition: .2s; }
+    .upload-status.uploading { color: #2563eb; }
+    .upload-status.success   { color: #16a34a; }
+    .upload-status.error     { color: #dc2626; }
 
     .panel-header {
       display: flex; align-items: flex-start; justify-content: space-between;
@@ -310,7 +342,7 @@
 
     @media (max-width: 860px) {
       .pl-sidebar { display: none; }
-      .task-panel { width: 100%; }
+      .task-panel { width: 98vw; max-height: 92vh; }
     }
     @media (max-width: 600px) {
       .pl-toolbar { padding: .5rem .75rem; }
@@ -476,6 +508,7 @@
       <label>Progresso da Tarefa</label>
       <div class="prog-row">
         <input type="range" class="prog-slider" id="panel-prog" min="0" max="100" value="0"
+               aria-label="Progresso da tarefa"
                oninput="document.getElementById('panel-prog-num').textContent=this.value+'%'; panelSave('progresso',parseInt(this.value))">
         <span class="prog-num" id="panel-prog-num">0%</span>
       </div>
@@ -511,13 +544,13 @@
           </div>
 
           <div class="panel-field">
-            <label>📅 Início (When)</label>
-            <input class="panel-date" type="date" id="panel-inicio" onchange="panelSave('dataInicio',this.value)">
+            <label for="panel-inicio">📅 Início (When)</label>
+            <input class="panel-date" type="date" id="panel-inicio" aria-label="Data de início" onchange="panelSave('dataInicio',this.value)">
           </div>
 
           <div class="panel-field">
-            <label>🏁 Conclusão (When)</label>
-            <input class="panel-date" type="date" id="panel-conclusao" onchange="panelSave('dataConclusao',this.value)">
+            <label for="panel-conclusao">🏁 Conclusão (When)</label>
+            <input class="panel-date" type="date" id="panel-conclusao" aria-label="Data de conclusão" onchange="panelSave('dataConclusao',this.value)">
           </div>
 
           <div class="panel-field full">
@@ -539,7 +572,8 @@
       <div class="panel-section">
         <div class="panel-section-title">📎 Anexos</div>
         <div class="anexos-list" id="panel-anexos"></div>
-        <button class="btn-upload" type="button" onclick="uploadAnexo()">📎 Adicionar arquivo</button>
+        <button class="btn-upload" type="button" onclick="uploadAnexo()" id="btn-upload-file">📎 Adicionar arquivo</button>
+        <div class="upload-status" id="upload-status" aria-live="polite"></div>
       </div>
 
       <!-- Comentários -->
@@ -547,11 +581,17 @@
         <div class="panel-section-title">💬 Comentários</div>
         <div class="comment-list" id="panel-comments"></div>
         <div class="comment-input-row">
-          <textarea id="comment-text" placeholder="Escreva um comentário..." rows="2"></textarea>
-          <button class="btn-comment" onclick="addComment()">Enviar</button>
+          <textarea id="comment-text" placeholder="Escreva um comentário..." rows="2" aria-label="Comentário"></textarea>
+          <button class="btn-comment" type="button" onclick="addComment()">Enviar</button>
         </div>
       </div>
 
+    </div>
+
+    <!-- Rodapé com botão Salvar -->
+    <div class="modal-footer">
+      <span style="font-size:11px;color:var(--muted)">💾 Alterações salvas automaticamente</span>
+      <button class="btn-salvar" type="button" onclick="closePanel()">✅ Salvar e Fechar</button>
     </div>
   </div>
 
@@ -610,7 +650,9 @@
       // Usa dados locais imediatamente se disponíveis
       if (getGrupo()) {
         renderAll();
-        // Sincroniza em segundo plano
+        // Pré-inicializa o widget Cloudinary em segundo plano (elimina delay no primeiro uso)
+        setTimeout(initCldWidget, 1500);
+        // Sincroniza com a nuvem em segundo plano
         cloudSync().then(synced => { if (synced && getGrupo()) renderAll(); });
         return;
       }
@@ -619,6 +661,7 @@
       const g = getGrupo();
       if (!g) { alert('Equipe não encontrada.'); history.back(); return; }
       renderAll();
+      setTimeout(initCldWidget, 1500);
     }
 
     // ── Render ────────────────────────────────────────────────────────────
@@ -817,14 +860,17 @@
       if (_activeTid === tid) populatePanel(grupos[idx]);
     }
 
-    // ── Panel ─────────────────────────────────────────────────────────────
+    // ── Panel (modal centralizado) ────────────────────────────────────────
     function openPanel(tid) {
       _activeTid = tid;
       const g = getGrupo();
       if (!g) return;
       populatePanel(g);
+      setUploadStatus('');
       document.getElementById('task-panel').classList.add('open');
       document.getElementById('panel-overlay').classList.add('open');
+      // Foca o título para o usuário já começar a digitar
+      setTimeout(() => { const t = document.getElementById('panel-title'); if (t) t.focus(); }, 250);
     }
 
     function closePanel() {
@@ -832,6 +878,7 @@
       document.getElementById('task-panel').classList.remove('open');
       document.getElementById('panel-overlay').classList.remove('open');
       document.querySelectorAll('.panel-assign-drop').forEach(d => d.classList.remove('open'));
+      setUploadStatus('');
     }
 
     function populatePanel(g) {
@@ -1031,14 +1078,27 @@
     }
 
     // ── Attachments ───────────────────────────────────────────────────────
-    function uploadAnexo() {
-      if (!_activeTid) return;
-      const widget = cloudinary.createUploadWidget({
+    let _cldWidget = null;
+
+    function setUploadStatus(state, msg) {
+      const el = document.getElementById('upload-status');
+      if (!el) return;
+      el.className = 'upload-status' + (state ? ' ' + state : '');
+      el.textContent = msg || '';
+    }
+
+    function initCldWidget() {
+      if (_cldWidget) return;
+      _cldWidget = cloudinary.createUploadWidget({
         cloudName: CLD_CLOUD, uploadPreset: CLD_PRESET,
-        resourceType: 'auto', maxFiles: 1, sources: ['local'],
+        resourceType: 'auto', maxFiles: 1, sources: ['local'], multiple: false,
         clientAllowedFormats: ['pdf','doc','docx','ppt','pptx','xls','xlsx','txt','jpg','jpeg','png'],
+        showPoweredBy: false,
         styles: { palette: { window: '#ffffff', tabIcon: '#F7941D', link: '#F7941D', action: '#F7941D', sourceBg: '#f7fafd', textDark: '#1e3a5f', textLight: '#1e3a5f', menuIcons: '#7a92b0' } }
       }, (error, result) => {
+        if (result && result.event === 'upload-added') {
+          setUploadStatus('uploading', '⏳ Enviando arquivo...');
+        }
         if (!error && result && result.event === 'success') {
           const grupos = getGrupos();
           const idx = grupos.findIndex(g => g.id === urlId);
@@ -1053,11 +1113,26 @@
             url: result.info.secure_url, data: new Date().toISOString()
           });
           saveGrupos(grupos);
+          setUploadStatus('success', '✅ Arquivo anexado com sucesso!');
           renderPanelAnexos(planner.tarefas[ti]);
-          widget.close();
+          // Fecha o widget automaticamente após 1,2 s
+          setTimeout(() => { _cldWidget.close(); }, 1200);
+        }
+        if (error) {
+          setUploadStatus('error', '❌ Erro ao enviar. Tente novamente.');
         }
       });
-      widget.open();
+    }
+
+    function uploadAnexo() {
+      if (!_activeTid) return;
+      const btn = document.getElementById('btn-upload-file');
+      if (btn) { btn.textContent = '⏳ Carregando...'; btn.disabled = true; }
+      initCldWidget();
+      setTimeout(() => {
+        _cldWidget.open();
+        if (btn) { btn.textContent = '📎 Adicionar arquivo'; btn.disabled = false; }
+      }, 50);
     }
 
     function removeAnexo(tid, i) {
