@@ -2432,11 +2432,17 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
     // ── renderConfig ─────────────────────────────────────────────────────
     function renderConfig() {
       const cfg = getConfig();
-      const nomeCurso = cfg.nomeCurso || '';
+      const TITULO_PADRAO = 'Metodologias de Trabalho por Projetos Integradores';
+      const UNIDADE_PADRAO = 'Senac Araçatuba';
+      const nomeCurso = (!cfg.nomeCurso || cfg.nomeCurso.trim() === 'Técnico em Logística')
+        ? TITULO_PADRAO : cfg.nomeCurso.trim();
       const uc = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
       const docente = cfg.docente || '';
       const email = cfg.emailDocente || '';
-      const unidade = cfg.unidade || 'Senac Araçatuba';
+      const unidadeRaw = cfg.unidade || '';
+      const unidade = unidadeRaw
+        ? (unidadeRaw.toLowerCase().startsWith('senac') ? unidadeRaw : 'Senac ' + unidadeRaw)
+        : UNIDADE_PADRAO;
 
       const fc = document.getElementById('footer-center');
       if (fc) {
@@ -2616,10 +2622,13 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
       doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY);
       doc.text('Hub de Projetos — Gestão de Projetos Integradores', margin, y); y += 5;
 
-      if (cfg.nomeCurso) { doc.text(`Curso: ${cfg.nomeCurso}`, margin, y); y += 5; }
+      const _pdfNomeCurso = (!cfg.nomeCurso || cfg.nomeCurso.trim() === 'Técnico em Logística') ? 'Metodologias de Trabalho por Projetos Integradores' : cfg.nomeCurso.trim();
+      const _pdfUnidadeRaw = cfg.unidade || '';
+      const _pdfUnidade = _pdfUnidadeRaw ? (_pdfUnidadeRaw.toLowerCase().startsWith('senac') ? _pdfUnidadeRaw : 'Senac ' + _pdfUnidadeRaw) : 'Senac Araçatuba';
+      doc.text(`Curso: ${_pdfNomeCurso}`, margin, y); y += 5;
       if (cfg.unidadeCurricular) { doc.text(`UC: ${cfg.unidadeCurricular}`, margin, y); y += 5; }
       if (cfg.docente) { doc.text(`Docente: ${cfg.docente}`, margin, y); y += 5; }
-      if (cfg.unidade) { doc.text(`Unidade: ${cfg.unidade}`, margin, y); y += 5; }
+      doc.text(`Unidade: ${_pdfUnidade}`, margin, y); y += 5;
       if (cfg.anoSemestre) { doc.text(`Período: ${cfg.anoSemestre}`, margin, y); y += 5; }
 
       doc.setFontSize(9); doc.setTextColor(...GRAY);
@@ -2825,7 +2834,10 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
 
       // ── RODAPÉ EM TODAS AS PÁGINAS ───────────────────────────────────
       const totalPages = doc.internal.getNumberOfPages();
-      const unidade = cfg.unidade || 'Senac Araçatuba';
+      const _unidadeRaw = cfg.unidade || '';
+      const unidade = _unidadeRaw
+        ? (_unidadeRaw.toLowerCase().startsWith('senac') ? _unidadeRaw : 'Senac ' + _unidadeRaw)
+        : 'Senac Araçatuba';
       for (let p = 1; p <= totalPages; p++) {
         doc.setPage(p);
         doc.setDrawColor(...ORANGE); doc.setLineWidth(0.5);
