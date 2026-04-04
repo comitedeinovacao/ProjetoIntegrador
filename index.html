@@ -154,20 +154,19 @@
 
       const badge = document.getElementById('hero-badge');
       if (badge) {
-        let badgeParts = [uc, unidade];
+        let badgeParts = [unidade];
         if (docente) badgeParts.push(docente);
         if (anoSem) badgeParts.push(anoSem);
         badge.textContent = badgeParts.join(' · ');
       }
 
       const subtitle = document.getElementById('hero-subtitle');
-      if (subtitle) subtitle.textContent = nomeCurso || 'Gestão de Projetos Integradores';
+      if (subtitle) subtitle.textContent = nomeCurso || 'Metodologias de Trabalho por Projetos Integradores';
 
       const fc = document.getElementById('footer-center');
       if (fc) {
-        const linha1 = nomeCurso ? `${nomeCurso} · ${uc}` : `Hub de Projetos — ${uc}`;
-        const linha2 = [docente, unidade].filter(Boolean).join(' · ');
-        fc.innerHTML = `<div style="font-weight:700">${linha1}</div>${linha2 ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${linha2}</div>` : ''}`;
+        const linha1 = docente || 'Hub de Projetos';
+        fc.innerHTML = `<div style="font-weight:700">${linha1}</div><div style="color:var(--muted);font-size:12px;margin-top:2px">Todos os direitos são reservados</div>`;
       }
 
       const fr = document.getElementById('footer-right');

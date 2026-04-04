@@ -1248,7 +1248,7 @@
           <div class="form-grid" style="max-width:100%;margin-bottom:0.75rem">
             <div>
               <label for="cfg-nomeCurso" class="form-label">Nome do Curso</label>
-              <input type="text" class="field-input" id="cfg-nomeCurso" placeholder="ex: Técnico em Logística">
+              <input type="text" class="field-input" id="cfg-nomeCurso" placeholder="ex: Metodologias de Trabalho por Projetos Integradores">
             </div>
             <div>
               <label for="cfg-unidadeCurricular" class="form-label">Unidade Curricular</label>
@@ -1647,8 +1647,24 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
       event.currentTarget.setAttribute('aria-selected', 'true');
     }
 
+    // ── Migração de configurações legadas ────────────────────────────────
+    function migrarConfig() {
+      const cfg = getConfig();
+      let mudou = false;
+      if (cfg.nomeCurso === 'Técnico em Logística') {
+        cfg.nomeCurso = 'Metodologias de Trabalho por Projetos Integradores';
+        mudou = true;
+      }
+      if (cfg.unidade && !cfg.unidade.toLowerCase().startsWith('senac')) {
+        cfg.unidade = 'Senac ' + cfg.unidade;
+        mudou = true;
+      }
+      if (mudou) saveConfig(cfg);
+    }
+
     // ── Render All ───────────────────────────────────────────────────────
     function renderAll() {
+      migrarConfig();
       renderConfig();
       renderVisaoGeral();
       renderStats();
@@ -2424,9 +2440,8 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
 
       const fc = document.getElementById('footer-center');
       if (fc) {
-        const linha1 = nomeCurso ? `${nomeCurso} · ${uc}` : `Hub de Projetos — ${uc}`;
-        const linha2 = [docente, unidade].filter(Boolean).join(' · ');
-        fc.innerHTML = `<div style="font-weight:700">${linha1}</div>${linha2 ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${linha2}</div>` : ''}`;
+        const linha1 = docente || 'Hub de Projetos';
+        fc.innerHTML = `<div style="font-weight:700">${linha1}</div><div style="color:var(--muted);font-size:12px;margin-top:2px">Todos os direitos são reservados</div>`;
       }
       const fr = document.getElementById('footer-right');
       if (fr) fr.innerHTML = email ? `<a href="mailto:${email}" style="color:inherit;text-decoration:none">${email}</a>` : '';
