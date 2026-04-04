@@ -2215,6 +2215,7 @@
 
     function logout() {
       sessionStorage.removeItem(SESSION_TEAM);
+      sessionStorage.removeItem('pi_admin');
       window.location.href = 'index.html';
     }
 
@@ -2650,8 +2651,10 @@
         oQue: '', porQue: '', responsaveis: [],
         onde: '', dataInicio: '', dataConclusao: '',
         como: '', quanto: '',
-        status: 'pendente', prioridade: 'media'
+        status: 'pendente', prioridade: 'media',
+        criadoEm: new Date().toISOString()
       });
+      updateUltimaAtividade(grupos[idx]);
       saveGrupos(grupos);
       renderTarefas(grupos[idx]);
     }
@@ -2662,6 +2665,7 @@
       const idx = grupos.findIndex(g => g.id === urlId);
       if (idx < 0) return;
       grupos[idx].planner.tarefas = (grupos[idx].planner.tarefas || []).filter(t => t.id !== tid);
+      updateUltimaAtividade(grupos[idx]);
       saveGrupos(grupos);
       renderTarefas(grupos[idx]);
     }
@@ -2688,6 +2692,7 @@
       const pos = resp.indexOf(membNome);
       if (pos >= 0) resp.splice(pos, 1); else resp.push(membNome);
       grupos[idx].planner.tarefas[ti].responsaveis = resp;
+      updateUltimaAtividade(grupos[idx]);
       saveGrupos(grupos);
       // Update pills + checkboxes without full re-render
       const pills = document.getElementById('pills-' + tid);

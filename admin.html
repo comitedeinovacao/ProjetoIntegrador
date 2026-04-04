@@ -700,6 +700,197 @@
       color: #991b1b;
     }
 
+    .link-orange {
+      color: var(--orange);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    /* Rubrica config table */
+    .rubrica-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .rubrica-table th {
+      background: var(--glass);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .rubrica-table td {
+      padding: 0.5rem 0.5rem;
+      vertical-align: top;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .rubrica-table td:first-child {
+      width: 22%;
+    }
+
+    .rubrica-table td:nth-child(2),
+    .rubrica-table td:nth-child(3),
+    .rubrica-table td:nth-child(4) {
+      width: 24%;
+    }
+
+    .rubrica-table td:last-child {
+      width: 4%;
+      text-align: center;
+    }
+
+    .rubrica-cell {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.45rem 0.6rem;
+      font-size: 12px;
+      color: var(--text);
+      font-family: 'Montserrat', sans-serif;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .rubrica-cell:focus {
+      outline: 2px solid var(--focus-ring);
+      border-color: var(--orange);
+    }
+
+    .rubrica-cell-nome {
+      min-height: 36px;
+      resize: none;
+    }
+
+    .btn-remove-row {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0.3rem;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .btn-remove-row:hover {
+      background: rgba(239,68,68,0.1);
+    }
+
+    .rubrica-obs-admin {
+      width: 100%;
+      min-height: 90px;
+      margin-top: 0.75rem;
+    }
+
+    .rubrica-save-msg {
+      font-size: 12px;
+      color: #5ae09a;
+      margin-left: 1rem;
+      display: none;
+    }
+
+    /* Banca results table */
+    .banca-res-d {
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    .banca-res-nd {
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    .banca-detalhe-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .banca-detalhe-btn:hover {
+      color: var(--text);
+      border-color: var(--orange);
+    }
+
+    .banca-detalhe-row {
+      display: none;
+    }
+
+    .banca-detalhe-row.open {
+      display: table-row;
+    }
+
+    .banca-detalhe-cell {
+      background: var(--glass);
+      padding: 1rem 1.25rem;
+    }
+
+    .banca-aval-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 12px;
+    }
+
+    .banca-aval-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .banca-mencao-D {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(22,163,74,0.12);
+      color: #16a34a;
+    }
+
+    .banca-mencao-ND {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(220,38,38,0.1);
+      color: #dc2626;
+    }
+
+    .banca-criterio-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      margin-bottom: 0.25rem;
+      line-height: 1.4;
+    }
+
+    .badge-A { font-size:10px;font-weight:800;padding:0.1rem 0.35rem;border-radius:3px;background:#16a34a;color:#fff;flex-shrink:0; }
+    .badge-PA { font-size:10px;font-weight:800;padding:0.1rem 0.35rem;border-radius:3px;background:#ca8a04;color:#fff;flex-shrink:0; }
+    .badge-NA { font-size:10px;font-weight:800;padding:0.1rem 0.35rem;border-radius:3px;background:#dc2626;color:#fff;flex-shrink:0; }
+
+    .rubrica-add-row { margin-top: 0.75rem; }
+    .rubrica-save-row { margin-top: 1rem; display: flex; align-items: center; }
+    .rubrica-results-mt { margin-top: 1.25rem; }
+
     .alerta-ok {
       background: rgba(50, 200, 100, 0.08);
       border: 1px solid rgba(50, 200, 100, 0.25);
@@ -822,6 +1013,7 @@
       <a href="index.html">Início</a>
       <a href="materiais.html">Materiais</a>
       <a href="admin.html" class="nav-active" aria-current="page">🔑 Admin</a>
+      <button onclick="logoutAdmin()" class="nav-btn" style="background: rgba(255, 100, 100, 0.1); border: 1px solid #ff6b6b; color: #ff6b6b; padding: 0.4rem 1rem; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif;">Sair do Painel</button>
     </div>
     <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu"
       aria-expanded="false" aria-controls="mob-menu">
@@ -832,6 +1024,7 @@
     <a href="index.html" role="menuitem" onclick="closeMenu()">Início</a>
     <a href="materiais.html" role="menuitem" onclick="closeMenu()">Materiais</a>
     <a href="admin.html" role="menuitem" onclick="closeMenu()">🔑 Admin</a>
+    <button onclick="logoutAdmin()" role="menuitem" style="background: none; border: none; color: #ff6b6b; text-align: left; padding: 1rem 1.5rem; width: 100%; cursor: pointer; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 14px; font-weight: 600; font-family: 'Montserrat', sans-serif;">Sair do Painel</button>
   </div>
 
   <div class="page" id="main-content" style="display:none">
@@ -849,6 +1042,8 @@
         onclick="showTab('materiais')">📚 Materiais</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback"
         onclick="showTab('feedback')">💬 Feedback Coletivo</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-banca"
+        onclick="showTab('banca')">📋 Equipe Pedagógica</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-config" onclick="showTab('config')">⚙️
         Configurações</button>
     </div>
@@ -971,6 +1166,72 @@
           <h3>Comunicados Publicados</h3>
         </div>
         <div id="fc-list" style="display:flex;flex-direction:column;gap:1rem"></div>
+      </section>
+
+      <!-- TAB: EQUIPE PEDAGÓGICA -->
+      <section class="tab-content" id="tab-banca" role="tabpanel" aria-labelledby="tab-banca">
+
+        <!-- SEÇÃO 1: Configurar Rubrica -->
+        <div class="s-head">
+          <h3>📋 Configurar Rubrica de Avaliação</h3>
+          <p>Defina os indicadores e descritores de cada menção. A página da Equipe Pedagógica carregará estes critérios automaticamente. <a href="banca.html" target="_blank" rel="noopener noreferrer" class="link-orange">↗ Abrir página de avaliação</a></p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="rubrica-table" aria-label="Configuração da rubrica de avaliação">
+            <thead>
+              <tr>
+                <th scope="col">Indicador</th>
+                <th scope="col">✅ Atendido (A)</th>
+                <th scope="col">⚠️ Parcialmente Atendido (PA)</th>
+                <th scope="col">❌ Não Atendido (NA)</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody id="rubrica-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="rubrica-add-row">
+          <button class="btn-action btn-sm" type="button" onclick="addCriterioRow()">+ Adicionar Indicador</button>
+        </div>
+
+        <div class="s-head s-head-mt">
+          <h3>📌 Critério de Aprovação / Nota do Coordenador</h3>
+        </div>
+        <textarea class="field-input field-textarea rubrica-obs-admin" id="rubrica-obs-admin"
+          placeholder="Ex: Para atingir a menção D (Desenvolvida), o aluno deve obter A em todos os indicadores..."></textarea>
+
+        <div class="rubrica-save-row">
+          <button class="btn-action" type="button" onclick="saveRubrica()">💾 Salvar Rubrica</button>
+          <span class="rubrica-save-msg" id="rubrica-save-msg">✅ Rubrica salva!</span>
+        </div>
+
+        <!-- SEÇÃO 2: Resultados -->
+        <div class="visao-tab-head s-head-mt">
+          <div class="s-head">
+            <h3>📊 Resultados por Equipe</h3>
+          </div>
+          <button class="btn-action btn-sm" onclick="exportarCSVBanca()" type="button">📊 Exportar CSV</button>
+        </div>
+
+        <div class="stats-grid" id="banca-metrics"></div>
+
+        <div class="table-wrap rubrica-results-mt">
+          <table class="visao-table" id="banca-table" aria-label="Resultados da avaliação por equipe">
+            <thead>
+              <tr>
+                <th scope="col">Equipe</th>
+                <th scope="col">Avaliações</th>
+                <th scope="col">D</th>
+                <th scope="col">ND</th>
+                <th scope="col">Última Avaliação</th>
+                <th scope="col">Detalhes</th>
+              </tr>
+            </thead>
+            <tbody id="banca-tbody"></tbody>
+          </table>
+        </div>
       </section>
 
       <!-- TAB: CONFIGURAÇÕES -->
@@ -1394,6 +1655,7 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
       renderTeams();
       renderMaterials();
       renderFCList();
+      renderBanca();
       loadTemaGerador();
       loadCursoConfig();
     }
@@ -1972,6 +2234,185 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
       }
     });
 
+    // ── Equipe Pedagógica — Rubrica ───────────────────────────────────────
+    const DEFAULT_RUBRICA_ADM = {
+      criterios: [
+        { id: 'r1', nome: 'Cumprimento do Plano de Ação', descA: 'Executa todas as etapas previstas no cronograma e gere os recursos com autonomia.', descPA: 'Executa a maior parte das etapas, mas apresenta atrasos ou falhas na organização.', descNA: 'Não realiza as atividades planejadas ou não apresenta organização mínima.' },
+        { id: 'r2', nome: 'Solução de Problemas (Tema Gerador)', descA: 'Apresenta soluções inovadoras e tecnicamente viáveis para os desafios logísticos propostos.', descPA: 'Apresenta soluções que resolvem apenas parte do problema ou com falhas técnicas.', descNA: 'Não apresenta solução para a problemática ou a proposta é inviável.' },
+        { id: 'r3', nome: 'Mobilização de Marcas Formativas', descA: 'Demonstra domínio técnico, visão crítica, atitude sustentável e colaboração em equipe.', descPA: 'Demonstra algumas marcas (ex: domínio técnico), mas falha em outras (ex: colaboração).', descNA: 'Não demonstra as marcas formativas nas entregas ou atitudes.' },
+        { id: 'r4', nome: 'Sistematização (Portfólio/Síntese)', descA: 'Organiza portfólio completo com reflexões críticas sobre as aprendizagens de todas as UCs.', descPA: 'O portfólio está incompleto ou contém apenas registros de atividades sem reflexão.', descNA: 'Não apresenta portfólio ou os registros não possuem nexo com o curso.' }
+      ],
+      observacoes: 'Para atingir a menção D (Desenvolvida), o aluno deve:\n• Obter a menção "Atendido (A)" nos indicadores ao final da UC.\n• Demonstrar a articulação dos insumos técnicos na solução final.\n• Participar ativamente das fases de Problematização, Desenvolvimento e Síntese.\n\nNo Projeto Integrador, o critério de aprovação é apenas a Menção D — a regra de 75% de frequência mínima não se aplica.'
+    };
+
+    function getAdminRubrica() {
+      const cfg = getConfig();
+      return (cfg.rubrica && cfg.rubrica.criterios && cfg.rubrica.criterios.length > 0)
+        ? cfg.rubrica : DEFAULT_RUBRICA_ADM;
+    }
+
+    function loadRubrica() {
+      const rubrica = getAdminRubrica();
+      renderRubricaTable(rubrica.criterios);
+      document.getElementById('rubrica-obs-admin').value = rubrica.observacoes || '';
+    }
+
+    function renderRubricaTable(criterios) {
+      document.getElementById('rubrica-tbody').innerHTML = criterios.map((c, i) => `
+        <tr id="rubrica-row-${i}">
+          <td><textarea class="rubrica-cell rubrica-cell-nome" id="rc-nome-${i}" rows="2">${c.nome || ''}</textarea></td>
+          <td><textarea class="rubrica-cell" id="rc-descA-${i}" rows="3">${c.descA || ''}</textarea></td>
+          <td><textarea class="rubrica-cell" id="rc-descPA-${i}" rows="3">${c.descPA || ''}</textarea></td>
+          <td><textarea class="rubrica-cell" id="rc-descNA-${i}" rows="3">${c.descNA || ''}</textarea></td>
+          <td><button class="btn-remove-row" type="button" onclick="removeCriterioRow(${i})" aria-label="Remover indicador ${i + 1}" title="Remover">🗑</button></td>
+        </tr>`).join('');
+    }
+
+    function addCriterioRow() {
+      const tbody = document.getElementById('rubrica-tbody');
+      const i = tbody.querySelectorAll('tr').length;
+      const tr = document.createElement('tr');
+      tr.id = `rubrica-row-${i}`;
+      tr.innerHTML = `
+        <td><textarea class="rubrica-cell rubrica-cell-nome" id="rc-nome-${i}" rows="2" placeholder="Nome do indicador"></textarea></td>
+        <td><textarea class="rubrica-cell" id="rc-descA-${i}" rows="3" placeholder="Descrição para Atendido (A)"></textarea></td>
+        <td><textarea class="rubrica-cell" id="rc-descPA-${i}" rows="3" placeholder="Descrição para Parcialmente Atendido (PA)"></textarea></td>
+        <td><textarea class="rubrica-cell" id="rc-descNA-${i}" rows="3" placeholder="Descrição para Não Atendido (NA)"></textarea></td>
+        <td><button class="btn-remove-row" type="button" onclick="removeCriterioRow(${i})" aria-label="Remover" title="Remover">🗑</button></td>`;
+      tbody.appendChild(tr);
+    }
+
+    function removeCriterioRow(i) {
+      const tr = document.getElementById(`rubrica-row-${i}`);
+      if (tr) tr.remove();
+      // Re-index remaining rows
+      document.querySelectorAll('#rubrica-tbody tr').forEach((row, idx) => {
+        row.id = `rubrica-row-${idx}`;
+        row.querySelectorAll('[id]').forEach(el => {
+          const base = el.id.replace(/-\d+$/, '');
+          el.id = `${base}-${idx}`;
+        });
+        const btn = row.querySelector('.btn-remove-row');
+        if (btn) { btn.setAttribute('onclick', `removeCriterioRow(${idx})`); btn.setAttribute('aria-label', `Remover indicador ${idx + 1}`); }
+      });
+    }
+
+    function saveRubrica() {
+      const rows = document.querySelectorAll('#rubrica-tbody tr');
+      const criterios = Array.from(rows).map((_, i) => ({
+        id: 'r' + (i + 1),
+        nome: (document.getElementById(`rc-nome-${i}`) || {}).value?.trim() || '',
+        descA: (document.getElementById(`rc-descA-${i}`) || {}).value?.trim() || '',
+        descPA: (document.getElementById(`rc-descPA-${i}`) || {}).value?.trim() || '',
+        descNA: (document.getElementById(`rc-descNA-${i}`) || {}).value?.trim() || ''
+      })).filter(c => c.nome);
+
+      const cfg = getConfig();
+      cfg.rubrica = {
+        criterios,
+        observacoes: document.getElementById('rubrica-obs-admin').value.trim()
+      };
+      saveConfig(cfg);
+
+      const msg = document.getElementById('rubrica-save-msg');
+      msg.style.display = 'inline';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    }
+
+    // ── Banca — Resultados ────────────────────────────────────────────────
+    function renderBanca() {
+      loadRubrica();
+      const grupos = getGrupos().filter(g => g.ativo !== false);
+      const rubrica = getAdminRubrica();
+
+      const totalAvals = grupos.reduce((s, g) => s + (g.avaliacoesBanca || []).length, 0);
+      const equipesAvaliadas = grupos.filter(g => (g.avaliacoesBanca || []).length > 0).length;
+      const totalD = grupos.reduce((s, g) => s + (g.avaliacoesBanca || []).filter(a => a.mencaoFinal === 'D').length, 0);
+
+      document.getElementById('banca-metrics').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${totalAvals}</div><div class="stat-label">Avaliações registradas</div></div>
+        <div class="stat-card"><div class="stat-value">${equipesAvaliadas}/${grupos.length}</div><div class="stat-label">Equipes avaliadas</div></div>
+        <div class="stat-card"><div class="stat-value">${totalD}</div><div class="stat-label">Menção D registradas</div></div>`;
+
+      const tbody = document.getElementById('banca-tbody');
+      if (grupos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Nenhuma equipe cadastrada.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = grupos.flatMap(g => {
+        const avals = g.avaliacoesBanca || [];
+        const nD = avals.filter(a => a.mencaoFinal === 'D').length;
+        const nND = avals.filter(a => a.mencaoFinal === 'ND').length;
+        const ultima = avals.length ? fmtDtBR(avals[avals.length - 1].data) : '—';
+
+        const mainRow = `<tr>
+          <td><strong>${g.nome}</strong></td>
+          <td>${avals.length}</td>
+          <td class="banca-res-d">${nD}</td>
+          <td class="banca-res-nd">${nND}</td>
+          <td>${ultima}</td>
+          <td>${avals.length ? `<button class="banca-detalhe-btn" type="button" onclick="toggleBancaDetalhe('${g.id}')">Ver detalhes</button>` : '—'}</td>
+        </tr>`;
+
+        const detalheRow = `<tr class="banca-detalhe-row" id="bdetalhe-${g.id}">
+          <td class="banca-detalhe-cell" colspan="6">
+            ${avals.map(a => {
+              const mencaoClass = a.mencaoFinal === 'D' ? 'banca-mencao-D' : 'banca-mencao-ND';
+              const criteriosHTML = rubrica.criterios.map(c => {
+                const val = a.criterios ? a.criterios[c.id] : null;
+                return val ? `<div class="banca-criterio-row"><span class="badge-${val}">${val}</span><span>${c.nome}</span></div>` : '';
+              }).join('');
+              return `<div class="banca-aval-card">
+                <div class="banca-aval-header">
+                  <span>${a.avaliador || 'Avaliador'}${a.organizacao ? ' · ' + a.organizacao : ''}</span>
+                  <span class="${mencaoClass}">${a.mencaoFinal || '—'}</span>
+                </div>
+                ${criteriosHTML}
+                ${a.comentarios ? `<div style="margin-top:0.5rem;font-size:12px;color:var(--muted);font-style:italic">"${a.comentarios}"</div>` : ''}
+                <div style="font-size:11px;color:var(--muted);margin-top:0.4rem">${a.data ? fmtDtBR(a.data) : ''}</div>
+              </div>`;
+            }).join('')}
+          </td>
+        </tr>`;
+
+        return [mainRow, detalheRow];
+      }).join('');
+    }
+
+    function toggleBancaDetalhe(grupoId) {
+      document.getElementById('bdetalhe-' + grupoId).classList.toggle('open');
+    }
+
+    function exportarCSVBanca() {
+      const grupos = getGrupos().filter(g => g.ativo !== false);
+      const rubrica = getAdminRubrica();
+      const BOM = '\uFEFF';
+      const critHeaders = rubrica.criterios.map(c => c.nome);
+      const header = ['Equipe', 'Tema', 'Avaliador', 'Cargo/Instituição', 'Data', ...critHeaders, 'Menção Final', 'Comentários'];
+      const rows = [];
+      grupos.forEach(g => {
+        (g.avaliacoesBanca || []).forEach(a => {
+          const critVals = rubrica.criterios.map(c => (a.criterios && a.criterios[c.id]) || '');
+          rows.push([
+            g.nome, g.tema || '',
+            a.avaliador || '', a.organizacao || '',
+            a.data ? fmtDtBR(a.data) : '',
+            ...critVals,
+            a.mencaoFinal || '', a.comentarios || ''
+          ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+        });
+      });
+      const csv = BOM + [header.map(h => `"${h}"`).join(','), ...rows].join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const hoje = new Date();
+      const stamp = `${hoje.getFullYear()}${String(hoje.getMonth() + 1).padStart(2, '0')}${String(hoje.getDate()).padStart(2, '0')}`;
+      a.href = url; a.download = `HubPI_EquipePedagogica_${stamp}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    }
+
     // ── renderConfig ─────────────────────────────────────────────────────
     function renderConfig() {
       const cfg = getConfig();
@@ -2384,6 +2825,11 @@ Trabalhar em equipe com autonomia e responsabilidade"></textarea>
       const hoje2 = new Date();
       const stamp = `${hoje2.getFullYear()}${String(hoje2.getMonth() + 1).padStart(2, '0')}${String(hoje2.getDate()).padStart(2, '0')}`;
       doc.save(`HubPI_${nomeArquivo}_${stamp}.pdf`);
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem('pi_admin');
+      window.location.href = 'index.html';
     }
 
     // ── Init ─────────────────────────────────────────────────────────────

@@ -70,7 +70,22 @@
             <div class="ac-desc">Área exclusiva para gerenciar equipes, cadastrar membros, definir senhas e registrar
               feedback.</div>
           </a>
+          <a href="banca.html" class="access-card" role="listitem" aria-label="Acessar área da Equipe Pedagógica">
+            <div class="ac-icon" aria-hidden="true">📋</div>
+            <div class="ac-title">Equipe Pedagógica</div>
+            <div class="ac-desc">Área para registro de avaliações com rubrica A/PA/NA configurada pelo docente e menção final D/ND.</div>
+          </a>
         </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section class="section" id="uc-section" style="display:none; background:var(--glass); border:1px solid rgba(255,255,255,0.08); border-left:3px solid var(--orange); border-radius:14px; padding:2rem; margin-bottom:2rem;">
+        <div class="section-label">Foco Pedagógico</div>
+        <h2 class="section-title">Competências das UCs Integradas</h2>
+        <p class="section-desc">O Projeto Integrador desenvolve e articula ativamente as seguintes competências do curso:</p>
+        <ul id="uc-list" style="margin-top:1.5rem; padding-left:1.5rem; display:flex; flex-direction:column; gap:0.5rem; color:var(--text); font-size:14px; font-weight:600;">
+        </ul>
       </section>
 
       <div class="divider"></div>
@@ -160,6 +175,18 @@
 
       const fy = document.getElementById('footer-year');
       if (fy) fy.textContent = new Date().getFullYear();
+
+      const ucSection = document.getElementById('uc-section');
+      const ucList = document.getElementById('uc-list');
+      if (ucSection && ucList) {
+        if (cfg.competencias && cfg.competencias.trim().length > 0) {
+          const comps = cfg.competencias.split('\n').filter(c => c.trim().length > 0);
+          ucList.innerHTML = comps.map(c => `<li style="line-height:1.5">${c.trim()}</li>`).join('');
+          ucSection.style.display = 'block';
+        } else {
+          ucSection.style.display = 'none';
+        }
+      }
     }
 
     // ── Nav ────────────────────────────────────────────────────────────
@@ -229,6 +256,7 @@
       if (!senha) return;
       if (senha === g.senha) {
         sessionStorage.setItem(SESSION_TEAM, JSON.stringify({ id: g.id, nome: g.nome }));
+        sessionStorage.removeItem(SESSION_ADMIN);
         window.location.href = `equipe.html?id=${g.id}`;
       } else {
         document.getElementById('err-msg').classList.add('show');
