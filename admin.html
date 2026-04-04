@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Docente — PI Logística</title>
+  <title>Painel do Docente — Hub de Projetos</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="db.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
     /* Page-specific styles */
     .page-header { padding: 3rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(247,148,29,0.15); }
@@ -132,6 +134,31 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     }
+
+    /* ── Visão Geral ──────────────────────────────────────────────────── */
+    .visao-tab-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .visao-tab-head .s-head { margin-bottom: 0; }
+    .visao-table td { vertical-align: middle; }
+    .visao-table .eq-icon { font-size: 16px; text-align: center; }
+    .alerta-item { border-radius: 10px; padding: 0.85rem 1.1rem; margin-bottom: 0.6rem; font-size: 13px; display: flex; align-items: flex-start; gap: 0.6rem; }
+    .alerta-amarelo { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .alerta-vermelho { background: #fff1f2; border: 1px solid #fecaca; color: #991b1b; }
+    .alerta-ok { background: rgba(50,200,100,0.08); border: 1px solid rgba(50,200,100,0.25); color: #0d7a3e; padding: 1rem; border-radius: 10px; font-size: 14px; }
+    .s-head-mt { margin-top: 2rem; }
+
+    /* ── Identidade do Curso ──────────────────────────────────────────── */
+    .cfg-curso-block { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid var(--orange); border-radius: 14px; padding: 1.5rem; max-width: 700px; margin-bottom: 1.5rem; }
+    .cfg-curso-block h4 { font-size: 15px; font-weight: 700; margin-bottom: 0.4rem; }
+    .cfg-curso-block p { font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.6; }
+
+    /* ── Reflexões no modal ───────────────────────────────────────────── */
+    .reflexao-card { background: rgba(247,148,29,0.06); border-left: 3px solid var(--orange); border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 0.75rem; }
+    .reflexao-card-title { font-size: 13px; font-weight: 700; margin-bottom: 0.6rem; color: var(--navy); }
+    .reflexao-item { margin-bottom: 0.5rem; font-size: 12px; color: #1a202c; line-height: 1.6; }
+    .reflexao-item span { font-weight: 700; }
+    .reflexao-date { font-size: 11px; color: #64748b; margin-top: 0.4rem; }
+    .fb-reflexoes-header { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #e2e8f0; }
+    .fb-reflexoes-title { font-size: 14px; font-weight: 700; margin-bottom: 0.75rem; color: #1a202c; }
   </style>
 </head>
 <body>
@@ -155,7 +182,7 @@
 
   <!-- Main App -->
   <nav class="nav" role="navigation" aria-label="Navegação principal" id="main-nav" style="display:none">
-    <a href="index.html" class="nav-logo">PI <span>Logística</span></a>
+    <a href="index.html" class="nav-logo">Hub <span>de Projetos</span></a>
     <div class="nav-links">
       <a href="index.html">Início</a>
       <a href="materiais.html">Materiais</a>
@@ -178,7 +205,8 @@
     </header>
 
     <div class="tab-bar" role="tablist" aria-label="Abas de administração">
-      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-equipes" onclick="showTab('equipes')">👥 Equipes</button>
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-visao" onclick="showTab('visao')">📊 Visão Geral</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-equipes" onclick="showTab('equipes')">👥 Equipes</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-materiais" onclick="showTab('materiais')">📚 Materiais</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback" onclick="showTab('feedback')">💬 Feedback Coletivo</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-config" onclick="showTab('config')">⚙️ Configurações</button>
@@ -186,8 +214,46 @@
 
     <div class="container">
 
+      <!-- TAB: VISÃO GERAL -->
+      <section class="tab-content active" id="tab-visao" role="tabpanel" aria-labelledby="tab-visao">
+        <div class="visao-tab-head">
+          <div class="s-head">
+            <h3>Visão Geral da Turma</h3>
+            <p>Acompanhe o progresso de todas as equipes, alertas e indicadores em tempo real.</p>
+          </div>
+          <button class="btn-action btn-sm" onclick="exportarCSV()" type="button">📊 Exportar CSV</button>
+        </div>
+
+        <!-- Métricas -->
+        <div class="stats-grid" id="visao-metrics"></div>
+
+        <!-- Tabela Consolidada -->
+        <div class="s-head"><h3>📋 Tabela da Turma</h3></div>
+        <div class="table-wrap">
+          <table class="visao-table" id="visao-table" aria-label="Tabela consolidada da turma">
+            <thead>
+              <tr>
+                <th scope="col">Equipe</th>
+                <th scope="col">Integrantes</th>
+                <th scope="col">E1</th>
+                <th scope="col">E2</th>
+                <th scope="col">E3</th>
+                <th scope="col">E4</th>
+                <th scope="col">Última Atividade</th>
+                <th scope="col">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="visao-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Alertas -->
+        <div class="s-head s-head-mt"><h3>🔔 Alertas Automáticos</h3></div>
+        <div id="visao-alertas"></div>
+      </section>
+
       <!-- TAB: EQUIPES -->
-      <section class="tab-content active" id="tab-equipes" role="tabpanel" aria-labelledby="tab-equipes">
+      <section class="tab-content" id="tab-equipes" role="tabpanel" aria-labelledby="tab-equipes">
         <div class="stats-grid" id="stats-grid"></div>
 
         <div class="s-head">
@@ -266,6 +332,41 @@
           <p>Configure a senha de administrador e outras opções do sistema.</p>
         </div>
 
+        <!-- Identidade do Curso -->
+        <div class="cfg-curso-block">
+          <h4>🏫 Identidade do Curso</h4>
+          <p>Esses dados aparecem dinamicamente no cabeçalho, rodapé e hero de todas as páginas.</p>
+          <div class="form-grid" style="max-width:100%;margin-bottom:0.75rem">
+            <div>
+              <label for="cfg-nomeCurso" class="form-label">Nome do Curso</label>
+              <input type="text" class="field-input" id="cfg-nomeCurso" placeholder="ex: Técnico em Logística">
+            </div>
+            <div>
+              <label for="cfg-unidadeCurricular" class="form-label">Unidade Curricular</label>
+              <input type="text" class="field-input" id="cfg-unidadeCurricular" placeholder="ex: UC12 — Projeto Integrador">
+            </div>
+            <div>
+              <label for="cfg-anoSemestre" class="form-label">Ano / Semestre</label>
+              <input type="text" class="field-input" id="cfg-anoSemestre" placeholder="ex: 2025/1">
+            </div>
+            <div>
+              <label for="cfg-docente" class="form-label">Docente Responsável</label>
+              <input type="text" class="field-input" id="cfg-docente" placeholder="ex: Jean Carlos Macedo">
+            </div>
+            <div>
+              <label for="cfg-emailDocente" class="form-label">E-mail do Docente</label>
+              <input type="email" class="field-input" id="cfg-emailDocente" placeholder="ex: docente@senacsp.edu.br">
+            </div>
+            <div>
+              <label for="cfg-unidade" class="form-label">Unidade Senac</label>
+              <input type="text" class="field-input" id="cfg-unidade" placeholder="ex: Senac Araçatuba">
+            </div>
+          </div>
+          <button class="btn-action" onclick="saveCursoConfig()" type="button">💾 Salvar Configurações do Curso</button>
+          <div id="cfg-curso-msg" style="font-size:12px;color:#5ae09a;margin-top:0.6rem;display:none">✅ Configurações salvas com sucesso.</div>
+        </div>
+
+        <!-- Tema Gerador -->
         <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--orange);border-radius:14px;padding:1.5rem;max-width:600px;margin-bottom:1.5rem">
           <h4 style="font-size:15px;font-weight:700;margin-bottom:0.4rem">🎯 Tema Gerador da Turma</h4>
           <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6">Este tema aparece como referência em somente leitura no Planner de todas as equipes.</p>
@@ -445,6 +546,12 @@
         </div>
 
         <button class="btn-action" onclick="saveFeedback()" style="width:100%;margin-top:0.25rem" type="button">Salvar Feedback</button>
+
+        <!-- Reflexões da Equipe -->
+        <div class="fb-reflexoes-header">
+          <div class="fb-reflexoes-title">🪞 Reflexões da Equipe</div>
+          <div id="fb-reflexoes-list"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -491,15 +598,13 @@
 
   <footer role="contentinfo" id="main-footer" style="display:none">
     <div class="f-logo">SENAC</div>
-    <div class="f-center">
-      <div style="font-weight:700">Técnico em Logística · UC12 — Projeto Integrador</div>
-      <div style="color:var(--muted);font-size:12px;margin-top:2px">Jean Carlos Macedo · Senac Araçatuba</div>
+    <div class="f-center" id="footer-center">
+      <div style="font-weight:700">Hub de Projetos — Gestão de Projetos Integradores</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:2px">Senac Araçatuba</div>
     </div>
-    <div class="f-right">
-      <a href="mailto:jean.cmmacedo@senacsp.edu.br" style="color:inherit;text-decoration:none">jean.cmmacedo@senacsp.edu.br</a>
-    </div>
+    <div class="f-right" id="footer-right"></div>
   </footer>
-  <div class="f-copy" id="main-copy" style="display:none">© Senac São Paulo · Material educacional interno · 2025</div>
+  <div class="f-copy" id="main-copy" style="display:none">© Senac São Paulo · Material educacional interno · <span id="footer-year">2025</span></div>
 
   <script>
     const KEY_GRUPOS = 'pi_grupos';
@@ -591,11 +696,14 @@
 
     // ── Render All ───────────────────────────────────────────────────────
     function renderAll() {
+      renderConfig();
+      renderVisaoGeral();
       renderStats();
       renderTeams();
       renderMaterials();
       renderFCList();
       loadTemaGerador();
+      loadCursoConfig();
     }
 
     // ── Stats ────────────────────────────────────────────────────────────
@@ -639,6 +747,7 @@
                 <button class="btn-icon" onclick="openEntregasModal('${g.id}')" title="Ver entregas" aria-label="Ver entregas de ${g.nome}">📤</button>
                 <button class="btn-icon" onclick="openMemberModal('${g.id}')" title="Gerenciar membros" aria-label="Gerenciar membros de ${g.nome}">👥</button>
                 <button class="btn-icon" onclick="openFeedbackModal('${g.id}')" title="Adicionar feedback" aria-label="Adicionar feedback para ${g.nome}">💬</button>
+                <button class="btn-icon" onclick="exportarPDF('${g.id}')" title="Exportar PDF" aria-label="Exportar PDF de ${g.nome}">📄</button>
                 <button class="btn-icon" onclick="editTeam('${g.id}')" title="Editar equipe" aria-label="Editar ${g.nome}">✏️</button>
                 <button class="btn-icon danger" onclick="deleteTeam('${g.id}')" title="Excluir equipe" aria-label="Excluir ${g.nome}">🗑</button>
               </div>
@@ -670,7 +779,7 @@
       renderModalMemberList();
       document.getElementById('tm-nome').value = '';
       document.getElementById('tm-email').value = '';
-      document.getElementById('tm-telefone').value = '';
+      const tmTel = document.getElementById('tm-telefone'); if (tmTel) tmTel.value = '';
       document.getElementById('team-modal').classList.add('open');
       setTimeout(() => document.getElementById('team-nome').focus(), 100);
     }
@@ -895,7 +1004,6 @@
       const grupo = getGrupos().find(g => g.id === teamId);
       if (!grupo) return;
       document.getElementById('feedback-modal-title').textContent = `💬 Feedback — ${grupo.nome}`;
-      // Reset para tipo "entrega"
       setFbType('entrega');
       document.getElementById('fb-entrega').value = '1';
       document.getElementById('fb-mencao').value = 'A';
@@ -903,7 +1011,35 @@
       document.getElementById('fb-assunto').value = '';
       document.getElementById('fb-processo-texto').value = '';
       document.getElementById('fb-prioridade').value = 'informativo';
+      renderFbReflexoes(grupo);
       document.getElementById('feedback-modal').classList.add('open');
+      setTimeout(() => document.getElementById('fb-orientacoes').focus(), 120);
+    }
+
+    function renderFbReflexoes(grupo) {
+      const el = document.getElementById('fb-reflexoes-list');
+      if (!el) return;
+      const reflexoes = grupo.reflexoes || {};
+      const keys = Object.keys(reflexoes);
+      if (keys.length === 0) {
+        el.innerHTML = '<p style="font-size:13px;color:#64748b">Nenhuma reflexão registrada ainda.</p>';
+        return;
+      }
+      const ENTREGA_TITULOS = ['Plano de Ação 5W2H', 'Matriz GUT + Diagnóstico', 'Relatório de Desenvolvimento', 'Apresentação Final'];
+      el.innerHTML = keys.map(k => {
+        const idx = parseInt(k.replace('entrega_', '')) - 1;
+        const titulo = ENTREGA_TITULOS[idx] || k;
+        const r = reflexoes[k];
+        const dataFmt = r.timestamp ? new Date(r.timestamp).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+        return `
+          <div class="reflexao-card">
+            <div class="reflexao-card-title">Entrega ${idx+1} — ${titulo}</div>
+            <div class="reflexao-item"><span>💡 Aprendizado:</span> ${r.aprendeu || '—'}</div>
+            <div class="reflexao-item"><span>🧩 Dificuldade:</span> ${r.dificuldade || '—'}</div>
+            <div class="reflexao-item"><span>🔄 Faria diferente:</span> ${r.fariaDiferente || '—'}</div>
+            ${dataFmt ? `<div class="reflexao-date">${dataFmt}</div>` : ''}
+          </div>`;
+      }).join('');
     }
 
     function closeFeedbackModal() {
@@ -1142,6 +1278,368 @@
         document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
       }
     });
+
+    // ── renderConfig ─────────────────────────────────────────────────────
+    function renderConfig() {
+      const cfg     = getConfig();
+      const nomeCurso = cfg.nomeCurso || '';
+      const uc      = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
+      const docente = cfg.docente || '';
+      const email   = cfg.emailDocente || '';
+      const unidade = cfg.unidade || 'Senac Araçatuba';
+
+      const fc = document.getElementById('footer-center');
+      if (fc) {
+        const linha1 = nomeCurso ? `${nomeCurso} · ${uc}` : `Hub de Projetos — ${uc}`;
+        const linha2 = [docente, unidade].filter(Boolean).join(' · ');
+        fc.innerHTML = `<div style="font-weight:700">${linha1}</div>${linha2 ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${linha2}</div>` : ''}`;
+      }
+      const fr = document.getElementById('footer-right');
+      if (fr) fr.innerHTML = email ? `<a href="mailto:${email}" style="color:inherit;text-decoration:none">${email}</a>` : '';
+      const fy = document.getElementById('footer-year');
+      if (fy) fy.textContent = new Date().getFullYear();
+    }
+
+    // ── Identidade do Curso ───────────────────────────────────────────────
+    function loadCursoConfig() {
+      const cfg = getConfig();
+      const fields = ['nomeCurso','unidadeCurricular','anoSemestre','docente','emailDocente','unidade'];
+      fields.forEach(f => {
+        const el = document.getElementById('cfg-' + f);
+        if (el && cfg[f]) el.value = cfg[f];
+      });
+    }
+
+    function saveCursoConfig() {
+      const cfg = getConfig();
+      const fields = ['nomeCurso','unidadeCurricular','anoSemestre','docente','emailDocente','unidade'];
+      fields.forEach(f => {
+        const el = document.getElementById('cfg-' + f);
+        if (el) cfg[f] = el.value.trim();
+      });
+      saveConfig(cfg);
+      renderConfig();
+      const msg = document.getElementById('cfg-curso-msg');
+      if (msg) { msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 2500); }
+    }
+
+    // ── Visão Geral ───────────────────────────────────────────────────────
+    const ENTREGA_TITULOS_ADM = ['Plano de Ação 5W2H', 'Matriz GUT + Diagnóstico', 'Relatório de Desenvolvimento', 'Apresentação Final'];
+
+    function renderVisaoGeral() {
+      const grupos  = getGrupos().filter(g => g.ativo !== false);
+      const hoje    = new Date();
+
+      // Métricas
+      const totalEquipes   = grupos.length;
+      const totalEntregas  = grupos.reduce((s, g) => s + (g.entregas||[]).filter(e => e.status==='entregue').length, 0);
+      const maxEntregas    = totalEquipes * 4;
+      const completas      = grupos.filter(g => (g.entregas||[]).filter(e=>e.status==='entregue').length === 4).length;
+      const semFeedback    = grupos.filter(g => !(g.feedback||[]).length).length;
+
+      document.getElementById('visao-metrics').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${totalEquipes}</div><div class="stat-label">Total de Equipes</div></div>
+        <div class="stat-card"><div class="stat-value">${totalEntregas} / ${maxEntregas}</div><div class="stat-label">Entregas Realizadas</div></div>
+        <div class="stat-card"><div class="stat-value">${completas}</div><div class="stat-label">Equipes Completas</div></div>
+        <div class="stat-card"><div class="stat-value">${semFeedback}</div><div class="stat-label">Sem Feedback</div></div>`;
+
+      // Tabela
+      const tbody = document.getElementById('visao-tbody');
+      if (grupos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Nenhuma equipe cadastrada.</td></tr>';
+      } else {
+        tbody.innerHTML = grupos.map(g => {
+          const membros  = (g.membros||[]).map(m=>m.nome).join(', ') || '—';
+          const entregas = g.entregas || [];
+          const eCols    = [1,2,3,4].map(n => {
+            const e = entregas.find(x => x.numero === n);
+            if (!e || e.status === 'bloqueado') return '<td style="text-align:center">⏳</td>';
+            if (e.status === 'entregue')         return '<td style="text-align:center">✅</td>';
+            return '<td style="text-align:center">📝</td>';
+          }).join('');
+          const ultima = g.ultimaAtividade
+            ? new Date(g.ultimaAtividade).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+            : '—';
+          return `<tr>
+            <td><strong>${g.nome}</strong></td>
+            <td style="font-size:12px;color:var(--muted)">${(g.membros||[]).length} integrante${(g.membros||[]).length!==1?'s':''}</td>
+            ${eCols}
+            <td style="font-size:12px">${ultima}</td>
+            <td>
+              <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                <button class="btn-action btn-sm" onclick="openFeedbackModal('${g.id}')" type="button">💬 Feedback</button>
+                <button class="btn-action btn-sm btn-secondary" onclick="exportarPDF('${g.id}')" type="button">📄 PDF</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      }
+
+      // Alertas
+      const alertas = [];
+      const sete_dias = 7 * 24 * 60 * 60 * 1000;
+      grupos.forEach(g => {
+        if (g.ultimaAtividade) {
+          const diff = hoje - new Date(g.ultimaAtividade);
+          if (diff > sete_dias) {
+            const dias = Math.floor(diff / (24*60*60*1000));
+            alertas.push(`<div class="alerta-item alerta-amarelo">⚠️ <span><strong>${g.nome}</strong> — sem atividade há ${dias} dias.</span></div>`);
+          }
+        }
+        (g.prazoEntrega || []).forEach((prazo, i) => {
+          const entrega = (g.entregas||[])[i];
+          if (prazo && entrega && entrega.status !== 'entregue' && new Date(prazo) < hoje) {
+            alertas.push(`<div class="alerta-item alerta-vermelho">🚨 <span><strong>${g.nome}</strong> — Entrega ${i+1} atrasada (prazo: ${formatDate(prazo)}).</span></div>`);
+          }
+        });
+      });
+
+      const alertasEl = document.getElementById('visao-alertas');
+      alertasEl.innerHTML = alertas.length
+        ? alertas.join('')
+        : '<div class="alerta-ok">✅ Nenhum alerta no momento.</div>';
+    }
+
+    // ── Exportar CSV ──────────────────────────────────────────────────────
+    function fmtDtBR(iso) {
+      if (!iso) return '';
+      return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    }
+
+    function exportarCSV() {
+      const grupos = getGrupos().filter(g => g.ativo !== false);
+      const BOM = '\uFEFF';
+      const header = ['Equipe','Tema','Integrantes','Status E1','Data E1','Status E2','Data E2','Status E3','Data E3','Status E4','Data E4','Feedbacks Registrados','Reflexões Registradas','Última Atividade'];
+      const STATUS_PT = { entregue: 'Entregue', pendente: 'Pendente', rascunho: 'Rascunho', bloqueado: 'Pendente' };
+
+      const rows = grupos.map(g => {
+        const integrantes = (g.membros||[]).map(m=>m.nome).join(' | ');
+        const eCols = [];
+        for (let n = 1; n <= 4; n++) {
+          const e = (g.entregas||[]).find(x => x.numero === n);
+          eCols.push(e ? (STATUS_PT[e.status] || e.status) : 'Pendente');
+          eCols.push(e && e.data ? fmtDtBR(e.data) : '');
+        }
+        const nFeedbacks  = (g.feedback||[]).length;
+        const nReflexoes  = Object.keys(g.reflexoes||{}).length;
+        const ultimaAtiv  = g.ultimaAtividade ? fmtDtBR(g.ultimaAtividade) : '';
+        return [g.nome, g.tema||'', integrantes, ...eCols, nFeedbacks, nReflexoes, ultimaAtiv]
+          .map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+      });
+
+      const csv = BOM + [header.map(h=>`"${h}"`).join(','), ...rows].join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      const hoje = new Date();
+      const stamp = `${hoje.getFullYear()}${String(hoje.getMonth()+1).padStart(2,'0')}${String(hoje.getDate()).padStart(2,'0')}`;
+      a.href = url; a.download = `HubPI_Turma_${stamp}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ── Exportar PDF ──────────────────────────────────────────────────────
+    function exportarPDF(grupoId) {
+      const grupo = getGrupos().find(g => g.id === grupoId);
+      if (!grupo) return;
+      if (typeof window.jspdf === 'undefined') { alert('jsPDF ainda carregando. Aguarde um momento e tente novamente.'); return; }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+      const cfg = getConfig();
+      const NAVY   = [0, 69, 135];
+      const ORANGE = [247, 148, 29];
+      const GRAY   = [100, 116, 139];
+      const pageW  = 210;
+      const margin = 15;
+      let y = margin;
+
+      function addPage() { doc.addPage(); y = margin; }
+      function checkY(need) { if (y + need > 280) addPage(); }
+
+      // ── CABEÇALHO ────────────────────────────────────────────────────
+      doc.setFillColor(...NAVY);
+      doc.rect(0, 0, pageW, 8, 'F');
+
+      y = 16;
+      doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.text('SENAC SÃO PAULO', margin, y); y += 6;
+
+      doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+      doc.text('Hub de Projetos — Gestão de Projetos Integradores', margin, y); y += 5;
+
+      if (cfg.nomeCurso)          { doc.text(`Curso: ${cfg.nomeCurso}`, margin, y); y += 5; }
+      if (cfg.unidadeCurricular)  { doc.text(`UC: ${cfg.unidadeCurricular}`, margin, y); y += 5; }
+      if (cfg.docente)            { doc.text(`Docente: ${cfg.docente}`, margin, y); y += 5; }
+      if (cfg.unidade)            { doc.text(`Unidade: ${cfg.unidade}`, margin, y); y += 5; }
+      if (cfg.anoSemestre)        { doc.text(`Período: ${cfg.anoSemestre}`, margin, y); y += 5; }
+
+      doc.setFontSize(9); doc.setTextColor(...GRAY);
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, margin, y); y += 4;
+
+      doc.setDrawColor(...ORANGE); doc.setLineWidth(0.8);
+      doc.line(margin, y, pageW - margin, y); y += 8;
+
+      // ── IDENTIFICAÇÃO DA EQUIPE ───────────────────────────────────────
+      doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.text(grupo.nome, margin, y); y += 7;
+
+      if (grupo.tema) {
+        doc.setFontSize(11); doc.setFont('helvetica','italic'); doc.setTextColor(...GRAY);
+        doc.text(`Tema: ${grupo.tema}`, margin, y); y += 6;
+      }
+
+      // Integrantes
+      const membros = grupo.membros || [];
+      if (membros.length > 0) {
+        y += 2;
+        doc.autoTable({
+          startY: y,
+          head: [['Integrante', 'E-mail']],
+          body: membros.map(m => [m.nome, m.email || '—']),
+          margin: { left: margin, right: margin },
+          styles: { fontSize: 10, cellPadding: 3 },
+          headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold' },
+          theme: 'striped',
+          didDrawPage: (d) => { y = d.cursor.y + 6; }
+        });
+        y = doc.lastAutoTable.finalY + 8;
+      }
+
+      // ── PLANO DE AÇÃO ────────────────────────────────────────────────
+      checkY(15);
+      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.text('Plano de Ação 5W2H', margin, y); y += 6;
+
+      const tarefas = (grupo.planner||{}).tarefas || [];
+      if (tarefas.length === 0) {
+        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.text('Plano de ação não preenchido.', margin, y); y += 8;
+      } else {
+        doc.autoTable({
+          startY: y,
+          head: [['Tarefa','O Quê','Por Quê','Quem','Onde','Início','Conclusão','Como','Quanto','Status']],
+          body: tarefas.map((t,i) => [
+            `#${i+1}`, t.oQue||'', t.porQue||'',
+            (t.responsaveis||[]).join(', '), t.onde||'',
+            t.dataInicio ? formatDate(t.dataInicio) : '',
+            t.dataConclusao ? formatDate(t.dataConclusao) : '',
+            t.como||'', t.quanto||'', t.status||''
+          ]),
+          margin: { left: margin, right: margin },
+          styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+          headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold', fontSize: 8 },
+          columnStyles: { 0: { cellWidth: 10 }, 5: { cellWidth: 18 }, 6: { cellWidth: 18 }, 9: { cellWidth: 20 } },
+          theme: 'striped',
+        });
+        y = doc.lastAutoTable.finalY + 8;
+      }
+
+      // ── ENTREGAS ────────────────────────────────────────────────────
+      checkY(15);
+      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.text('Entregas', margin, y); y += 6;
+
+      const entregas = grupo.entregas || [];
+      doc.autoTable({
+        startY: y,
+        head: [['Entrega','Título','Status','Data/Hora','Link']],
+        body: [1,2,3,4].map(n => {
+          const e = entregas.find(x=>x.numero===n);
+          const titulo = ENTREGA_TITULOS_ADM[n-1] || `Entrega ${n}`;
+          return [
+            `E${n}`, titulo,
+            e && e.status === 'entregue' ? '✓ Entregue' : '⏳ Pendente',
+            e && e.data ? fmtDtBR(e.data) : '',
+            e && e.link ? e.link : ''
+          ];
+        }),
+        margin: { left: margin, right: margin },
+        styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
+        headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold' },
+        columnStyles: { 4: { cellWidth: 50 } },
+        theme: 'striped',
+      });
+      y = doc.lastAutoTable.finalY + 8;
+
+      // ── REFLEXÕES ───────────────────────────────────────────────────
+      checkY(15);
+      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.text('Reflexões da Equipe', margin, y); y += 6;
+
+      const reflexoes = grupo.reflexoes || {};
+      const refKeys   = Object.keys(reflexoes);
+      if (refKeys.length === 0) {
+        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.text('Nenhuma reflexão registrada.', margin, y); y += 8;
+      } else {
+        refKeys.forEach(k => {
+          const idx = parseInt(k.replace('entrega_','')) - 1;
+          const r   = reflexoes[k];
+          const titulo = `${ENTREGA_TITULOS_ADM[idx]||k} — ${r.timestamp ? fmtDtBR(r.timestamp) : ''}`;
+          checkY(30);
+          doc.autoTable({
+            startY: y,
+            head: [[titulo]],
+            body: [
+              [`💡 Aprendizado: ${r.aprendeu||'—'}`],
+              [`🧩 Dificuldade: ${r.dificuldade||'—'}`],
+              [`🔄 Faria diferente: ${r.fariaDiferente||'—'}`]
+            ],
+            margin: { left: margin, right: margin },
+            styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
+            headStyles: { fillColor: ORANGE, textColor: [255,255,255], fontStyle: 'bold' },
+            theme: 'plain',
+          });
+          y = doc.lastAutoTable.finalY + 6;
+        });
+      }
+
+      // ── FEEDBACKS ───────────────────────────────────────────────────
+      checkY(15);
+      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.text('Feedbacks do Docente', margin, y); y += 6;
+
+      const feedbacks = grupo.feedback || [];
+      if (feedbacks.length === 0) {
+        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.text('Nenhum feedback registrado.', margin, y); y += 8;
+      } else {
+        doc.autoTable({
+          startY: y,
+          head: [['Tipo','Entrega/Assunto','Menção','Orientações','Data']],
+          body: feedbacks.map(f => [
+            f.tipo === 'entrega' ? 'Entrega' : 'Processo',
+            f.tipo === 'entrega' ? `Entrega ${f.entrega}` : (f.assunto||''),
+            f.mencao || f.prioridade || '',
+            f.orientacoes || '',
+            f.data ? fmtDtBR(f.data) : ''
+          ]),
+          margin: { left: margin, right: margin },
+          styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
+          headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold' },
+          theme: 'striped',
+        });
+        y = doc.lastAutoTable.finalY + 8;
+      }
+
+      // ── RODAPÉ EM TODAS AS PÁGINAS ───────────────────────────────────
+      const totalPages = doc.internal.getNumberOfPages();
+      const unidade = cfg.unidade || 'Senac Araçatuba';
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        doc.setDrawColor(...ORANGE); doc.setLineWidth(0.5);
+        doc.line(margin, 290, pageW - margin, 290);
+        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.text(`Hub de Projetos · ${unidade} · Material educacional interno · ${new Date().getFullYear()}`, margin, 295);
+        doc.text(`Página ${p} de ${totalPages}`, pageW - margin, 295, { align: 'right' });
+      }
+
+      // Nome do arquivo
+      const nomeArquivo = grupo.nome.replace(/[^a-zA-Z0-9À-ÿ ]/g,'').replace(/\s+/g,'_');
+      const hoje2 = new Date();
+      const stamp = `${hoje2.getFullYear()}${String(hoje2.getMonth()+1).padStart(2,'0')}${String(hoje2.getDate()).padStart(2,'0')}`;
+      doc.save(`HubPI_${nomeArquivo}_${stamp}.pdf`);
+    }
 
     // ── Init ─────────────────────────────────────────────────────────────
     checkAdminAuth();

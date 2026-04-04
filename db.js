@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-//  db.js — PI Logística · Camada de dados: localStorage + Google Sheets
+//  db.js — Hub de Projetos · Camada de dados: localStorage + Google Sheets
 //  Instrução: após implantar o Apps Script, cole a URL em GAS_URL.
 // ═══════════════════════════════════════════════════════════════════
 
@@ -60,4 +60,16 @@ function cloudSave(key) {
     mode   : 'no-cors',
     body   : JSON.stringify({ action: 'save', secret: GAS_SECRET, key, value })
   }).catch(() => {});
+}
+
+/**
+ * Utilitários globais para pi_grupos.
+ */
+function saveGrupos(grupos) {
+  localStorage.setItem('pi_grupos', JSON.stringify(grupos));
+  cloudSave('pi_grupos');
+}
+
+function getGruposDB() {
+  return JSON.parse(localStorage.getItem('pi_grupos') || '[]');
 }

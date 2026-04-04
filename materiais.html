@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Materiais — PI Logística</title>
+  <title>Materiais — Hub de Projetos</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="db.js"></script>
@@ -90,7 +90,7 @@
 <body>
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
   <nav class="nav" role="navigation" aria-label="Navegação principal">
-    <a href="index.html" class="nav-logo">PI <span>Logística</span></a>
+    <a href="index.html" class="nav-logo">Hub <span>de Projetos</span></a>
     <div class="nav-links">
       <a href="index.html">Início</a>
       <a href="materiais.html" class="nav-active" aria-current="page">Materiais</a>
@@ -182,24 +182,44 @@
 
   <footer role="contentinfo">
     <div class="f-logo">SENAC</div>
-    <div class="f-center">
-      <div style="font-weight:700">Técnico em Logística · UC12 — Projeto Integrador</div>
-      <div style="color:var(--muted);font-size:12px;margin-top:2px">Jean Carlos Macedo · Senac Araçatuba</div>
+    <div class="f-center" id="footer-center">
+      <div style="font-weight:700">Hub de Projetos — Gestão de Projetos Integradores</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:2px">Senac Araçatuba</div>
     </div>
-    <div class="f-right">
-      <a href="mailto:jean.cmmacedo@senacsp.edu.br" style="color:inherit;text-decoration:none">jean.cmmacedo@senacsp.edu.br</a>
-    </div>
+    <div class="f-right" id="footer-right"></div>
   </footer>
-  <div class="f-copy">© Senac São Paulo · Material educacional interno · 2025</div>
+  <div class="f-copy">© Senac São Paulo · Material educacional interno · <span id="footer-year">2025</span></div>
 
   <script>
-    const KEY_MAT = 'pi_materiais';
-    const KEY_FC  = 'pi_feedback_coletivo';
-    const KEY_TR  = 'pi_trocas';
+    const KEY_MAT    = 'pi_materiais';
+    const KEY_FC     = 'pi_feedback_coletivo';
+    const KEY_TR     = 'pi_trocas';
+    const KEY_CONFIG = 'pi_config';
 
     function getMat()    { return JSON.parse(localStorage.getItem(KEY_MAT) || 'null'); }
     function getFC()     { return JSON.parse(localStorage.getItem(KEY_FC)  || '[]'); }
     function getTrocas() { return JSON.parse(localStorage.getItem(KEY_TR)  || '[]'); }
+
+    function renderConfig() {
+      const cfg     = JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}');
+      const nomeCurso = cfg.nomeCurso || '';
+      const uc      = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
+      const docente = cfg.docente || '';
+      const email   = cfg.emailDocente || '';
+      const unidade = cfg.unidade || 'Senac Araçatuba';
+      const anoSem  = cfg.anoSemestre || '';
+
+      const fc = document.getElementById('footer-center');
+      if (fc) {
+        const linha1 = nomeCurso ? `${nomeCurso} · ${uc}` : `Hub de Projetos — ${uc}`;
+        const linha2 = [docente, unidade].filter(Boolean).join(' · ');
+        fc.innerHTML = `<div style="font-weight:700">${linha1}</div>${linha2 ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${linha2}</div>` : ''}`;
+      }
+      const fr = document.getElementById('footer-right');
+      if (fr) fr.innerHTML = email ? `<a href="mailto:${email}" style="color:inherit;text-decoration:none">${email}</a>` : '';
+      const fy = document.getElementById('footer-year');
+      if (fy) fy.textContent = new Date().getFullYear();
+    }
 
     // ── Nav ─────────────────────────────────────────────────────────────
     function toggleMenu() {
@@ -333,9 +353,10 @@
       renderTrocas();
     }
 
+    renderConfig();
     renderSlides();
     renderVideos();
-    cloudSync().then(synced => { if (synced) { renderSlides(); renderVideos(); } });
+    cloudSync().then(synced => { renderConfig(); if (synced) { renderSlides(); renderVideos(); } });
   </script>
 </body>
 </html>

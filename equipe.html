@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel da Equipe — PI Logística</title>
+  <title>Painel da Equipe — Hub de Projetos</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="db.js"></script>
@@ -245,6 +245,14 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     }
+
+    /* ── Modal Autorreflexão ──────────────────────────────────────────── */
+    .reflexao-modal { max-width: 560px; max-height: 92vh; overflow-y: auto; }
+    .reflexao-field-label { font-size: 13px; font-weight: 700; margin-bottom: 0.4rem; color: var(--navy); }
+    .reflexao-field-wrap { margin-bottom: 1rem; }
+    .reflexao-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .reflexao-btns .btn { flex: 1; justify-content: center; }
+    .field-textarea-sm { min-height: 80px; }
   </style>
 </head>
 <body>
@@ -253,7 +261,7 @@
          onchange="handleFileSelected(this)">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
   <nav class="nav" role="navigation" aria-label="Navegação principal">
-    <a href="index.html" class="nav-logo">PI <span>Logística</span></a>
+    <a href="index.html" class="nav-logo">Hub <span>de Projetos</span></a>
     <div id="nav-team-badge" class="nav-team-badge" style="display:none" aria-live="polite"></div>
     <div class="nav-links">
       <a href="materiais.html">Materiais</a>
@@ -428,15 +436,53 @@
 
   <footer role="contentinfo">
     <div class="f-logo">SENAC</div>
-    <div class="f-center">
-      <div style="font-weight:700">Técnico em Logística · UC12 — Projeto Integrador</div>
-      <div style="color:var(--muted);font-size:12px;margin-top:2px">Jean Carlos Macedo · Senac Araçatuba</div>
+    <div class="f-center" id="footer-center">
+      <div style="font-weight:700">Hub de Projetos — Gestão de Projetos Integradores</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:2px">Senac Araçatuba</div>
     </div>
-    <div class="f-right">
-      <a href="mailto:jean.cmmacedo@senacsp.edu.br" style="color:inherit;text-decoration:none">jean.cmmacedo@senacsp.edu.br</a>
-    </div>
+    <div class="f-right" id="footer-right"></div>
   </footer>
-  <div class="f-copy">© Senac São Paulo · Material educacional interno · 2025</div>
+  <div class="f-copy">© Senac São Paulo · Material educacional interno · <span id="footer-year">2025</span></div>
+
+  <!-- Modal: Autorreflexão pós-entrega -->
+  <div class="overlay" id="reflexao-overlay" role="dialog" aria-modal="true" aria-labelledby="reflexao-modal-title">
+    <div class="modal reflexao-modal">
+      <button class="modal-close" type="button" onclick="fecharReflexao()" aria-label="Fechar modal">
+        <span aria-hidden="true">✕</span>
+      </button>
+      <h3 id="reflexao-modal-title">🪞 Reflexão da Equipe</h3>
+      <p class="modal-sub">Respondam juntos. Isso faz parte da aprendizagem.</p>
+
+      <div class="reflexao-field-wrap">
+        <label for="ref-aprendeu" class="sr-only">O que a equipe aprendeu com esta entrega?</label>
+        <div class="reflexao-field-label">💡 O que a equipe aprendeu com esta entrega?</div>
+        <textarea class="field-input field-textarea field-textarea-sm" id="ref-aprendeu"
+                  placeholder="Descreva os principais aprendizados..."></textarea>
+        <div class="error-msg" id="ref-aprendeu-err">Mínimo 30 caracteres.</div>
+      </div>
+
+      <div class="reflexao-field-wrap">
+        <label for="ref-dificuldade" class="sr-only">Qual foi a maior dificuldade enfrentada?</label>
+        <div class="reflexao-field-label">🧩 Qual foi a maior dificuldade enfrentada?</div>
+        <textarea class="field-input field-textarea field-textarea-sm" id="ref-dificuldade"
+                  placeholder="Seja específico. Dificuldades reais geram aprendizados reais."></textarea>
+        <div class="error-msg" id="ref-dificuldade-err">Mínimo 30 caracteres.</div>
+      </div>
+
+      <div class="reflexao-field-wrap">
+        <label for="ref-faria-diferente" class="sr-only">O que fariam diferente se começassem agora?</label>
+        <div class="reflexao-field-label">🔄 O que fariam diferente se começassem agora?</div>
+        <textarea class="field-input field-textarea field-textarea-sm" id="ref-faria-diferente"
+                  placeholder="Reflita sobre processo, decisões e colaboração."></textarea>
+        <div class="error-msg" id="ref-faria-err">Mínimo 30 caracteres.</div>
+      </div>
+
+      <div class="reflexao-btns">
+        <button class="btn btn-primary" type="button" onclick="salvarReflexao()">💾 Salvar Reflexão</button>
+        <button class="btn btn-ghost" type="button" onclick="fecharReflexao()">Pular por agora</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const KEY_GRUPOS    = 'pi_grupos';
@@ -546,6 +592,7 @@
 
     // ── Render all ────────────────────────────────────────────────────────
     function renderAll(grupo) {
+      renderConfig();
       renderHeader(grupo);
       renderOverview(grupo);
       renderMembers(grupo);
@@ -614,6 +661,7 @@
       if (idx < 0) return;
       if (!grupos[idx].gut) grupos[idx].gut = Array.from({length:5}, () => ({problema:'',g:1,u:1,t:1}));
       grupos[idx].gut[i][field] = field === 'problema' ? val : parseInt(val);
+      updateUltimaAtividade(grupos[idx]);
       saveGrupos(grupos);
       renderGUT(grupos[idx]);
     }
@@ -732,10 +780,16 @@
       // Unlock next
       const next = grupos[idx].entregas.findIndex(e => e.numero === num + 1);
       if (next >= 0 && grupos[idx].entregas[next].status === 'bloqueado') grupos[idx].entregas[next].status = 'pendente';
+      updateUltimaAtividade(grupos[idx]);
       saveGrupos(grupos);
       renderEntregas(grupos[idx]);
       renderHeader(grupos[idx]);
       renderOverview(grupos[idx]);
+      // Exibir modal de reflexão apenas se ainda não foi respondido para esta entrega
+      const reflexoes = grupos[idx].reflexoes || {};
+      if (!reflexoes['entrega_' + num]) {
+        showReflexaoModal(num, ENTREGA_DEFS[num-1]?.titulo || `Entrega ${num}`);
+      }
     }
 
     function reEntregar(num) {
@@ -877,6 +931,7 @@
         if (!grupos[idx].planner) grupos[idx].planner = {};
         grupos[idx].planner.temaProjeto       = document.getElementById('dc-tema-pi').value;
         grupos[idx].planner.perguntaNorteadora = document.getElementById('dc-pergunta').value;
+        updateUltimaAtividade(grupos[idx]);
         saveGrupos(grupos);
         document.getElementById('planner-save-msg').textContent = '✅ Salvo automaticamente.';
       }, 800);
@@ -921,6 +976,7 @@
       const ti = (grupos[idx].planner.tarefas || []).findIndex(t => t.id === tid);
       if (ti < 0) return;
       grupos[idx].planner.tarefas[ti][field] = value;
+      updateUltimaAtividade(grupos[idx]);
       saveGrupos(grupos);
       if (field === 'status' || field === 'prioridade') renderTarefas(grupos[idx]);
     }
@@ -1098,11 +1154,100 @@
       event.currentTarget.setAttribute('aria-selected', 'true');
     }
 
-    // ── ESC to close auth modal ───────────────────────────────────────────
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && document.getElementById('auth-gate').classList.contains('open')) {
-        // Don't close auth modal - user must authenticate or go back
+    // ── ultimaAtividade ───────────────────────────────────────────────────
+    function updateUltimaAtividade(grupo) {
+      grupo.ultimaAtividade = new Date().toISOString();
+    }
+
+    // ── renderConfig ──────────────────────────────────────────────────────
+    function renderConfig() {
+      const cfg     = JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}');
+      const nomeCurso = cfg.nomeCurso || '';
+      const uc      = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
+      const docente = cfg.docente || '';
+      const email   = cfg.emailDocente || '';
+      const unidade = cfg.unidade || 'Senac Araçatuba';
+
+      const fc = document.getElementById('footer-center');
+      if (fc) {
+        const linha1 = nomeCurso ? `${nomeCurso} · ${uc}` : `Hub de Projetos — ${uc}`;
+        const linha2 = [docente, unidade].filter(Boolean).join(' · ');
+        fc.innerHTML = `<div style="font-weight:700">${linha1}</div>${linha2 ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${linha2}</div>` : ''}`;
       }
+      const fr = document.getElementById('footer-right');
+      if (fr) fr.innerHTML = email ? `<a href="mailto:${email}" style="color:inherit;text-decoration:none">${email}</a>` : '';
+      const fy = document.getElementById('footer-year');
+      if (fy) fy.textContent = new Date().getFullYear();
+    }
+
+    // ── Modal Autorreflexão ───────────────────────────────────────────────
+    let _reflexaoNum = null;
+
+    function showReflexaoModal(num, titulo) {
+      _reflexaoNum = num;
+      document.getElementById('reflexao-modal-title').textContent = `🪞 Reflexão da Equipe — ${titulo}`;
+      document.getElementById('ref-aprendeu').value = '';
+      document.getElementById('ref-dificuldade').value = '';
+      document.getElementById('ref-faria-diferente').value = '';
+      ['ref-aprendeu-err','ref-dificuldade-err','ref-faria-err'].forEach(id => {
+        document.getElementById(id).classList.remove('show');
+      });
+      document.getElementById('reflexao-overlay').classList.add('open');
+      setTimeout(() => document.getElementById('ref-aprendeu').focus(), 120);
+    }
+
+    function fecharReflexao() {
+      document.getElementById('reflexao-overlay').classList.remove('open');
+      _reflexaoNum = null;
+    }
+
+    function salvarReflexao() {
+      const aprendeu      = document.getElementById('ref-aprendeu').value.trim();
+      const dificuldade   = document.getElementById('ref-dificuldade').value.trim();
+      const fariaDiferente = document.getElementById('ref-faria-diferente').value.trim();
+      let valido = true;
+
+      if (aprendeu.length < 30) {
+        document.getElementById('ref-aprendeu-err').classList.add('show'); valido = false;
+      } else document.getElementById('ref-aprendeu-err').classList.remove('show');
+
+      if (dificuldade.length < 30) {
+        document.getElementById('ref-dificuldade-err').classList.add('show'); valido = false;
+      } else document.getElementById('ref-dificuldade-err').classList.remove('show');
+
+      if (fariaDiferente.length < 30) {
+        document.getElementById('ref-faria-err').classList.add('show'); valido = false;
+      } else document.getElementById('ref-faria-err').classList.remove('show');
+
+      if (!valido) return;
+
+      const grupos = getGrupos();
+      const idx    = grupos.findIndex(g => g.id === urlId);
+      if (idx < 0) return;
+      if (!grupos[idx].reflexoes) grupos[idx].reflexoes = {};
+      grupos[idx].reflexoes['entrega_' + _reflexaoNum] = {
+        aprendeu,
+        dificuldade,
+        fariaDiferente,
+        timestamp: new Date().toISOString()
+      };
+      updateUltimaAtividade(grupos[idx]);
+      saveGrupos(grupos);
+      fecharReflexao();
+    }
+
+    // ── ESC fecha reflexao-overlay, não fecha auth-gate ──────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (document.getElementById('reflexao-overlay').classList.contains('open')) {
+          fecharReflexao();
+        }
+        // Auth gate não fecha com ESC — usuário deve autenticar ou voltar
+      }
+    });
+
+    document.getElementById('reflexao-overlay').addEventListener('click', e => {
+      if (e.target.id === 'reflexao-overlay') fecharReflexao();
     });
 
     init();
