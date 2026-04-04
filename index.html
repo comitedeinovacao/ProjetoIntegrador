@@ -32,6 +32,7 @@
 
   <div class="page" id="main-content">
     <section class="hero" role="banner" aria-label="Boas-vindas">
+      <canvas id="hero-canvas" aria-hidden="true"></canvas>
       <div class="hero-badge" id="hero-badge">Gestão de Projetos Integradores Senac Araçatuba</div>
       <h1 class="hero-title">Hub de Projetos<br><span class="grad" id="hero-subtitle">Gestão de Projetos
           Integradores</span></h1>
@@ -80,12 +81,11 @@
 
       <div class="divider"></div>
 
-      <section class="section" id="uc-section" style="display:none; background:var(--glass); border:1px solid rgba(255,255,255,0.08); border-left:3px solid var(--orange); border-radius:14px; padding:2rem; margin-bottom:2rem;">
+      <section class="section uc-section" id="uc-section">
         <div class="section-label">Foco Pedagógico</div>
         <h2 class="section-title">Competências das UCs Integradas</h2>
         <p class="section-desc">O Projeto Integrador desenvolve e articula ativamente as seguintes competências do curso:</p>
-        <ul id="uc-list" style="margin-top:1.5rem; padding-left:1.5rem; display:flex; flex-direction:column; gap:0.5rem; color:var(--text); font-size:14px; font-weight:600;">
-        </ul>
+        <ul id="uc-list" class="uc-list"></ul>
       </section>
 
       <div class="divider"></div>
@@ -94,7 +94,7 @@
         <div class="section-label">Acesso protegido</div>
         <h2 class="section-title" id="teams-title">Equipes</h2>
         <p class="section-desc">Clique na sua equipe e insira a senha para acessar o painel completo do seu grupo.</p>
-        <div class="teams-grid" id="teams-grid" role="list" aria-label="Lista de equipes">
+        <div class="teams-grid" id="teams-grid" aria-label="Lista de equipes">
           <div class="empty-state">
             <span class="ei">⏳</span>
             <h3>Aguardando cadastro</h3>
@@ -115,9 +115,9 @@
       <p class="modal-sub" id="modal-sub">Digite a senha da sua equipe para continuar.</p>
       <div class="error-msg" id="err-msg" role="alert" aria-live="polite">Senha incorreta. Tente novamente.</div>
       <label for="senha-input" class="sr-only">Senha da equipe</label>
-      <input type="password" class="field-input" id="senha-input" placeholder="Senha da equipe..."
-        onkeydown="if(event.key==='Enter')checkPassword()" style="margin-bottom:1rem" autocomplete="current-password">
-      <button class="btn btn-primary" type="button" onclick="checkPassword()" style="width:100%;justify-content:center">
+      <input type="password" class="field-input field-input-mb" id="senha-input" placeholder="Senha da equipe..."
+        onkeydown="if(event.key==='Enter')checkPassword()" autocomplete="current-password">
+      <button class="btn btn-primary btn-block" type="button" onclick="checkPassword()">
         Entrar →
       </button>
     </div>
@@ -126,8 +126,8 @@
   <footer role="contentinfo">
     <div class="f-logo">SENAC</div>
     <div class="f-center" id="footer-center">
-      <div style="font-weight:700">Hub de Projetos — Gestão de Projetos Integradores</div>
-      <div style="color:var(--muted);font-size:12px;margin-top:2px">Senac Araçatuba</div>
+      <div class="f-line1">Hub de Projetos — Gestão de Projetos Integradores</div>
+      <div class="f-line2">Senac Araçatuba</div>
     </div>
     <div class="f-right" id="footer-right"></div>
   </footer>
@@ -145,11 +145,17 @@
 
     function renderConfig() {
       const cfg = JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}');
-      const nomeCurso = cfg.nomeCurso || '';
+      const TITULO_PADRAO = 'Metodologias de Trabalho por Projetos Integradores';
+      const UNIDADE_PADRAO = 'Senac Araçatuba';
+      const nomeCurso = (!cfg.nomeCurso || cfg.nomeCurso.trim() === 'Técnico em Logística')
+        ? TITULO_PADRAO : cfg.nomeCurso.trim();
       const uc = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
       const docente = cfg.docente || '';
       const email = cfg.emailDocente || '';
-      const unidade = cfg.unidade || 'Senac Araçatuba';
+      const unidadeRaw = cfg.unidade || '';
+      const unidade = unidadeRaw
+        ? (unidadeRaw.toLowerCase().startsWith('senac') ? unidadeRaw : 'Senac ' + unidadeRaw)
+        : UNIDADE_PADRAO;
       const anoSem = cfg.anoSemestre || '';
 
       const badge = document.getElementById('hero-badge');
@@ -166,11 +172,11 @@
       const fc = document.getElementById('footer-center');
       if (fc) {
         const linha1 = docente || 'Hub de Projetos';
-        fc.innerHTML = `<div style="font-weight:700">${linha1}</div><div style="color:var(--muted);font-size:12px;margin-top:2px">Todos os direitos são reservados</div>`;
+        fc.innerHTML = `<div class="f-line1">${linha1}</div><div class="f-line2">Todos os direitos são reservados</div>`;
       }
 
       const fr = document.getElementById('footer-right');
-      if (fr) fr.innerHTML = email ? `<a href="mailto:${email}" style="color:inherit;text-decoration:none">${email}</a>` : '';
+      if (fr) fr.innerHTML = email ? `<a class="f-email-link" href="mailto:${email}">${email}</a>` : '';
 
       const fy = document.getElementById('footer-year');
       if (fy) fy.textContent = new Date().getFullYear();
@@ -180,7 +186,7 @@
       if (ucSection && ucList) {
         if (cfg.competencias && cfg.competencias.trim().length > 0) {
           const comps = cfg.competencias.split('\n').filter(c => c.trim().length > 0);
-          ucList.innerHTML = comps.map(c => `<li style="line-height:1.5">${c.trim()}</li>`).join('');
+          ucList.innerHTML = comps.map(c => `<li class="uc-item">${c.trim()}</li>`).join('');
           ucSection.style.display = 'block';
         } else {
           ucSection.style.display = 'none';
@@ -220,8 +226,8 @@
         const entregues = (g.entregas || []).filter(e => e.status === 'entregue').length;
         const membrosCount = (g.membros || []).length;
         return `
-          <button class="team-card" type="button" role="listitem" tabindex="0" aria-label="Acessar equipe ${g.nome}, ${membrosCount} integrantes, ${entregues} de 4 entregas"
-             onclick="openModal('${g.id}')" onkeydown="if(event.key==='Enter')openModal('${g.id}')">
+          <button class="team-card" type="button" aria-label="Acessar equipe ${g.nome}, ${membrosCount} integrantes, ${entregues} de 4 entregas"
+             onclick="openModal('${g.id}')">
             <div class="tc-lock" aria-hidden="true">🔒</div>
             <div class="tc-name">${g.nome}</div>
             <div class="tc-info">
@@ -269,7 +275,103 @@
     // Renderiza com dados locais imediatamente, depois sincroniza e re-renderiza
     renderConfig();
     renderTeams();
-    cloudSync().then(synced => { renderConfig(); if (synced) renderTeams(); });
+    cloudSync().then(synced => {
+      renderConfig();
+      if (synced) { renderTeams(); if (window.observeCards) observeCards(); }
+    });
+  </script>
+
+  <script>
+    // ── Nav scroll behavior ────────────────────────────────────────────
+    (function () {
+      const nav = document.querySelector('.nav');
+      const hero = document.querySelector('.hero');
+      if (!nav || !hero) return;
+      function updateNav() {
+        const heroBottom = hero.getBoundingClientRect().bottom;
+        nav.classList.toggle('nav-light', heroBottom < 68);
+      }
+      window.addEventListener('scroll', updateNav, { passive: true });
+      updateNav();
+    })();
+
+    // ── Particle network canvas ────────────────────────────────────────
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const canvas = document.getElementById('hero-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let W, H, pts;
+      const N = 52, MAX_D = 130;
+
+      function resize() {
+        W = canvas.width  = canvas.offsetWidth;
+        H = canvas.height = canvas.offsetHeight;
+      }
+
+      function initPts() {
+        pts = Array.from({ length: N }, function () {
+          return {
+            x: Math.random() * W, y: Math.random() * H,
+            vx: (Math.random() - 0.5) * 0.45,
+            vy: (Math.random() - 0.5) * 0.45,
+            r: Math.random() * 1.4 + 0.7
+          };
+        });
+      }
+
+      function tick() {
+        ctx.clearRect(0, 0, W, H);
+        for (var i = 0; i < pts.length; i++) {
+          var a = pts[i];
+          a.x += a.vx; a.y += a.vy;
+          if (a.x < 0 || a.x > W) a.vx = -a.vx;
+          if (a.y < 0 || a.y > H) a.vy = -a.vy;
+          for (var j = i + 1; j < pts.length; j++) {
+            var b = pts[j];
+            var dx = a.x - b.x, dy = a.y - b.y;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            if (d < MAX_D) {
+              ctx.globalAlpha = (1 - d / MAX_D) * 0.5;
+              ctx.strokeStyle = '#F7941D';
+              ctx.lineWidth = 0.7;
+              ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            }
+          }
+          ctx.globalAlpha = 0.6;
+          ctx.fillStyle = '#F2F2F2';
+          ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, 6.2832); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(tick);
+      }
+
+      window.addEventListener('resize', function () { resize(); initPts(); }, { passive: true });
+      resize(); initPts(); tick();
+    })();
+
+    // ── Scroll entrance animations ─────────────────────────────────────
+    window._animDelay = 0;
+    window._cardObserver = null;
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      window._cardObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.style.animationDelay = (window._animDelay * 0.09) + 's';
+            e.target.classList.add('animate-in');
+            window._animDelay++;
+            window._cardObserver.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.08 });
+    }
+    window.observeCards = function () {
+      if (!window._cardObserver) return;
+      document.querySelectorAll('.access-card:not(.animate-in), .team-card:not(.animate-in)').forEach(function (el) {
+        window._cardObserver.observe(el);
+      });
+    };
+    observeCards();
   </script>
 </body>
 
