@@ -29,6 +29,8 @@ const DB_KEYS = [
 
 /**
  * Busca todos os dados do Google Sheets e atualiza localStorage.
+ * Aplica migrações de configuração após a sincronização para garantir
+ * que valores legados na nuvem não sobrescrevam os corretos localmente.
  * Retorna true se sincronizou com sucesso, false se falhou.
  */
 async function cloudSync() {
@@ -42,10 +44,34 @@ async function cloudSync() {
         localStorage.setItem(k, JSON.stringify(json.data[k]));
       }
     });
+    _migrarConfigPos();
     return true;
   } catch {
     return false;
   }
+}
+
+/**
+ * Corrige valores legados de pi_config após sync com a nuvem.
+ * Se houver mudanças, reenvia o config corrigido para o Google Sheets.
+ */
+function _migrarConfigPos() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('pi_config') || '{}');
+    let mudou = false;
+    if (cfg.nomeCurso === 'Técnico em Logística') {
+      cfg.nomeCurso = 'Metodologias de Trabalho por Projetos Integradores';
+      mudou = true;
+    }
+    if (cfg.unidade && !cfg.unidade.toLowerCase().startsWith('senac')) {
+      cfg.unidade = 'Senac ' + cfg.unidade;
+      mudou = true;
+    }
+    if (mudou) {
+      localStorage.setItem('pi_config', JSON.stringify(cfg));
+      cloudSave('pi_config');
+    }
+  } catch {}
 }
 
 /**
