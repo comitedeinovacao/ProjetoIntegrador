@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="db.js"></script>
 </head>
+
 <body>
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
   <nav class="nav" role="navigation" aria-label="Navegação principal">
@@ -17,7 +19,8 @@
       <a href="materiais.html">Materiais</a>
       <a href="admin.html" class="nav-btn">🔑 Admin</a>
     </div>
-    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob-menu">
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu"
+      aria-expanded="false" aria-controls="mob-menu">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -30,8 +33,10 @@
   <div class="page" id="main-content">
     <section class="hero" role="banner" aria-label="Boas-vindas">
       <div class="hero-badge" id="hero-badge">Gestão de Projetos Integradores Senac Araçatuba</div>
-      <h1 class="hero-title">Hub de Projetos<br><span class="grad" id="hero-subtitle">Gestão de Projetos Integradores</span></h1>
-      <p class="hero-sub">Seu espaço para planejar, construir, entregar e evoluir como profissional. Acesse os materiais do curso ou entre na sua equipe.</p>
+      <h1 class="hero-title">Hub de Projetos<br><span class="grad" id="hero-subtitle">Gestão de Projetos
+          Integradores</span></h1>
+      <p class="hero-sub">Seu espaço para planejar, construir, entregar e evoluir como profissional. Acesse os materiais
+        do curso ou entre na sua equipe.</p>
       <div class="hero-btns">
         <a href="materiais.html" class="btn btn-primary">📚 Acessar Materiais</a>
         <a href="#equipes" class="btn btn-ghost">👥 Ver Equipes</a>
@@ -49,17 +54,21 @@
           <a href="materiais.html" class="access-card" role="listitem" aria-label="Acessar Materiais do curso">
             <div class="ac-icon" aria-hidden="true">📚</div>
             <div class="ac-title">Materiais</div>
-            <div class="ac-desc">Slides das aulas, vídeos de apoio, feedback coletivo do docente e espaço de trocas entre as equipes.</div>
+            <div class="ac-desc">Slides das aulas, vídeos de apoio, feedback coletivo do docente e espaço de trocas
+              entre as equipes.</div>
           </a>
-          <button class="access-card" role="listitem" aria-label="Ir para seção Minha Equipe" onclick="scrollToTeams()" type="button">
+          <button class="access-card" role="listitem" aria-label="Ir para seção Minha Equipe" onclick="scrollToTeams()"
+            type="button">
             <div class="ac-icon" aria-hidden="true">👥</div>
             <div class="ac-title">Minha Equipe</div>
-            <div class="ac-desc">Acesse o plano de ação 5W2H, Matriz GUT, entregas e feedback exclusivo do seu grupo.</div>
+            <div class="ac-desc">Acesse o plano de ação 5W2H, Matriz GUT, entregas e feedback exclusivo do seu grupo.
+            </div>
           </button>
           <a href="admin.html" class="access-card" role="listitem" aria-label="Acessar Painel do Docente">
             <div class="ac-icon" aria-hidden="true">🔑</div>
             <div class="ac-title">Painel do Docente</div>
-            <div class="ac-desc">Área exclusiva para gerenciar equipes, cadastrar membros, definir senhas e registrar feedback.</div>
+            <div class="ac-desc">Área exclusiva para gerenciar equipes, cadastrar membros, definir senhas e registrar
+              feedback.</div>
           </a>
         </div>
       </section>
@@ -92,7 +101,7 @@
       <div class="error-msg" id="err-msg" role="alert" aria-live="polite">Senha incorreta. Tente novamente.</div>
       <label for="senha-input" class="sr-only">Senha da equipe</label>
       <input type="password" class="field-input" id="senha-input" placeholder="Senha da equipe..."
-             onkeydown="if(event.key==='Enter')checkPassword()" style="margin-bottom:1rem" autocomplete="current-password">
+        onkeydown="if(event.key==='Enter')checkPassword()" style="margin-bottom:1rem" autocomplete="current-password">
       <button class="btn btn-primary" type="button" onclick="checkPassword()" style="width:100%;justify-content:center">
         Entrar →
       </button>
@@ -107,7 +116,8 @@
     </div>
     <div class="f-right" id="footer-right"></div>
   </footer>
-  <div class="f-copy" role="contentinfo">© Senac São Paulo · Material educacional interno · <span id="footer-year">2025</span></div>
+  <div class="f-copy" role="contentinfo">© Senac São Paulo · Material educacional interno · <span
+      id="footer-year">2025</span></div>
 
   <script>
     const KEY_GRUPOS = 'pi_grupos';
@@ -121,17 +131,17 @@
     function renderConfig() {
       const cfg = JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}');
       const nomeCurso = cfg.nomeCurso || '';
-      const uc        = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
-      const docente   = cfg.docente || '';
-      const email     = cfg.emailDocente || '';
-      const unidade   = cfg.unidade || 'Senac Araçatuba';
-      const anoSem    = cfg.anoSemestre || '';
+      const uc = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
+      const docente = cfg.docente || '';
+      const email = cfg.emailDocente || '';
+      const unidade = cfg.unidade || 'Senac Araçatuba';
+      const anoSem = cfg.anoSemestre || '';
 
       const badge = document.getElementById('hero-badge');
       if (badge) {
         let badgeParts = [uc, unidade];
         if (docente) badgeParts.push(docente);
-        if (anoSem)  badgeParts.push(anoSem);
+        if (anoSem) badgeParts.push(anoSem);
         badge.textContent = badgeParts.join(' · ');
       }
 
@@ -189,8 +199,8 @@
             <div class="tc-lock" aria-hidden="true">🔒</div>
             <div class="tc-name">${g.nome}</div>
             <div class="tc-info">
-              <span>👥 ${membrosCount} integrante${membrosCount!==1?'s':''}</span>
-              ${g.tema ? `<span title="${g.tema}">📋 ${g.tema.substring(0,38)}${g.tema.length>38?'…':''}</span>` : ''}
+              <span>👥 ${membrosCount} integrante${membrosCount !== 1 ? 's' : ''}</span>
+              ${g.tema ? `<span title="${g.tema}">📋 ${g.tema.substring(0, 38)}${g.tema.length > 38 ? '…' : ''}</span>` : ''}
               <span>📤 ${entregues}/4 entregas</span>
             </div>
             <span class="tc-cta">→ Acessar equipe</span>
@@ -235,4 +245,5 @@
     cloudSync().then(synced => { renderConfig(); if (synced) renderTeams(); });
   </script>
 </body>
+
 </html>

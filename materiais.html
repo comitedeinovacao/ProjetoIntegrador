@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,84 +10,423 @@
   <script src="db.js"></script>
   <style>
     /* Page-specific styles */
-    .page-header { padding: 3rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(247,148,29,0.15); }
-    .page-header h1 { font-size: clamp(22px, 4vw, 36px); font-weight: 900; margin-bottom: 0.5rem; }
-    .page-header h1 span { background: linear-gradient(135deg, var(--orange), var(--orange-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .page-header p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .page-header {
+      padding: 3rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(247, 148, 29, 0.15);
+    }
+
+    .page-header h1 {
+      font-size: clamp(22px, 4vw, 36px);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header h1 span {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
 
     /* Tab Navigation */
-    .tab-bar { display: flex; gap: 0.25rem; padding: 1.25rem 1.5rem 0; max-width: 1100px; margin: 0 auto; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .tab-bar::-webkit-scrollbar { display: none; }
-    .tab-btn { padding: 0.65rem 1.25rem; font-size: 13px; font-weight: 700; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap; transition: all 0.2s; position: relative; bottom: -1px; border-bottom: 2px solid transparent; }
-    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-    .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); background: rgba(247,148,29,0.06); }
-    .tab-btn:focus-visible { outline-offset: 2px; }
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      padding: 1.25rem 1.5rem 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tab-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      padding: 0.65rem 1.25rem;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      white-space: nowrap;
+      transition: all 0.2s;
+      position: relative;
+      bottom: -1px;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: var(--orange);
+      border-bottom-color: var(--orange);
+      background: rgba(247, 148, 29, 0.06);
+    }
+
+    .tab-btn:focus-visible {
+      outline-offset: 2px;
+    }
 
     /* Tab Content */
-    .tab-content { display: none; padding: 2.5rem 0; }
-    .tab-content.active { display: block; }
+    .tab-content {
+      display: none;
+      padding: 2.5rem 0;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
 
     /* Cards Grid */
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
-    .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; transition: all 0.3s; }
-    .card:hover { border-color: rgba(247,148,29,0.35); transform: translateY(-3px); background: rgba(255,255,255,0.07); }
-    .card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-    .card-locked { opacity: 0.55; cursor: default; }
-    .card-locked:hover { transform: none; border-color: rgba(255,255,255,0.08); background: var(--glass); }
-    .card-icon { font-size: 28px; margin-bottom: 0.75rem; }
-    .card-title { font-size: 15px; font-weight: 700; margin-bottom: 0.35rem; }
-    .card-sub { font-size: 12px; color: var(--muted); margin-bottom: 1rem; line-height: 1.6; }
-    .badge { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 0.75rem; }
-    .badge-blue { background: rgba(0,69,135,0.5); border: 1px solid rgba(0,69,135,0.8); color: #90baff; }
-    .badge-orange { background: rgba(247,148,29,0.15); border: 1px solid rgba(247,148,29,0.4); color: var(--orange); }
-    .badge-gray { background: rgba(255,255,255,0.08); color: var(--muted); }
-    .btn-card { display: block; width: 100%; padding: 0.65rem; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
-    .btn-card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-    .btn-card-primary { background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; }
-    .btn-card-primary:hover { box-shadow: 0 4px 14px rgba(247,148,29,0.35); }
-    .btn-card-secondary { background: rgba(0,69,135,0.4); border: 1px solid rgba(0,69,135,0.7); color: #90baff; }
-    .btn-card-secondary:hover { background: rgba(0,69,135,0.6); }
-    .btn-card-disabled { background: rgba(255,255,255,0.06); color: var(--muted); cursor: not-allowed; }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(247, 148, 29, 0.35);
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .card:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .card-locked {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .card-locked:hover {
+      transform: none;
+      border-color: rgba(255, 255, 255, 0.08);
+      background: var(--glass);
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge-blue {
+      background: rgba(0, 69, 135, 0.5);
+      border: 1px solid rgba(0, 69, 135, 0.8);
+      color: #90baff;
+    }
+
+    .badge-orange {
+      background: rgba(247, 148, 29, 0.15);
+      border: 1px solid rgba(247, 148, 29, 0.4);
+      color: var(--orange);
+    }
+
+    .badge-gray {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+    }
+
+    .btn-card {
+      display: block;
+      width: 100%;
+      padding: 0.65rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-card:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .btn-card-primary {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+    }
+
+    .btn-card-primary:hover {
+      box-shadow: 0 4px 14px rgba(247, 148, 29, 0.35);
+    }
+
+    .btn-card-secondary {
+      background: rgba(0, 69, 135, 0.4);
+      border: 1px solid rgba(0, 69, 135, 0.7);
+      color: #90baff;
+    }
+
+    .btn-card-secondary:hover {
+      background: rgba(0, 69, 135, 0.6);
+    }
+
+    .btn-card-disabled {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
 
     /* Section Header */
-    .s-head { margin-bottom: 1.5rem; }
-    .s-head h3 { font-size: 18px; font-weight: 800; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
-    .s-head h3::before { content: ''; display: block; width: 4px; height: 1em; background: var(--orange); border-radius: 2px; }
-    .s-head p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .s-head {
+      margin-bottom: 1.5rem;
+    }
+
+    .s-head h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .s-head h3::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 1em;
+      background: var(--orange);
+      border-radius: 2px;
+    }
+
+    .s-head p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
 
     /* Feedback Coletivo */
-    .fc-list { display: flex; flex-direction: column; gap: 1rem; }
-    .fc-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid var(--orange); border-radius: 12px; padding: 1.5rem; }
-    .fc-card.important { border-left-color: #ff6b6b; background: rgba(255,107,107,0.06); }
-    .fc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; gap: 1rem; flex-wrap: wrap; }
-    .fc-title { font-size: 15px; font-weight: 700; }
-    .fc-date { font-size: 11px; color: var(--muted); }
-    .fc-body { font-size: 13px; color: rgba(242,242,242,0.8); line-height: 1.75; white-space: pre-wrap; }
-    .fc-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+    .fc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .fc-card {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid var(--orange);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .fc-card.important {
+      border-left-color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.06);
+    }
+
+    .fc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .fc-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .fc-date {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .fc-body {
+      font-size: 13px;
+      color: rgba(242, 242, 242, 0.8);
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+
+    .fc-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      font-size: 14px;
+    }
 
     /* Espaço de Trocas */
-    .troca-form { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .troca-form h4 { font-size: 15px; font-weight: 700; margin-bottom: 1rem; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
-    .field-input { width: 100%; padding: 0.75rem 0.9rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; transition: border-color 0.2s; }
-    .field-input:focus { outline: none; border-color: var(--orange); }
-    .field-input::placeholder { color: rgba(242,242,242,0.28); }
-    .field-textarea { resize: vertical; min-height: 80px; }
-    .btn-send { padding: 0.75rem 1.75rem; background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
-    .btn-send:hover { box-shadow: 0 4px 14px rgba(247,148,29,0.35); }
-    .btn-send:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-    .troca-list { display: flex; flex-direction: column; gap: 0.85rem; }
-    .troca-item { background: var(--glass); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1.1rem 1.25rem; }
-    .troca-meta { font-size: 11px; color: var(--muted); margin-bottom: 0.4rem; }
-    .troca-autor { font-weight: 700; color: var(--orange); }
-    .troca-msg { font-size: 13px; color: rgba(242,242,242,0.85); line-height: 1.65; }
-    @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+    .troca-form {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .troca-form h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Montserrat', sans-serif;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--orange);
+    }
+
+    .field-input::placeholder {
+      color: rgba(242, 242, 242, 0.28);
+    }
+
+    .field-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn-send {
+      padding: 0.75rem 1.75rem;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-send:hover {
+      box-shadow: 0 4px 14px rgba(247, 148, 29, 0.35);
+    }
+
+    .btn-send:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--orange);
+      margin-bottom: 0.25rem;
+    }
+
+    .troca-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .troca-item {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+    }
+
+    .troca-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .troca-autor {
+      font-weight: 700;
+      color: var(--orange);
+    }
+
+    .troca-msg {
+      font-size: 13px;
+      color: rgba(242, 242, 242, 0.85);
+      line-height: 1.65;
+    }
+
+    @media (max-width: 600px) {
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
+
 <body>
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
   <nav class="nav" role="navigation" aria-label="Navegação principal">
@@ -96,7 +436,8 @@
       <a href="materiais.html" class="nav-active" aria-current="page">Materiais</a>
       <a href="admin.html" class="nav-btn">🔑 Admin</a>
     </div>
-    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob-menu">
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu"
+      aria-expanded="false" aria-controls="mob-menu">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -113,10 +454,14 @@
     </header>
 
     <div class="tab-bar" role="tablist" aria-label="Abas de conteúdo">
-      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-slides" onclick="showTab('slides')">🖥 Slides</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-videos" onclick="showTab('videos')">▶ Vídeos</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback" onclick="showTab('feedback')">💬 Feedback Coletivo</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-trocas" onclick="showTab('trocas')">🔄 Espaço de Trocas</button>
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-slides"
+        onclick="showTab('slides')">🖥 Slides</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-videos" onclick="showTab('videos')">▶
+        Vídeos</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback"
+        onclick="showTab('feedback')">💬 Feedback Coletivo</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-trocas" onclick="showTab('trocas')">🔄
+        Espaço de Trocas</button>
     </div>
 
     <div class="container">
@@ -163,13 +508,23 @@
         <form class="troca-form" onsubmit="publicarTroca(event)">
           <h3>✏️ Publicar mensagem</h3>
           <div class="field-row">
-            <label for="troca-autor" class="sr-only">Seu nome (opcional)</label>
-            <input type="text" class="field-input" id="troca-autor" placeholder="Seu nome (opcional)">
-            <label for="troca-grupo" class="sr-only">Sua equipe (opcional)</label>
-            <input type="text" class="field-input" id="troca-grupo" placeholder="Sua equipe (opcional)">
+            <div>
+              <label for="troca-grupo" class="form-label">Equipe *</label>
+              <select class="field-input" id="troca-grupo" required onchange="atualizarMembrosTroca()">
+                <option value="">Selecione sua equipe</option>
+              </select>
+            </div>
+            <div>
+              <label for="troca-autor" class="form-label">Membro *</label>
+              <select class="field-input" id="troca-autor" required>
+                <option value="">Selecione o membro</option>
+              </select>
+            </div>
           </div>
           <label for="troca-msg" class="sr-only">Mensagem</label>
-          <textarea class="field-input field-textarea" id="troca-msg" placeholder="Escreva sua mensagem, dúvida ou descoberta..." required style="margin-bottom:0.75rem"></textarea>
+          <textarea class="field-input field-textarea" id="troca-msg"
+            placeholder="Escreva sua mensagem, dúvida ou descoberta..." required
+            style="margin-bottom:0.75rem"></textarea>
           <button type="submit" class="btn-send">📤 Publicar</button>
         </form>
         <div class="troca-list" id="trocas-list" role="list" aria-label="Lista de mensagens">
@@ -191,23 +546,25 @@
   <div class="f-copy">© Senac São Paulo · Material educacional interno · <span id="footer-year">2025</span></div>
 
   <script>
-    const KEY_MAT    = 'pi_materiais';
-    const KEY_FC     = 'pi_feedback_coletivo';
-    const KEY_TR     = 'pi_trocas';
+    const KEY_MAT = 'pi_materiais';
+    const KEY_FC = 'pi_feedback_coletivo';
+    const KEY_TR = 'pi_trocas';
     const KEY_CONFIG = 'pi_config';
+    const KEY_GRUPOS = 'pi_grupos';
 
-    function getMat()    { return JSON.parse(localStorage.getItem(KEY_MAT) || 'null'); }
-    function getFC()     { return JSON.parse(localStorage.getItem(KEY_FC)  || '[]'); }
-    function getTrocas() { return JSON.parse(localStorage.getItem(KEY_TR)  || '[]'); }
+    function getMat() { return JSON.parse(localStorage.getItem(KEY_MAT) || 'null'); }
+    function getFC() { return JSON.parse(localStorage.getItem(KEY_FC) || '[]'); }
+    function getTrocas() { return JSON.parse(localStorage.getItem(KEY_TR) || '[]'); }
+    function getGrupos() { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '[]'); }
 
     function renderConfig() {
-      const cfg     = JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}');
+      const cfg = JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}');
       const nomeCurso = cfg.nomeCurso || '';
-      const uc      = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
+      const uc = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
       const docente = cfg.docente || '';
-      const email   = cfg.emailDocente || '';
+      const email = cfg.emailDocente || '';
       const unidade = cfg.unidade || 'Senac Araçatuba';
-      const anoSem  = cfg.anoSemestre || '';
+      const anoSem = cfg.anoSemestre || '';
 
       const fc = document.getElementById('footer-center');
       if (fc) {
@@ -275,8 +632,8 @@
           <div class="card-sub">${s.descricao}</div>
           <span class="badge ${s.disponivel ? 'badge-blue' : 'badge-gray'}">${s.badge || (s.disponivel ? 'Disponível' : 'Em breve')}</span>
           ${s.disponivel && s.link
-            ? `<a href="${s.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-primary">📥 Acessar Slides</a>`
-            : s.disponivel
+          ? `<a href="${s.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-primary">📥 Acessar Slides</a>`
+          : s.disponivel
             ? `<button class="btn-card btn-card-primary" onclick="alert('Link não configurado. Solicite ao docente.')">📥 Acessar Slides</button>`
             : `<button class="btn-card btn-card-disabled" disabled>🔒 Em breve</button>`}
         </div>`).join('');
@@ -292,8 +649,8 @@
           <div class="card-sub">${v.descricao}</div>
           <span class="badge ${v.disponivel ? 'badge-orange' : 'badge-gray'}">${v.disponivel ? 'Disponível' : 'Em breve'}</span>
           ${v.disponivel && v.link
-            ? `<a href="${v.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-secondary">▶ Assistir</a>`
-            : v.disponivel
+          ? `<a href="${v.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-secondary">▶ Assistir</a>`
+          : v.disponivel
             ? `<button class="btn-card btn-card-secondary" onclick="alert('Link não configurado. Solicite ao docente.')">▶ Assistir</button>`
             : `<button class="btn-card btn-card-disabled" disabled>🔒 Em breve</button>`}
         </div>`).join('');
@@ -310,7 +667,7 @@
         <article class="fc-card ${i.importante ? 'important' : ''}">
           <div class="fc-header">
             <span class="fc-title">${i.importante ? '🚨 ' : '📌 '}${i.titulo}</span>
-            <time class="fc-date" datetime="${i.data}">${new Date(i.data).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'})}</time>
+            <time class="fc-date" datetime="${i.data}">${new Date(i.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
           </div>
           <div class="fc-body">${i.conteudo}</div>
         </article>`).join('');
@@ -328,7 +685,7 @@
           <div class="troca-meta">
             <span class="troca-autor">${t.autor || 'Anônimo'}</span>
             ${t.grupo ? ` · <strong>${t.grupo}</strong>` : ''}
-            · <time datetime="${t.data}">${new Date(t.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} ${new Date(t.data).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</time>
+            · <time datetime="${t.data}">${new Date(t.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} ${new Date(t.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</time>
           </div>
           <div class="troca-msg">${t.msg}</div>
         </article>`).join('');
@@ -336,27 +693,83 @@
 
     function publicarTroca(e) {
       e.preventDefault();
+      const grupoSelect = document.getElementById('troca-grupo');
+      const autorSelect = document.getElementById('troca-autor');
       const msg = document.getElementById('troca-msg').value.trim();
+
+      if (!grupoSelect.value) { alert('Selecione sua equipe.'); return; }
+      if (!autorSelect.value) { alert('Selecione o membro.'); return; }
       if (!msg) { alert('Escreva uma mensagem antes de publicar.'); return; }
+
+      const grupos = getGrupos();
+      const grupo = grupos.find(g => g.id === grupoSelect.value);
+      const grupoNome = grupo ? grupo.nome : grupoSelect.value;
+      const autorNome = autorSelect.options[autorSelect.selectedIndex].text;
+
       const trocas = getTrocas();
       trocas.push({
         id: 'tr_' + Date.now(),
-        autor: document.getElementById('troca-autor').value.trim() || 'Anônimo',
-        grupo: document.getElementById('troca-grupo').value.trim(),
+        autor: autorNome,
+        autorId: autorSelect.value,
+        grupo: grupoNome,
+        grupoId: grupoSelect.value,
         msg,
         data: new Date().toISOString()
       });
       localStorage.setItem(KEY_TR, JSON.stringify(trocas)); cloudSave(KEY_TR);
-      document.getElementById('troca-autor').value = '';
-      document.getElementById('troca-grupo').value = '';
+      grupoSelect.value = '';
+      autorSelect.innerHTML = '<option value="">Selecione o membro</option>';
       document.getElementById('troca-msg').value = '';
       renderTrocas();
+    }
+
+    // ── Selects de Equipe e Membro ───────────────────────────────────────
+    function popularEquipesTroca() {
+      const grupos = getGrupos().filter(g => g.ativo !== false);
+      const select = document.getElementById('troca-grupo');
+      if (!select) return;
+
+      select.innerHTML = '<option value="">Selecione sua equipe</option>' +
+        grupos.map(g => `<option value="${g.id}">${g.nome}</option>`).join('');
+
+      // Limpa membros
+      const membroSelect = document.getElementById('troca-autor');
+      if (membroSelect) {
+        membroSelect.innerHTML = '<option value="">Selecione o membro</option>';
+      }
+    }
+
+    function atualizarMembrosTroca() {
+      const grupoId = document.getElementById('troca-grupo').value;
+      const membroSelect = document.getElementById('troca-autor');
+      if (!membroSelect) return;
+
+      if (!grupoId) {
+        membroSelect.innerHTML = '<option value="">Selecione o membro</option>';
+        return;
+      }
+
+      const grupos = getGrupos();
+      const grupo = grupos.find(g => g.id === grupoId);
+      const membros = grupo && grupo.membros ? grupo.membros : [];
+
+      membroSelect.innerHTML = '<option value="">Selecione o membro</option>' +
+        membros.map(m => `<option value="${m.id || m.nome}">${m.nome}</option>`).join('');
     }
 
     renderConfig();
     renderSlides();
     renderVideos();
-    cloudSync().then(synced => { renderConfig(); if (synced) { renderSlides(); renderVideos(); } });
+    popularEquipesTroca();
+    cloudSync().then(synced => {
+      renderConfig();
+      if (synced) {
+        renderSlides();
+        renderVideos();
+        popularEquipesTroca();
+      }
+    });
   </script>
 </body>
+
 </html>

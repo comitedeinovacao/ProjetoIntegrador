@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,156 +12,790 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
     /* Page-specific styles */
-    .page-header { padding: 3rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(247,148,29,0.15); }
-    .page-header h1 { font-size: clamp(22px, 4vw, 36px); font-weight: 900; margin-bottom: 0.5rem; }
-    .page-header h1 span { background: linear-gradient(135deg, var(--orange), var(--orange-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .page-header p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .page-header {
+      padding: 3rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(247, 148, 29, 0.15);
+    }
+
+    .page-header h1 {
+      font-size: clamp(22px, 4vw, 36px);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header h1 span {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
 
     /* Tab Navigation */
-    .tab-bar { display: flex; gap: 0.25rem; padding: 1.25rem 1.5rem 0; max-width: 1200px; margin: 0 auto; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .tab-bar::-webkit-scrollbar { display: none; }
-    .tab-btn { padding: 0.65rem 1.25rem; font-size: 13px; font-weight: 700; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap; transition: all 0.2s; position: relative; bottom: -1px; border-bottom: 2px solid transparent; font-family: 'Montserrat', sans-serif; }
-    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-    .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); background: rgba(247,148,29,0.06); }
-    .tab-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      padding: 1.25rem 1.5rem 0;
+      max-width: 1200px;
+      margin: 0 auto;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tab-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      padding: 0.65rem 1.25rem;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      white-space: nowrap;
+      transition: all 0.2s;
+      position: relative;
+      bottom: -1px;
+      border-bottom: 2px solid transparent;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: var(--orange);
+      border-bottom-color: var(--orange);
+      background: rgba(247, 148, 29, 0.06);
+    }
+
+    .tab-btn:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
 
     /* Tab Content */
-    .tab-content { display: none; padding: 2.5rem 0; }
-    .tab-content.active { display: block; }
+    .tab-content {
+      display: none;
+      padding: 2.5rem 0;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
 
     /* Section Header */
-    .s-head { margin-bottom: 1.5rem; }
-    .s-head h3 { font-size: 18px; font-weight: 800; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
-    .s-head h3::before { content: ''; display: block; width: 4px; height: 1em; background: var(--orange); border-radius: 2px; }
-    .s-head p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .s-head {
+      margin-bottom: 1.5rem;
+    }
+
+    .s-head h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .s-head h3::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 1em;
+      background: var(--orange);
+      border-radius: 2px;
+    }
+
+    .s-head p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
 
     /* Cards */
-    .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
-    .admin-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; transition: all 0.3s; }
-    .admin-card:hover { border-color: rgba(247,148,29,0.25); }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-    .card-title { font-size: 16px; font-weight: 700; }
-    .card-sub { font-size: 12px; color: var(--muted); margin-top: 0.25rem; }
-    .card-actions { display: flex; gap: 0.5rem; }
-    .btn-icon { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem; cursor: pointer; transition: all 0.2s; color: var(--muted); font-size: 14px; }
-    .btn-icon:hover { background: rgba(247,148,29,0.15); border-color: var(--orange); color: var(--orange); }
-    .btn-icon:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-    .btn-icon.danger:hover { background: rgba(255,100,100,0.15); border-color: #ff6b6b; color: #ff6b6b; }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .admin-card {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .admin-card:hover {
+      border-color: rgba(247, 148, 29, 0.25);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .btn-icon:hover {
+      background: rgba(247, 148, 29, 0.15);
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .btn-icon:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .btn-icon.danger:hover {
+      background: rgba(255, 100, 100, 0.15);
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+    }
 
     /* Members List */
-    .member-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
-    .member-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px; }
-    .member-item:hover { background: rgba(255,255,255,0.06); }
-    .member-info { display: flex; flex-direction: column; gap: 0.15rem; }
-    .member-name { font-weight: 600; }
-    .member-contact { font-size: 11px; color: var(--muted); }
+    .member-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .member-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .member-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .member-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .member-name {
+      font-weight: 600;
+    }
+
+    .member-contact {
+      font-size: 11px;
+      color: var(--muted);
+    }
 
     /* Forms */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
-    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-    .field-input { width: 100%; padding: 0.75rem 0.9rem; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--text); font-size: 13px; font-family: 'Montserrat', sans-serif; transition: border-color 0.2s; }
-    .field-input:focus { outline: none; border-color: var(--orange); }
-    .field-input::placeholder { color: rgba(242,242,242,0.28); }
-    .field-textarea { resize: vertical; min-height: 80px; }
-    .btn-action { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
-    .btn-action:hover { box-shadow: 0 4px 14px rgba(247,148,29,0.35); }
-    .btn-action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-    .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text); }
-    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
-    .btn-sm { padding: 0.5rem 1rem; font-size: 12px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Montserrat', sans-serif;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--orange);
+    }
+
+    .field-input::placeholder {
+      color: rgba(242, 242, 242, 0.28);
+    }
+
+    .field-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn-action {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-action:hover {
+      box-shadow: 0 4px 14px rgba(247, 148, 29, 0.35);
+    }
+
+    .btn-action:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 12px;
+    }
 
     /* Modal */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 1rem; }
-    .overlay.open { display: flex; }
-    .modal { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; position: relative; animation: fadeIn 0.2s ease; max-height: 90vh; overflow-y: auto; color: #1a202c; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    .modal-close { position: absolute; top: 1rem; right: 1.2rem; background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; transition: color 0.2s; line-height: 1; }
-    .modal-close:hover { color: #1a202c; }
-    .modal-close:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-    .modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 1rem; color: #1a202c; }
-    .modal-body { display: flex; flex-direction: column; gap: 0.75rem; }
-    .form-label { font-size: 12px; font-weight: 700; color: var(--orange); margin-bottom: 0.25rem; display: block; }
-    .modal .field-input { background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1a202c; }
-    .modal .field-input:focus { border-color: var(--orange); background: #fff; }
-    .modal .field-input::placeholder { color: #94a3b8; }
-    .modal .member-item { background: #f1f5f9; color: #1a202c; }
-    .modal .member-item:hover { background: #e2e8f0; }
-    .modal .member-contact { color: #64748b; }
-    .modal .btn-secondary { background: #f1f5f9; border-color: #cbd5e1; color: #1a202c; }
-    .modal .btn-secondary:hover { background: #e2e8f0; }
-    .form-row { display: flex; gap: 0.75rem; align-items: flex-end; }
-    .form-row > * { flex: 1; }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(5px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+      animation: fadeIn 0.2s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+      color: #1a202c;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 20px;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #1a202c;
+    }
+
+    .modal-close:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .modal h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: #1a202c;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--orange);
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+
+    .modal .field-input {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      color: #1a202c;
+    }
+
+    .modal .field-input:focus {
+      border-color: var(--orange);
+      background: #fff;
+    }
+
+    .modal .field-input::placeholder {
+      color: #94a3b8;
+    }
+
+    .modal .member-item {
+      background: #f1f5f9;
+      color: #1a202c;
+    }
+
+    .modal .member-item:hover {
+      background: #e2e8f0;
+    }
+
+    .modal .member-contact {
+      color: #64748b;
+    }
+
+    .modal .btn-secondary {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #1a202c;
+    }
+
+    .modal .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .form-row>* {
+      flex: 1;
+    }
 
     /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .stat-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; text-align: center; }
-    .stat-value { font-size: 32px; font-weight: 900; color: var(--orange); }
-    .stat-label { font-size: 12px; color: var(--muted); margin-top: 0.25rem; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--orange);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
 
     /* Empty State */
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-    .empty-state-icon { font-size: 48px; margin-bottom: 1rem; }
-    .empty-state h4 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
 
     /* Badge */
-    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .badge-success { background: rgba(50,200,100,0.2); color: #5ae09a; }
-    .badge-warning { background: rgba(247,148,29,0.2); color: var(--orange); }
-    .badge-info { background: rgba(0,69,135,0.4); color: #90baff; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-success {
+      background: rgba(50, 200, 100, 0.2);
+      color: #5ae09a;
+    }
+
+    .badge-warning {
+      background: rgba(247, 148, 29, 0.2);
+      color: var(--orange);
+    }
+
+    .badge-info {
+      background: rgba(0, 69, 135, 0.4);
+      color: #90baff;
+    }
 
     /* Feedback Form */
-    .feedback-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
-    @media (max-width: 500px) { .feedback-grid { grid-template-columns: 1fr; } }
-    .fb-select { padding: 0.5rem; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; color: #1a202c; font-size: 13px; font-family: 'Montserrat', sans-serif; }
-    .fb-select:focus { outline: none; border-color: var(--orange); }
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 500px) {
+      .feedback-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .fb-select {
+      padding: 0.5rem;
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      color: #1a202c;
+      font-size: 13px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .fb-select:focus {
+      outline: none;
+      border-color: var(--orange);
+    }
+
     /* Tipo de feedback (pills) */
-    .fb-type-row { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; }
-    .fb-type-btn { flex: 1; padding: 0.6rem 0.75rem; font-size: 13px; font-weight: 700; border: 1.5px solid #cbd5e1; border-radius: 9px; background: #f8fafc; color: #64748b; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all .18s; }
-    .fb-type-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; }
-    .fb-section { display: none; flex-direction: column; gap: 0.75rem; }
-    .fb-section.visible { display: flex; }
+    .fb-type-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .fb-type-btn {
+      flex: 1;
+      padding: 0.6rem 0.75rem;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 9px;
+      background: #f8fafc;
+      color: #64748b;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      transition: all .18s;
+    }
+
+    .fb-type-btn.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+    }
+
+    .fb-section {
+      display: none;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .fb-section.visible {
+      display: flex;
+    }
 
     /* Auth Gate */
-    .auth-gate { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-    .auth-modal { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; max-width: 420px; width: 100%; animation: fadeIn 0.25s ease; color: #1a202c; }
-    .auth-modal h3 { font-size: 22px; font-weight: 800; margin-bottom: 0.5rem; color: #1a202c; }
-    .auth-modal p { color: #64748b; font-size: 13px; margin-bottom: 1.75rem; line-height: 1.6; }
-    .auth-modal .field-input { background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1a202c; }
-    .auth-modal .field-input:focus { border-color: var(--orange); background: #fff; }
-    .auth-modal .field-input::placeholder { color: #94a3b8; }
-    .error-msg { color: #ff8080; font-size: 12px; margin-bottom: 0.75rem; display: none; }
-    .error-msg.show { display: block; }
+    .auth-gate {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .auth-modal {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      animation: fadeIn 0.25s ease;
+      color: #1a202c;
+    }
+
+    .auth-modal h3 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #1a202c;
+    }
+
+    .auth-modal p {
+      color: #64748b;
+      font-size: 13px;
+      margin-bottom: 1.75rem;
+      line-height: 1.6;
+    }
+
+    .auth-modal .field-input {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      color: #1a202c;
+    }
+
+    .auth-modal .field-input:focus {
+      border-color: var(--orange);
+      background: #fff;
+    }
+
+    .auth-modal .field-input::placeholder {
+      color: #94a3b8;
+    }
+
+    .error-msg {
+      color: #ff8080;
+      font-size: 12px;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+
+    .error-msg.show {
+      display: block;
+    }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     /* ── Visão Geral ──────────────────────────────────────────────────── */
-    .visao-tab-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
-    .visao-tab-head .s-head { margin-bottom: 0; }
-    .visao-table td { vertical-align: middle; }
-    .visao-table .eq-icon { font-size: 16px; text-align: center; }
-    .alerta-item { border-radius: 10px; padding: 0.85rem 1.1rem; margin-bottom: 0.6rem; font-size: 13px; display: flex; align-items: flex-start; gap: 0.6rem; }
-    .alerta-amarelo { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-    .alerta-vermelho { background: #fff1f2; border: 1px solid #fecaca; color: #991b1b; }
-    .alerta-ok { background: rgba(50,200,100,0.08); border: 1px solid rgba(50,200,100,0.25); color: #0d7a3e; padding: 1rem; border-radius: 10px; font-size: 14px; }
-    .s-head-mt { margin-top: 2rem; }
+    .visao-tab-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .visao-tab-head .s-head {
+      margin-bottom: 0;
+    }
+
+    .visao-table td {
+      vertical-align: middle;
+    }
+
+    .visao-table .eq-icon {
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .alerta-item {
+      border-radius: 10px;
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 0.6rem;
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    .alerta-amarelo {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .alerta-vermelho {
+      background: #fff1f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alerta-ok {
+      background: rgba(50, 200, 100, 0.08);
+      border: 1px solid rgba(50, 200, 100, 0.25);
+      color: #0d7a3e;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .s-head-mt {
+      margin-top: 2rem;
+    }
 
     /* ── Identidade do Curso ──────────────────────────────────────────── */
-    .cfg-curso-block { background: var(--glass); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid var(--orange); border-radius: 14px; padding: 1.5rem; max-width: 700px; margin-bottom: 1.5rem; }
-    .cfg-curso-block h4 { font-size: 15px; font-weight: 700; margin-bottom: 0.4rem; }
-    .cfg-curso-block p { font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.6; }
+    .cfg-curso-block {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid var(--orange);
+      border-radius: 14px;
+      padding: 1.5rem;
+      max-width: 700px;
+      margin-bottom: 1.5rem;
+    }
+
+    .cfg-curso-block h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .cfg-curso-block p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+
+    .cfg-competencias-wrap {
+      margin-top: 1rem;
+    }
+
+    .cfg-competencias-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
 
     /* ── Reflexões no modal ───────────────────────────────────────────── */
-    .reflexao-card { background: rgba(247,148,29,0.06); border-left: 3px solid var(--orange); border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 0.75rem; }
-    .reflexao-card-title { font-size: 13px; font-weight: 700; margin-bottom: 0.6rem; color: var(--navy); }
-    .reflexao-item { margin-bottom: 0.5rem; font-size: 12px; color: #1a202c; line-height: 1.6; }
-    .reflexao-item span { font-weight: 700; }
-    .reflexao-date { font-size: 11px; color: #64748b; margin-top: 0.4rem; }
-    .fb-reflexoes-header { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #e2e8f0; }
-    .fb-reflexoes-title { font-size: 14px; font-weight: 700; margin-bottom: 0.75rem; color: #1a202c; }
+    .reflexao-card {
+      background: rgba(247, 148, 29, 0.06);
+      border-left: 3px solid var(--orange);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .reflexao-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: var(--navy);
+    }
+
+    .reflexao-item {
+      margin-bottom: 0.5rem;
+      font-size: 12px;
+      color: #1a202c;
+      line-height: 1.6;
+    }
+
+    .reflexao-item span {
+      font-weight: 700;
+    }
+
+    .reflexao-date {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 0.4rem;
+    }
+
+    .fb-reflexoes-header {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .fb-reflexoes-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #1a202c;
+    }
   </style>
 </head>
+
 <body>
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
@@ -172,7 +807,7 @@
       <div class="error-msg" id="auth-err" role="alert" aria-live="polite">Senha incorreta. Tente novamente.</div>
       <label for="admin-senha" class="sr-only">Senha de administrador</label>
       <input type="password" class="field-input" id="admin-senha" placeholder="Senha de administrador..."
-             onkeydown="if(event.key==='Enter')authAdmin()" style="margin-bottom:1rem" autocomplete="current-password">
+        onkeydown="if(event.key==='Enter')authAdmin()" style="margin-bottom:1rem" autocomplete="current-password">
       <button class="btn-action" onclick="authAdmin()" style="width:100%">Entrar</button>
       <div style="text-align:center;margin-top:1rem">
         <a href="index.html" style="color:var(--muted);font-size:12px;text-decoration:none">← Voltar para início</a>
@@ -188,7 +823,8 @@
       <a href="materiais.html">Materiais</a>
       <a href="admin.html" class="nav-active" aria-current="page">🔑 Admin</a>
     </div>
-    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob-menu">
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu"
+      aria-expanded="false" aria-controls="mob-menu">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -205,11 +841,16 @@
     </header>
 
     <div class="tab-bar" role="tablist" aria-label="Abas de administração">
-      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-visao" onclick="showTab('visao')">📊 Visão Geral</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-equipes" onclick="showTab('equipes')">👥 Equipes</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-materiais" onclick="showTab('materiais')">📚 Materiais</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback" onclick="showTab('feedback')">💬 Feedback Coletivo</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-config" onclick="showTab('config')">⚙️ Configurações</button>
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-visao"
+        onclick="showTab('visao')">📊 Visão Geral</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-equipes"
+        onclick="showTab('equipes')">👥 Equipes</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-materiais"
+        onclick="showTab('materiais')">📚 Materiais</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-feedback"
+        onclick="showTab('feedback')">💬 Feedback Coletivo</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-config" onclick="showTab('config')">⚙️
+        Configurações</button>
     </div>
 
     <div class="container">
@@ -228,7 +869,9 @@
         <div class="stats-grid" id="visao-metrics"></div>
 
         <!-- Tabela Consolidada -->
-        <div class="s-head"><h3>📋 Tabela da Turma</h3></div>
+        <div class="s-head">
+          <h3>📋 Tabela da Turma</h3>
+        </div>
         <div class="table-wrap">
           <table class="visao-table" id="visao-table" aria-label="Tabela consolidada da turma">
             <thead>
@@ -248,7 +891,9 @@
         </div>
 
         <!-- Alertas -->
-        <div class="s-head s-head-mt"><h3>🔔 Alertas Automáticos</h3></div>
+        <div class="s-head s-head-mt">
+          <h3>🔔 Alertas Automáticos</h3>
+        </div>
         <div id="visao-alertas"></div>
       </section>
 
@@ -298,16 +943,19 @@
           <p>Publique comunicados e orientações para todas as equipes.</p>
         </div>
 
-        <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem">
+        <div
+          style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem">
           <h4 style="font-size:15px;font-weight:700;margin-bottom:1rem">✏️ Novo Comunicado</h4>
           <form onsubmit="addFeedbackColetivo(event)">
             <div style="margin-bottom:0.75rem">
               <label for="fc-titulo" class="form-label">Título</label>
-              <input type="text" class="field-input" id="fc-titulo" placeholder="Ex: Prazo de entrega estendido" required>
+              <input type="text" class="field-input" id="fc-titulo" placeholder="Ex: Prazo de entrega estendido"
+                required>
             </div>
             <div style="margin-bottom:0.75rem">
               <label for="fc-conteudo" class="form-label">Conteúdo</label>
-              <textarea class="field-input field-textarea" id="fc-conteudo" placeholder="Digite o comunicado..." required></textarea>
+              <textarea class="field-input field-textarea" id="fc-conteudo" placeholder="Digite o comunicado..."
+                required></textarea>
             </div>
             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
               <label style="display:flex;align-items:center;gap:0.5rem;font-size:13px;cursor:pointer">
@@ -343,7 +991,8 @@
             </div>
             <div>
               <label for="cfg-unidadeCurricular" class="form-label">Unidade Curricular</label>
-              <input type="text" class="field-input" id="cfg-unidadeCurricular" placeholder="ex: UC12 — Projeto Integrador">
+              <input type="text" class="field-input" id="cfg-unidadeCurricular"
+                placeholder="ex: UC12 — Projeto Integrador">
             </div>
             <div>
               <label for="cfg-anoSemestre" class="form-label">Ano / Semestre</label>
@@ -362,24 +1011,37 @@
               <input type="text" class="field-input" id="cfg-unidade" placeholder="ex: Senac Araçatuba">
             </div>
           </div>
+          <div class="cfg-competencias-wrap">
+            <label for="cfg-competencias" class="form-label">Competências das UCs Integradas</label>
+            <p class="cfg-competencias-hint">Uma competência por linha. Serão exibidas para os alunos na aba Visão Geral
+              de cada equipe.</p>
+            <textarea class="field-input field-textarea" id="cfg-competencias" rows="6" placeholder="ex: Planejar e organizar processos logísticos
+Comunicar-se de forma eficaz no ambiente profissional
+Trabalhar em equipe com autonomia e responsabilidade"></textarea>
+          </div>
           <button class="btn-action" onclick="saveCursoConfig()" type="button">💾 Salvar Configurações do Curso</button>
-          <div id="cfg-curso-msg" style="font-size:12px;color:#5ae09a;margin-top:0.6rem;display:none">✅ Configurações salvas com sucesso.</div>
+          <div id="cfg-curso-msg" style="font-size:12px;color:#5ae09a;margin-top:0.6rem;display:none">✅ Configurações
+            salvas com sucesso.</div>
         </div>
 
         <!-- Tema Gerador -->
-        <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--orange);border-radius:14px;padding:1.5rem;max-width:600px;margin-bottom:1.5rem">
+        <div
+          style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--orange);border-radius:14px;padding:1.5rem;max-width:600px;margin-bottom:1.5rem">
           <h4 style="font-size:15px;font-weight:700;margin-bottom:0.4rem">🎯 Tema Gerador da Turma</h4>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6">Este tema aparece como referência em somente leitura no Planner de todas as equipes.</p>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6">Este tema aparece como
+            referência em somente leitura no Planner de todas as equipes.</p>
           <div style="margin-bottom:0.75rem">
             <label for="tema-gerador-input" class="form-label">Tema Gerador</label>
             <input type="text" class="field-input" id="tema-gerador-input"
-                   placeholder="Ex: Sustentabilidade na Cadeia de Suprimentos">
+              placeholder="Ex: Sustentabilidade na Cadeia de Suprimentos">
           </div>
           <button class="btn-action" onclick="saveTemaGerador()" type="button">💾 Salvar Tema Gerador</button>
-          <div id="tema-gerador-msg" style="font-size:12px;color:#5ae09a;margin-top:0.6rem;display:none">✅ Tema salvo com sucesso.</div>
+          <div id="tema-gerador-msg" style="font-size:12px;color:#5ae09a;margin-top:0.6rem;display:none">✅ Tema salvo
+            com sucesso.</div>
         </div>
 
-        <div style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;max-width:500px">
+        <div
+          style="background:var(--glass);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;max-width:500px">
           <h4 style="font-size:15px;font-weight:700;margin-bottom:1rem">🔐 Alterar Senha de Administrador</h4>
           <form onsubmit="changeAdminPassword(event)">
             <div style="margin-bottom:0.75rem">
@@ -388,16 +1050,20 @@
             </div>
             <div style="margin-bottom:1rem">
               <label for="confirm-password" class="form-label">Confirmar Senha</label>
-              <input type="password" class="field-input" id="confirm-password" placeholder="Confirme a nova senha" required>
+              <input type="password" class="field-input" id="confirm-password" placeholder="Confirme a nova senha"
+                required>
             </div>
             <button type="submit" class="btn-action">Salvar Nova Senha</button>
           </form>
         </div>
 
-        <div style="margin-top:2rem;background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.3);border-radius:14px;padding:1.5rem;max-width:500px">
+        <div
+          style="margin-top:2rem;background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.3);border-radius:14px;padding:1.5rem;max-width:500px">
           <h4 style="font-size:15px;font-weight:700;margin-bottom:0.5rem;color:#ff8888">⚠️ Zona de Perigo</h4>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Essa ação irá apagar todos os dados (equipes, membros, feedbacks). Não pode ser desfeita.</p>
-          <button class="btn-action" style="background:rgba(255,100,100,0.2);border:1px solid rgba(255,100,100,0.5)" onclick="resetAllData()" type="button">🗑 Resetar Todos os Dados</button>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Essa ação irá apagar todos os dados (equipes,
+            membros, feedbacks). Não pode ser desfeita.</p>
+          <button class="btn-action" style="background:rgba(255,100,100,0.2);border:1px solid rgba(255,100,100,0.5)"
+            onclick="resetAllData()" type="button">🗑 Resetar Todos os Dados</button>
         </div>
       </section>
 
@@ -445,17 +1111,18 @@
               <div>
                 <label for="tm-email" class="form-label">E-mail</label>
                 <input type="email" class="field-input" id="tm-email" placeholder="email@aluno.com"
-                       onkeydown="if(event.key==='Enter'){event.preventDefault();addModalMember();}">
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();addModalMember();}">
               </div>
             </div>
             <button class="btn-action" type="button" onclick="addModalMember()"
-                    style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--text);box-shadow:none;width:100%">
+              style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--text);box-shadow:none;width:100%">
               + Adicionar Integrante
             </button>
           </div>
         </div>
 
-        <button class="btn-action" onclick="saveTeam()" style="width:100%;margin-top:1.25rem" type="button">✅ Salvar Equipe</button>
+        <button class="btn-action" onclick="saveTeam()" style="width:100%;margin-top:1.25rem" type="button">✅ Salvar
+          Equipe</button>
       </div>
     </div>
   </div>
@@ -473,7 +1140,8 @@
         <input type="text" class="field-input" id="member-nome" placeholder="Nome completo">
         <input type="email" class="field-input" id="member-email" placeholder="E-mail">
       </div>
-      <button class="btn-action" onclick="addMember()" style="width:100%;margin-bottom:0.5rem" type="button">+ Adicionar Membro</button>
+      <button class="btn-action" onclick="addMember()" style="width:100%;margin-bottom:0.5rem" type="button">+ Adicionar
+        Membro</button>
     </div>
   </div>
 
@@ -490,10 +1158,10 @@
         <div>
           <label class="form-label">Tipo de Feedback</label>
           <div class="fb-type-row">
-            <button class="fb-type-btn active" id="fb-type-entrega" type="button"
-                    onclick="setFbType('entrega')">📋 Entrega</button>
-            <button class="fb-type-btn" id="fb-type-processo" type="button"
-                    onclick="setFbType('processo')">🔄 Processo de Aprendizagem</button>
+            <button class="fb-type-btn active" id="fb-type-entrega" type="button" onclick="setFbType('entrega')">📋
+              Entrega</button>
+            <button class="fb-type-btn" id="fb-type-processo" type="button" onclick="setFbType('processo')">🔄 Processo
+              de Aprendizagem</button>
           </div>
         </div>
 
@@ -519,7 +1187,7 @@
           <div>
             <label for="fb-orientacoes" class="form-label">Orientações (opcional)</label>
             <textarea class="field-input field-textarea" id="fb-orientacoes"
-                      placeholder="Descreva pontos de melhoria, elogios ou próximos passos..."></textarea>
+              placeholder="Descreva pontos de melhoria, elogios ou próximos passos..."></textarea>
           </div>
         </div>
 
@@ -528,12 +1196,12 @@
           <div>
             <label for="fb-assunto" class="form-label">Assunto</label>
             <input type="text" class="field-input" id="fb-assunto"
-                   placeholder="Ex: Engajamento da equipe, Gestão do tempo...">
+              placeholder="Ex: Engajamento da equipe, Gestão do tempo...">
           </div>
           <div>
             <label for="fb-processo-texto" class="form-label">Orientações / Observações</label>
             <textarea class="field-input field-textarea" id="fb-processo-texto" style="min-height:110px"
-                      placeholder="Descreva observações sobre o processo de aprendizagem, pontos de atenção, elogios ou sugestões de melhoria..."></textarea>
+              placeholder="Descreva observações sobre o processo de aprendizagem, pontos de atenção, elogios ou sugestões de melhoria..."></textarea>
           </div>
           <div>
             <label for="fb-prioridade" class="form-label">Prioridade</label>
@@ -545,7 +1213,8 @@
           </div>
         </div>
 
-        <button class="btn-action" onclick="saveFeedback()" style="width:100%;margin-top:0.25rem" type="button">Salvar Feedback</button>
+        <button class="btn-action" onclick="saveFeedback()" style="width:100%;margin-top:0.25rem" type="button">Salvar
+          Feedback</button>
 
         <!-- Reflexões da Equipe -->
         <div class="fb-reflexoes-header">
@@ -591,7 +1260,8 @@
           <input type="checkbox" id="mat-disponivel" checked style="accent-color:var(--orange)">
           <label for="mat-disponivel" style="font-size:13px">Disponível para os alunos</label>
         </div>
-        <button class="btn-action" onclick="saveMaterial()" style="width:100%;margin-top:0.5rem" type="button">Salvar</button>
+        <button class="btn-action" onclick="saveMaterial()" style="width:100%;margin-top:0.5rem"
+          type="button">Salvar</button>
       </div>
     </div>
   </div>
@@ -604,23 +1274,30 @@
     </div>
     <div class="f-right" id="footer-right"></div>
   </footer>
-  <div class="f-copy" id="main-copy" style="display:none">© Senac São Paulo · Material educacional interno · <span id="footer-year">2025</span></div>
+  <div class="f-copy" id="main-copy" style="display:none">© Senac São Paulo · Material educacional interno · <span
+      id="footer-year">2025</span></div>
 
   <script>
     const KEY_GRUPOS = 'pi_grupos';
-    const KEY_MAT    = 'pi_materiais';
-    const KEY_FC     = 'pi_feedback_coletivo';
-    const KEY_ADMIN  = 'pi_admin_password';
+    const KEY_MAT = 'pi_materiais';
+    const KEY_FC = 'pi_feedback_coletivo';
+    const KEY_ADMIN = 'pi_admin_password';
     const KEY_CONFIG = 'pi_config';
     const SESSION_ADMIN = 'pi_admin';
-    const DEFAULT_ADMIN_PASSWORD = 'admin123';
+    const DEFAULT_ADMIN_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
 
     function getConfig() { return JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}'); }
     function saveConfig(c) { localStorage.setItem(KEY_CONFIG, JSON.stringify(c)); cloudSave(KEY_CONFIG); }
 
-    // Initialize admin password if not set
-    if (!localStorage.getItem(KEY_ADMIN)) {
-      localStorage.setItem(KEY_ADMIN, DEFAULT_ADMIN_PASSWORD);
+    async function hashString(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Inicializa a senha hash localmente na primeira vez, ou ajusta o admin123
+    let storedAdmin = localStorage.getItem(KEY_ADMIN);
+    if (!storedAdmin || storedAdmin === 'admin123') {
+      localStorage.setItem(KEY_ADMIN, DEFAULT_ADMIN_HASH);
     }
 
     function getGrupos() { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '[]'); }
@@ -631,10 +1308,13 @@
     function saveFC(f) { localStorage.setItem(KEY_FC, JSON.stringify(f)); cloudSave(KEY_FC); }
 
     // ── Auth ─────────────────────────────────────────────────────────────
-    function authAdmin() {
+    async function authAdmin() {
       const senha = document.getElementById('admin-senha').value.trim();
-      const adminPass = localStorage.getItem(KEY_ADMIN) || DEFAULT_ADMIN_PASSWORD;
-      if (senha === adminPass) {
+      if (!senha) return;
+      const passHash = await hashString(senha);
+      const adminHash = localStorage.getItem(KEY_ADMIN) || DEFAULT_ADMIN_HASH;
+
+      if (passHash === adminHash) {
         sessionStorage.setItem(SESSION_ADMIN, 'true');
         document.getElementById('auth-gate').style.display = 'none';
         document.getElementById('main-nav').style.display = 'flex';
@@ -647,6 +1327,18 @@
         document.getElementById('admin-senha').value = '';
         document.getElementById('admin-senha').focus();
       }
+    }
+
+    async function changeAdminPassword(e) {
+      e.preventDefault();
+      const n1 = document.getElementById('new-password').value;
+      const n2 = document.getElementById('confirm-password').value;
+      if (n1 !== n2) { alert('As senhas não coincidem!'); return; }
+      if (n1.length < 6) { alert('A senha deve ter no mínimo 6 caracteres.'); return; }
+      const newHash = await hashString(n1);
+      localStorage.setItem(KEY_ADMIN, newHash);
+      alert('Senha alterada com sucesso!');
+      e.target.reset();
     }
 
     async function checkAdminAuth() {
@@ -744,6 +1436,7 @@
                 <div class="card-sub">${membros} integrante${membros !== 1 ? 's' : ''} · ${entregues}/4 entregas</div>
               </div>
               <div class="card-actions">
+                <a href="planner.html?id=${g.id}&admin=1" target="_blank" class="btn-icon" title="Ver Planner" aria-label="Ver Planner de ${g.nome}" style="text-decoration:none">📋</a>
                 <button class="btn-icon" onclick="openEntregasModal('${g.id}')" title="Ver entregas" aria-label="Ver entregas de ${g.nome}">📤</button>
                 <button class="btn-icon" onclick="openMemberModal('${g.id}')" title="Gerenciar membros" aria-label="Gerenciar membros de ${g.nome}">👥</button>
                 <button class="btn-icon" onclick="openFeedbackModal('${g.id}')" title="Adicionar feedback" aria-label="Adicionar feedback para ${g.nome}">💬</button>
@@ -759,7 +1452,7 @@
                   <div class="member-info"><span class="member-name">${m.nome}</span><span class="member-contact">${m.email || ''}</span></div>
                 </div>
               `).join('')}
-              ${(g.membros || []).length > 3 ? `<div style="font-size:11px;color:var(--muted);text-align:center">+${(g.membros||[]).length - 3} mais</div>` : ''}
+              ${(g.membros || []).length > 3 ? `<div style="font-size:11px;color:var(--muted);text-align:center">+${(g.membros || []).length - 3} mais</div>` : ''}
             </div>
           </article>`;
       }).join('');
@@ -804,7 +1497,7 @@
       list.innerHTML = `
         <div style="background:rgba(0,40,80,0.4);border-radius:10px;overflow:hidden;margin-bottom:0.75rem">
           ${_modalMembros.map((m, i) => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.65rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;${i===_modalMembros.length-1?'border-bottom:none':''}">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.65rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;${i === _modalMembros.length - 1 ? 'border-bottom:none' : ''}">
               <div>
                 <span style="font-weight:600">👤 ${m.nome}</span>
                 ${m.email ? `<span style="color:var(--muted);font-size:11px;margin-left:0.5rem">${m.email}</span>` : ''}
@@ -887,8 +1580,8 @@
       } else {
         body.innerHTML = entregas.map((e, i) => {
           const titulo = ENTREGA_TITULOS[i] || `Entrega ${e.numero}`;
-          const done   = e.status === 'entregue';
-          const data   = e.data ? new Date(e.data).toLocaleDateString('pt-BR') : '';
+          const done = e.status === 'entregue';
+          const data = e.data ? new Date(e.data).toLocaleDateString('pt-BR') : '';
           return `
             <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-left:3px solid ${done ? '#5ae09a' : 'rgba(255,255,255,0.15)'};border-radius:10px;padding:1rem;margin-bottom:0.75rem">
               <div style="font-weight:700;font-size:13px;margin-bottom:0.3rem">ENTREGA ${e.numero} — ${titulo}</div>
@@ -899,12 +1592,12 @@
                 ${data ? `<span style="color:var(--muted);margin-left:0.75rem;font-size:11px">📅 ${data}</span>` : ''}
               </div>
               ${done && e.link
-                ? `<a href="${e.link}" target="_blank" rel="noopener noreferrer"
+              ? `<a href="${e.link}" target="_blank" rel="noopener noreferrer"
                       style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:linear-gradient(135deg,var(--orange),#ffb347);color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">
                      🔗 Abrir / Baixar arquivo
                    </a>`
-                : `<span style="color:var(--muted);font-size:12px">Sem arquivo enviado.</span>`
-              }
+              : `<span style="color:var(--muted);font-size:12px">Sem arquivo enviado.</span>`
+            }
             </div>`;
         }).join('');
       }
@@ -1030,10 +1723,10 @@
         const idx = parseInt(k.replace('entrega_', '')) - 1;
         const titulo = ENTREGA_TITULOS[idx] || k;
         const r = reflexoes[k];
-        const dataFmt = r.timestamp ? new Date(r.timestamp).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+        const dataFmt = r.timestamp ? new Date(r.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
         return `
           <div class="reflexao-card">
-            <div class="reflexao-card-title">Entrega ${idx+1} — ${titulo}</div>
+            <div class="reflexao-card-title">Entrega ${idx + 1} — ${titulo}</div>
             <div class="reflexao-item"><span>💡 Aprendizado:</span> ${r.aprendeu || '—'}</div>
             <div class="reflexao-item"><span>🧩 Dificuldade:</span> ${r.dificuldade || '—'}</div>
             <div class="reflexao-item"><span>🔄 Faria diferente:</span> ${r.fariaDiferente || '—'}</div>
@@ -1189,7 +1882,7 @@
           <div class="card-header">
             <div>
               <div class="card-title">${i.importante ? '🚨 ' : ''}${i.titulo}</div>
-              <div class="card-sub">${new Date(i.data).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'})}</div>
+              <div class="card-sub">${new Date(i.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
             </div>
             <button class="btn-icon danger" onclick="deleteFC(${items.length - 1 - idx})" title="Excluir" aria-label="Excluir comunicado">🗑</button>
           </div>
@@ -1281,11 +1974,11 @@
 
     // ── renderConfig ─────────────────────────────────────────────────────
     function renderConfig() {
-      const cfg     = getConfig();
+      const cfg = getConfig();
       const nomeCurso = cfg.nomeCurso || '';
-      const uc      = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
+      const uc = cfg.unidadeCurricular || 'Gestão de Projetos Integradores';
       const docente = cfg.docente || '';
-      const email   = cfg.emailDocente || '';
+      const email = cfg.emailDocente || '';
       const unidade = cfg.unidade || 'Senac Araçatuba';
 
       const fc = document.getElementById('footer-center');
@@ -1303,7 +1996,7 @@
     // ── Identidade do Curso ───────────────────────────────────────────────
     function loadCursoConfig() {
       const cfg = getConfig();
-      const fields = ['nomeCurso','unidadeCurricular','anoSemestre','docente','emailDocente','unidade'];
+      const fields = ['nomeCurso', 'unidadeCurricular', 'anoSemestre', 'docente', 'emailDocente', 'unidade', 'competencias'];
       fields.forEach(f => {
         const el = document.getElementById('cfg-' + f);
         if (el && cfg[f]) el.value = cfg[f];
@@ -1312,7 +2005,7 @@
 
     function saveCursoConfig() {
       const cfg = getConfig();
-      const fields = ['nomeCurso','unidadeCurricular','anoSemestre','docente','emailDocente','unidade'];
+      const fields = ['nomeCurso', 'unidadeCurricular', 'anoSemestre', 'docente', 'emailDocente', 'unidade', 'competencias'];
       fields.forEach(f => {
         const el = document.getElementById('cfg-' + f);
         if (el) cfg[f] = el.value.trim();
@@ -1327,15 +2020,15 @@
     const ENTREGA_TITULOS_ADM = ['Plano de Ação 5W2H', 'Matriz GUT + Diagnóstico', 'Relatório de Desenvolvimento', 'Apresentação Final'];
 
     function renderVisaoGeral() {
-      const grupos  = getGrupos().filter(g => g.ativo !== false);
-      const hoje    = new Date();
+      const grupos = getGrupos().filter(g => g.ativo !== false);
+      const hoje = new Date();
 
       // Métricas
-      const totalEquipes   = grupos.length;
-      const totalEntregas  = grupos.reduce((s, g) => s + (g.entregas||[]).filter(e => e.status==='entregue').length, 0);
-      const maxEntregas    = totalEquipes * 4;
-      const completas      = grupos.filter(g => (g.entregas||[]).filter(e=>e.status==='entregue').length === 4).length;
-      const semFeedback    = grupos.filter(g => !(g.feedback||[]).length).length;
+      const totalEquipes = grupos.length;
+      const totalEntregas = grupos.reduce((s, g) => s + (g.entregas || []).filter(e => e.status === 'entregue').length, 0);
+      const maxEntregas = totalEquipes * 4;
+      const completas = grupos.filter(g => (g.entregas || []).filter(e => e.status === 'entregue').length === 4).length;
+      const semFeedback = grupos.filter(g => !(g.feedback || []).length).length;
 
       document.getElementById('visao-metrics').innerHTML = `
         <div class="stat-card"><div class="stat-value">${totalEquipes}</div><div class="stat-label">Total de Equipes</div></div>
@@ -1349,20 +2042,20 @@
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Nenhuma equipe cadastrada.</td></tr>';
       } else {
         tbody.innerHTML = grupos.map(g => {
-          const membros  = (g.membros||[]).map(m=>m.nome).join(', ') || '—';
+          const membros = (g.membros || []).map(m => m.nome).join(', ') || '—';
           const entregas = g.entregas || [];
-          const eCols    = [1,2,3,4].map(n => {
+          const eCols = [1, 2, 3, 4].map(n => {
             const e = entregas.find(x => x.numero === n);
             if (!e || e.status === 'bloqueado') return '<td style="text-align:center">⏳</td>';
-            if (e.status === 'entregue')         return '<td style="text-align:center">✅</td>';
+            if (e.status === 'entregue') return '<td style="text-align:center">✅</td>';
             return '<td style="text-align:center">📝</td>';
           }).join('');
           const ultima = g.ultimaAtividade
-            ? new Date(g.ultimaAtividade).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+            ? new Date(g.ultimaAtividade).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
             : '—';
           return `<tr>
             <td><strong>${g.nome}</strong></td>
-            <td style="font-size:12px;color:var(--muted)">${(g.membros||[]).length} integrante${(g.membros||[]).length!==1?'s':''}</td>
+            <td style="font-size:12px;color:var(--muted)">${(g.membros || []).length} integrante${(g.membros || []).length !== 1 ? 's' : ''}</td>
             ${eCols}
             <td style="font-size:12px">${ultima}</td>
             <td>
@@ -1382,14 +2075,14 @@
         if (g.ultimaAtividade) {
           const diff = hoje - new Date(g.ultimaAtividade);
           if (diff > sete_dias) {
-            const dias = Math.floor(diff / (24*60*60*1000));
+            const dias = Math.floor(diff / (24 * 60 * 60 * 1000));
             alertas.push(`<div class="alerta-item alerta-amarelo">⚠️ <span><strong>${g.nome}</strong> — sem atividade há ${dias} dias.</span></div>`);
           }
         }
         (g.prazoEntrega || []).forEach((prazo, i) => {
-          const entrega = (g.entregas||[])[i];
+          const entrega = (g.entregas || [])[i];
           if (prazo && entrega && entrega.status !== 'entregue' && new Date(prazo) < hoje) {
-            alertas.push(`<div class="alerta-item alerta-vermelho">🚨 <span><strong>${g.nome}</strong> — Entrega ${i+1} atrasada (prazo: ${formatDate(prazo)}).</span></div>`);
+            alertas.push(`<div class="alerta-item alerta-vermelho">🚨 <span><strong>${g.nome}</strong> — Entrega ${i + 1} atrasada (prazo: ${formatDate(prazo)}).</span></div>`);
           }
         });
       });
@@ -1403,36 +2096,36 @@
     // ── Exportar CSV ──────────────────────────────────────────────────────
     function fmtDtBR(iso) {
       if (!iso) return '';
-      return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
     function exportarCSV() {
       const grupos = getGrupos().filter(g => g.ativo !== false);
       const BOM = '\uFEFF';
-      const header = ['Equipe','Tema','Integrantes','Status E1','Data E1','Status E2','Data E2','Status E3','Data E3','Status E4','Data E4','Feedbacks Registrados','Reflexões Registradas','Última Atividade'];
+      const header = ['Equipe', 'Tema', 'Integrantes', 'Status E1', 'Data E1', 'Status E2', 'Data E2', 'Status E3', 'Data E3', 'Status E4', 'Data E4', 'Feedbacks Registrados', 'Reflexões Registradas', 'Última Atividade'];
       const STATUS_PT = { entregue: 'Entregue', pendente: 'Pendente', rascunho: 'Rascunho', bloqueado: 'Pendente' };
 
       const rows = grupos.map(g => {
-        const integrantes = (g.membros||[]).map(m=>m.nome).join(' | ');
+        const integrantes = (g.membros || []).map(m => m.nome).join(' | ');
         const eCols = [];
         for (let n = 1; n <= 4; n++) {
-          const e = (g.entregas||[]).find(x => x.numero === n);
+          const e = (g.entregas || []).find(x => x.numero === n);
           eCols.push(e ? (STATUS_PT[e.status] || e.status) : 'Pendente');
           eCols.push(e && e.data ? fmtDtBR(e.data) : '');
         }
-        const nFeedbacks  = (g.feedback||[]).length;
-        const nReflexoes  = Object.keys(g.reflexoes||{}).length;
-        const ultimaAtiv  = g.ultimaAtividade ? fmtDtBR(g.ultimaAtividade) : '';
-        return [g.nome, g.tema||'', integrantes, ...eCols, nFeedbacks, nReflexoes, ultimaAtiv]
-          .map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+        const nFeedbacks = (g.feedback || []).length;
+        const nReflexoes = Object.keys(g.reflexoes || {}).length;
+        const ultimaAtiv = g.ultimaAtividade ? fmtDtBR(g.ultimaAtividade) : '';
+        return [g.nome, g.tema || '', integrantes, ...eCols, nFeedbacks, nReflexoes, ultimaAtiv]
+          .map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
       });
 
-      const csv = BOM + [header.map(h=>`"${h}"`).join(','), ...rows].join('\r\n');
+      const csv = BOM + [header.map(h => `"${h}"`).join(','), ...rows].join('\r\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
       const hoje = new Date();
-      const stamp = `${hoje.getFullYear()}${String(hoje.getMonth()+1).padStart(2,'0')}${String(hoje.getDate()).padStart(2,'0')}`;
+      const stamp = `${hoje.getFullYear()}${String(hoje.getMonth() + 1).padStart(2, '0')}${String(hoje.getDate()).padStart(2, '0')}`;
       a.href = url; a.download = `HubPI_Turma_${stamp}.csv`; a.click();
       URL.revokeObjectURL(url);
     }
@@ -1446,10 +2139,10 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
       const cfg = getConfig();
-      const NAVY   = [0, 69, 135];
+      const NAVY = [0, 69, 135];
       const ORANGE = [247, 148, 29];
-      const GRAY   = [100, 116, 139];
-      const pageW  = 210;
+      const GRAY = [100, 116, 139];
+      const pageW = 210;
       const margin = 15;
       let y = margin;
 
@@ -1461,17 +2154,17 @@
       doc.rect(0, 0, pageW, 8, 'F');
 
       y = 16;
-      doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
       doc.text('SENAC SÃO PAULO', margin, y); y += 6;
 
-      doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY);
       doc.text('Hub de Projetos — Gestão de Projetos Integradores', margin, y); y += 5;
 
-      if (cfg.nomeCurso)          { doc.text(`Curso: ${cfg.nomeCurso}`, margin, y); y += 5; }
-      if (cfg.unidadeCurricular)  { doc.text(`UC: ${cfg.unidadeCurricular}`, margin, y); y += 5; }
-      if (cfg.docente)            { doc.text(`Docente: ${cfg.docente}`, margin, y); y += 5; }
-      if (cfg.unidade)            { doc.text(`Unidade: ${cfg.unidade}`, margin, y); y += 5; }
-      if (cfg.anoSemestre)        { doc.text(`Período: ${cfg.anoSemestre}`, margin, y); y += 5; }
+      if (cfg.nomeCurso) { doc.text(`Curso: ${cfg.nomeCurso}`, margin, y); y += 5; }
+      if (cfg.unidadeCurricular) { doc.text(`UC: ${cfg.unidadeCurricular}`, margin, y); y += 5; }
+      if (cfg.docente) { doc.text(`Docente: ${cfg.docente}`, margin, y); y += 5; }
+      if (cfg.unidade) { doc.text(`Unidade: ${cfg.unidade}`, margin, y); y += 5; }
+      if (cfg.anoSemestre) { doc.text(`Período: ${cfg.anoSemestre}`, margin, y); y += 5; }
 
       doc.setFontSize(9); doc.setTextColor(...GRAY);
       doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, margin, y); y += 4;
@@ -1480,11 +2173,11 @@
       doc.line(margin, y, pageW - margin, y); y += 8;
 
       // ── IDENTIFICAÇÃO DA EQUIPE ───────────────────────────────────────
-      doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
       doc.text(grupo.nome, margin, y); y += 7;
 
       if (grupo.tema) {
-        doc.setFontSize(11); doc.setFont('helvetica','italic'); doc.setTextColor(...GRAY);
+        doc.setFontSize(11); doc.setFont('helvetica', 'italic'); doc.setTextColor(...GRAY);
         doc.text(`Tema: ${grupo.tema}`, margin, y); y += 6;
       }
 
@@ -1498,36 +2191,88 @@
           body: membros.map(m => [m.nome, m.email || '—']),
           margin: { left: margin, right: margin },
           styles: { fontSize: 10, cellPadding: 3 },
-          headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold' },
+          headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold' },
           theme: 'striped',
           didDrawPage: (d) => { y = d.cursor.y + 6; }
         });
         y = doc.lastAutoTable.finalY + 8;
       }
 
+      // ── OKRs e KPIs ───────────────────────────────────────────────────
+      const okrs = grupo.okrs;
+      if (okrs && (okrs.objetivo || okrs.kr1 || okrs.kr2 || okrs.kr3)) {
+        checkY(40);
+        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
+        doc.text('OKRs da Equipe', margin, y); y += 6;
+
+        doc.autoTable({
+          startY: y,
+          head: [['Objetivo Principal (O)']],
+          body: [[okrs.objetivo || 'Não definido']],
+          margin: { left: margin, right: margin },
+          styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
+          headStyles: { fillColor: ORANGE, textColor: [255, 255, 255], fontStyle: 'bold' },
+          theme: 'plain',
+        });
+        y = doc.lastAutoTable.finalY + 4;
+
+        doc.autoTable({
+          startY: y,
+          head: [['Resultados-Chave (KR)']],
+          body: [
+            ['KR1: ' + (okrs.kr1 || 'Não definido')],
+            ['KR2: ' + (okrs.kr2 || 'Não definido')],
+            ['KR3: ' + (okrs.kr3 || 'Não definido')]
+          ],
+          margin: { left: margin, right: margin },
+          styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
+          headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold' },
+          theme: 'striped',
+        });
+        y = doc.lastAutoTable.finalY + 8;
+      }
+
+      const kpis = grupo.kpis || [];
+      if (kpis.length > 0) {
+        checkY(25);
+        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
+        doc.text('KPIs — Indicadores de Desempenho', margin, y); y += 6;
+
+        doc.autoTable({
+          startY: y,
+          head: [['Métrica / KPI', 'Meta (Alvo)', 'Status Atual']],
+          body: kpis.map(k => [k.indicador || '-', k.meta || '-', k.atual || '-']),
+          margin: { left: margin, right: margin },
+          styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
+          headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold' },
+          theme: 'striped',
+        });
+        y = doc.lastAutoTable.finalY + 8;
+      }
+
       // ── PLANO DE AÇÃO ────────────────────────────────────────────────
       checkY(15);
-      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
       doc.text('Plano de Ação 5W2H', margin, y); y += 6;
 
-      const tarefas = (grupo.planner||{}).tarefas || [];
+      const tarefas = (grupo.planner || {}).tarefas || [];
       if (tarefas.length === 0) {
-        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY);
         doc.text('Plano de ação não preenchido.', margin, y); y += 8;
       } else {
         doc.autoTable({
           startY: y,
-          head: [['Tarefa','O Quê','Por Quê','Quem','Onde','Início','Conclusão','Como','Quanto','Status']],
-          body: tarefas.map((t,i) => [
-            `#${i+1}`, t.oQue||'', t.porQue||'',
-            (t.responsaveis||[]).join(', '), t.onde||'',
+          head: [['Tarefa', 'O Quê', 'Por Quê', 'Quem', 'Onde', 'Início', 'Conclusão', 'Como', 'Quanto', 'Status']],
+          body: tarefas.map((t, i) => [
+            `#${i + 1}`, t.oQue || '', t.porQue || '',
+            (t.responsaveis || []).join(', '), t.onde || '',
             t.dataInicio ? formatDate(t.dataInicio) : '',
             t.dataConclusao ? formatDate(t.dataConclusao) : '',
-            t.como||'', t.quanto||'', t.status||''
+            t.como || '', t.quanto || '', t.status || ''
           ]),
           margin: { left: margin, right: margin },
           styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-          headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold', fontSize: 8 },
+          headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
           columnStyles: { 0: { cellWidth: 10 }, 5: { cellWidth: 18 }, 6: { cellWidth: 18 }, 9: { cellWidth: 20 } },
           theme: 'striped',
         });
@@ -1536,16 +2281,16 @@
 
       // ── ENTREGAS ────────────────────────────────────────────────────
       checkY(15);
-      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
       doc.text('Entregas', margin, y); y += 6;
 
       const entregas = grupo.entregas || [];
       doc.autoTable({
         startY: y,
-        head: [['Entrega','Título','Status','Data/Hora','Link']],
-        body: [1,2,3,4].map(n => {
-          const e = entregas.find(x=>x.numero===n);
-          const titulo = ENTREGA_TITULOS_ADM[n-1] || `Entrega ${n}`;
+        head: [['Entrega', 'Título', 'Status', 'Data/Hora', 'Link']],
+        body: [1, 2, 3, 4].map(n => {
+          const e = entregas.find(x => x.numero === n);
+          const titulo = ENTREGA_TITULOS_ADM[n - 1] || `Entrega ${n}`;
           return [
             `E${n}`, titulo,
             e && e.status === 'entregue' ? '✓ Entregue' : '⏳ Pendente',
@@ -1555,7 +2300,7 @@
         }),
         margin: { left: margin, right: margin },
         styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
-        headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold' },
+        headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold' },
         columnStyles: { 4: { cellWidth: 50 } },
         theme: 'striped',
       });
@@ -1563,31 +2308,31 @@
 
       // ── REFLEXÕES ───────────────────────────────────────────────────
       checkY(15);
-      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
       doc.text('Reflexões da Equipe', margin, y); y += 6;
 
       const reflexoes = grupo.reflexoes || {};
-      const refKeys   = Object.keys(reflexoes);
+      const refKeys = Object.keys(reflexoes);
       if (refKeys.length === 0) {
-        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY);
         doc.text('Nenhuma reflexão registrada.', margin, y); y += 8;
       } else {
         refKeys.forEach(k => {
-          const idx = parseInt(k.replace('entrega_','')) - 1;
-          const r   = reflexoes[k];
-          const titulo = `${ENTREGA_TITULOS_ADM[idx]||k} — ${r.timestamp ? fmtDtBR(r.timestamp) : ''}`;
+          const idx = parseInt(k.replace('entrega_', '')) - 1;
+          const r = reflexoes[k];
+          const titulo = `${ENTREGA_TITULOS_ADM[idx] || k} — ${r.timestamp ? fmtDtBR(r.timestamp) : ''}`;
           checkY(30);
           doc.autoTable({
             startY: y,
             head: [[titulo]],
             body: [
-              [`💡 Aprendizado: ${r.aprendeu||'—'}`],
-              [`🧩 Dificuldade: ${r.dificuldade||'—'}`],
-              [`🔄 Faria diferente: ${r.fariaDiferente||'—'}`]
+              [`💡 Aprendizado: ${r.aprendeu || '—'}`],
+              [`🧩 Dificuldade: ${r.dificuldade || '—'}`],
+              [`🔄 Faria diferente: ${r.fariaDiferente || '—'}`]
             ],
             margin: { left: margin, right: margin },
             styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
-            headStyles: { fillColor: ORANGE, textColor: [255,255,255], fontStyle: 'bold' },
+            headStyles: { fillColor: ORANGE, textColor: [255, 255, 255], fontStyle: 'bold' },
             theme: 'plain',
           });
           y = doc.lastAutoTable.finalY + 6;
@@ -1596,27 +2341,27 @@
 
       // ── FEEDBACKS ───────────────────────────────────────────────────
       checkY(15);
-      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...NAVY);
+      doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
       doc.text('Feedbacks do Docente', margin, y); y += 6;
 
       const feedbacks = grupo.feedback || [];
       if (feedbacks.length === 0) {
-        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY);
         doc.text('Nenhum feedback registrado.', margin, y); y += 8;
       } else {
         doc.autoTable({
           startY: y,
-          head: [['Tipo','Entrega/Assunto','Menção','Orientações','Data']],
+          head: [['Tipo', 'Entrega/Assunto', 'Menção', 'Orientações', 'Data']],
           body: feedbacks.map(f => [
             f.tipo === 'entrega' ? 'Entrega' : 'Processo',
-            f.tipo === 'entrega' ? `Entrega ${f.entrega}` : (f.assunto||''),
+            f.tipo === 'entrega' ? `Entrega ${f.entrega}` : (f.assunto || ''),
             f.mencao || f.prioridade || '',
             f.orientacoes || '',
             f.data ? fmtDtBR(f.data) : ''
           ]),
           margin: { left: margin, right: margin },
           styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
-          headStyles: { fillColor: NAVY, textColor: [255,255,255], fontStyle: 'bold' },
+          headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold' },
           theme: 'striped',
         });
         y = doc.lastAutoTable.finalY + 8;
@@ -1629,15 +2374,15 @@
         doc.setPage(p);
         doc.setDrawColor(...ORANGE); doc.setLineWidth(0.5);
         doc.line(margin, 290, pageW - margin, 290);
-        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY);
         doc.text(`Hub de Projetos · ${unidade} · Material educacional interno · ${new Date().getFullYear()}`, margin, 295);
         doc.text(`Página ${p} de ${totalPages}`, pageW - margin, 295, { align: 'right' });
       }
 
       // Nome do arquivo
-      const nomeArquivo = grupo.nome.replace(/[^a-zA-Z0-9À-ÿ ]/g,'').replace(/\s+/g,'_');
+      const nomeArquivo = grupo.nome.replace(/[^a-zA-Z0-9À-ÿ ]/g, '').replace(/\s+/g, '_');
       const hoje2 = new Date();
-      const stamp = `${hoje2.getFullYear()}${String(hoje2.getMonth()+1).padStart(2,'0')}${String(hoje2.getDate()).padStart(2,'0')}`;
+      const stamp = `${hoje2.getFullYear()}${String(hoje2.getMonth() + 1).padStart(2, '0')}${String(hoje2.getDate()).padStart(2, '0')}`;
       doc.save(`HubPI_${nomeArquivo}_${stamp}.pdf`);
     }
 
@@ -1645,4 +2390,5 @@
     checkAdminAuth();
   </script>
 </body>
+
 </html>
