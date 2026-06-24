@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula Inaugural — Hub de Projetos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="db.js"></script>
+  <style>
+    /* Specific styles for the interactive lesson */
+    .lesson-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .lesson-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        position: static;
+      }
+    }
+
+    .sidebar-title {
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--navy);
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--orange);
+      padding-bottom: 0.5rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sidebar-link {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(247, 148, 29, 0.08);
+      color: var(--orange);
+      padding-left: 1rem;
+    }
+
+    .sidebar-link.active {
+      background: rgba(0, 69, 135, 0.06);
+      color: var(--navy);
+      font-weight: 700;
+      border-left: 3px solid var(--navy);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Content Area */
+    .lesson-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (max-width: 600px) {
+      .lesson-content {
+        padding: 1.5rem;
+      }
+    }
+
+    .lesson-section {
+      margin-bottom: 3.5rem;
+      scroll-margin-top: 100px;
+    }
+
+    .lesson-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .lesson-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lesson-title::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 1.2em;
+      background: var(--orange);
+      border-radius: 2px;
+    }
+
+    .lesson-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      text-align: justify;
+    }
+
+    .lesson-highlight {
+      background: rgba(247, 148, 29, 0.06);
+      border-left: 4px solid var(--orange);
+      padding: 1.25rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1.5rem 0;
+    }
+
+    .lesson-highlight-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      font-size: 14px;
+    }
+
+    /* Grid layout inside content */
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .lesson-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.3s;
+    }
+
+    .lesson-card:hover {
+      border-color: rgba(247, 148, 29, 0.25);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .lesson-card-title {
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 14px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .lesson-card-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* Badges & Tables */
+    .mark-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background: rgba(0, 69, 135, 0.1);
+      color: var(--navy);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 13px;
+    }
+
+    .comparison-table th, .comparison-table td {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .comparison-table th {
+      background: rgba(0, 69, 135, 0.05);
+      color: var(--navy-dark);
+      font-weight: 700;
+    }
+
+    .comparison-table tr:nth-child(even) td {
+      background: var(--surface-2);
+    }
+
+    /* Interactive Simulator */
+    .simulator-box {
+      border: 2px dashed var(--orange);
+      border-radius: 14px;
+      padding: 1.50rem;
+      background: rgba(247, 148, 29, 0.02);
+      margin-top: 2rem;
+    }
+
+    .simulator-title {
+      font-weight: 900;
+      color: var(--navy);
+      font-size: 16px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sim-field {
+      margin-bottom: 1rem;
+    }
+
+    .sim-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy-dark);
+      margin-bottom: 0.35rem;
+    }
+
+    .sim-input, .sim-select {
+      width: 100%;
+      padding: 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .sim-input:focus, .sim-select:focus {
+      outline: 2px solid var(--focus-ring);
+      border-color: var(--orange);
+    }
+
+    .sim-result {
+      background: var(--navy);
+      color: #fff;
+      padding: 1.25rem;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 1.25rem;
+      display: none;
+    }
+
+    .sim-result-title {
+      font-weight: 700;
+      color: var(--orange-light);
+      margin-bottom: 0.5rem;
+      font-size: 14px;
+    }
+
+    .btn-sim {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .btn-sim:hover {
+      box-shadow: 0 4px 14px rgba(247, 148, 29, 0.35);
+    }
+
+    /* Design Pedagogical notes */
+    .designer-note {
+      background: rgba(0, 69, 135, 0.04);
+      border: 1px solid rgba(0, 69, 135, 0.15);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 2rem 0;
+    }
+
+    .designer-note-title {
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 13px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+  <nav class="nav nav-light" role="navigation" aria-label="Navegação principal">
+    <a href="index.html" class="nav-logo">Hub <span>de Projetos</span></a>
+    <div class="nav-links">
+      <a href="index.html">Início</a>
+      <a href="materiais.html" class="nav-active">Materiais</a>
+      <a href="admin.html" class="nav-btn">🔑 Admin</a>
+    </div>
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu"
+      aria-expanded="false" aria-controls="mob-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mob-menu" role="menu" aria-label="Menu de navegação">
+    <a href="index.html" role="menuitem" onclick="closeMenu()">Início</a>
+    <a href="materiais.html" role="menuitem" onclick="closeMenu()">Materiais</a>
+    <a href="admin.html" role="menuitem" onclick="closeMenu()">🔑 Admin</a>
+  </div>
+
+  <div class="page" id="main-content" style="padding-top: 80px;">
+    <section class="page-header">
+      <h1>Aula 01: <span>Introdução ao Projeto Integrador</span></h1>
+      <p>Desenvolvimento do protagonismo profissional, entendimento da metodologia ABP e do tema gerador (SLA) para a Logística.</p>
+    </section>
+
+    <div class="lesson-container">
+      <!-- Sidebar TOC -->
+      <aside class="sidebar">
+        <div class="sidebar-title">Navegação</div>
+        <ul class="sidebar-menu">
+          <li><a href="#sec-contexto" class="sidebar-link active">1. Contexto e Conceito</a></li>
+          <li><a href="#sec-protagonismo" class="sidebar-link">2. O Protagonismo Senac</a></li>
+          <li><a href="#sec-metodologia" class="sidebar-link">3. Metodologia ABP</a></li>
+          <li><a href="#sec-integracao" class="sidebar-link">4. Integração de UCs</a></li>
+          <li><a href="#sec-tema" class="sidebar-link">5. SLA & Tema Gerador</a></li>
+          <li><a href="#sec-kpis" class="sidebar-link">6. Metas S.M.A.R.T.</a></li>
+          <li><a href="#sec-plano" class="sidebar-link">7. Plano de Ação e Portfólio</a></li>
+          <li><a href="#sec-avaliacao" class="sidebar-link">8. Modelo de Avaliação</a></li>
+          <li><a href="#sec-desafio" class="sidebar-link">9. Oficina de Formulação</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Lesson Content -->
+      <main class="lesson-content">
+
+        <!-- 1. CONTEXTO E CONCEITO -->
+        <section class="lesson-section" id="sec-contexto">
+          <h2 class="lesson-title">1. Contexto e Conceito: O Que é o Projeto Integrador?</h2>
+          <p class="lesson-text">
+            O <strong>Projeto Integrador (PI)</strong> é o fio condutor de toda a sua formação técnica no Senac. Longe de ser um trabalho acadêmico tradicional, o PI é um <strong>laboratório de experimentação ativa</strong>. Nele, você e sua equipe serão desafiados a atuar como consultores reais, diagnosticando falhas operacionais e propondo soluções para gargalos reais das empresas e da sociedade.
+          </p>
+          <div class="lesson-highlight">
+            <div class="lesson-highlight-title">💡 O Jeito Senac de Educar e a Base Legal</div>
+            <p class="lesson-card-text">
+              Regulado pelo <strong>Documento Técnico 4 do Senac DN (2022)</strong> e pela <strong>Resolução CNE/CP nº 1 de 2021</strong>, o Projeto Integrador baseia-se na indissociabilidade entre a teoria vista em sala de aula e a prática profissional. Ele é estruturado em torno do ciclo <strong>Ação-Reflexão-Ação</strong>: você planeja a ação, executa-a no mercado, reflete sobre os resultados e erros pedagógicos e reformula sua prática profissional de forma contínua.
+            </p>
+          </div>
+          <p class="lesson-text">
+            Para compreender o papel do PI, é importante definir o que ele <strong>NÃO</strong> é:
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card">
+              <div class="lesson-card-title">❌ Não é um TCC Tradicional</div>
+              <p class="lesson-card-text">O PI não se resume a uma monografia engavetada cheia de normas técnicas. O foco é a entrega de um produto ou serviço viável e mensurável para o mercado de trabalho local.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">❌ Não é Pesquisa sem Prática</div>
+              <p class="lesson-card-text">Não buscamos resumos bibliográficos exaustivos de livros clássicos. A investigação deve ser guiada por dados reais de empresas parceiras ou gargalos logísticos locais da região.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">❌ Não é Trabalho Isolado</div>
+              <p class="lesson-card-text">O PI não é uma disciplina avulsa ou teórica. Ele articula ativamente as competências de várias Unidades Curriculares (UCs) em prol de uma solução integrada.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. O PROTAGONISMO SENAC -->
+        <section class="lesson-section" id="sec-protagonismo">
+          <h2 class="lesson-title">2. O Protagonismo e as Marcas Formativas no Técnico em Logística</h2>
+          <p class="lesson-text">
+            No Modelo Pedagógico Senac, o aluno é o **protagonista** do seu aprendizado. Isso significa assumir a responsabilidade ativa pelo desenvolvimento do projeto, dividindo tarefas com o time de forma autônoma, buscando informações no mercado e gerindo prazos. O docente deixa de ser um "palestrante" para se tornar um <strong>mediador pedagógico</strong>, apoiando na resolução de dúvidas e orientando a investigação.
+          </p>
+          <p class="lesson-text">
+            Esse protagonismo materializa-se nas **6 Marcas Formativas do Senac**. Veja como elas se aplicam na prática do profissional de Logística:
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card">
+              <span class="mark-badge">Marca 1</span>
+              <div class="lesson-card-title">Domínio Técnico-Científico</div>
+              <p class="lesson-card-text">Saber utilizar ferramentas logísticas com precisão: desenhar fluxogramas de processos, calcular acurácia de estoque, medir taxas de ocupação física e analisar tempos de trânsito de frotas com rigor científico.</p>
+            </div>
+            <div class="lesson-card">
+              <span class="mark-badge">Marca 2</span>
+              <div class="lesson-card-title">Visão Crítica</div>
+              <p class="lesson-card-text">Investigar as causas-raiz de falhas logísticas. Não aceitar justificativas vagas como "sempre foi assim". Procurar as evidências de perdas de produtividade por trás de processos informais.</p>
+            </div>
+            <div class="lesson-card">
+              <span class="mark-badge">Marca 3</span>
+              <div class="lesson-card-title">Atitude Sustentável</div>
+              <p class="lesson-card-text">Propor projetos com base na economia circular e sustentabilidade. Exemplos: otimização de rotas para redução de pegada de carbono, redução do desperdício de embalagens no armazém ou projetos estruturados de logística reversa.</p>
+            </div>
+            <div class="lesson-card">
+              <span class="mark-badge">Marca 4</span>
+              <div class="lesson-card-title">Colaboração e Comunicação</div>
+              <p class="lesson-card-text">Saber dialogar com motoristas, operadores de empilhadeira, compradores e gestores. Defender ideias por meio de relatórios executivos bem estruturados e apresentações persuasivas baseadas em dados concretos.</p>
+            </div>
+            <div class="lesson-card">
+              <span class="mark-badge">Marca 5</span>
+              <div class="lesson-card-title">Criatividade e Empreendedorismo</div>
+              <p class="lesson-card-text">Identificar novas oportunidades de negócios, redesenhar layouts de armazéns ineficientes ou propor a adoção de novas tecnologias de baixo custo para melhorar processos logísticos tradicionais.</p>
+            </div>
+            <div class="lesson-card">
+              <span class="mark-badge">Marca 6</span>
+              <div class="lesson-card-title">Autonomia Digital</div>
+              <p class="lesson-card-text">Utilizar planilhas automatizadas de controle, construir dashboards executivos, operar sistemas simulados de gestão de armazéns (WMS) e de transporte (TMS), além de gerenciar projetos de ponta a ponta na nossa plataforma.</p>
+            </div>
+          </div>
+          <div class="designer-note">
+            <div class="designer-note-title">🧠 Desafio de Autonomia do Protagonista (Atitude Pedagógica)</div>
+            <p class="lesson-card-text" style="font-style: italic;">
+              "Um profissional de logística que aguarda ordens passivamente gera gargalos operacionais imediatos. No Projeto Integrador, assuma a liderança da sua equipe: defina quem fará as visitas de campo, quem digitará o plano no Hub e quem extrairá os dados. O Hub registra as datas de envio e as últimas modificações de cada equipe — a pontualidade digital é parte do seu protagonismo."
+            </p>
+          </div>
+        </section>
+
+        <!-- 3. METODOLOGIA ABP -->
+        <section class="lesson-section" id="sec-metodologia">
+          <h2 class="lesson-title">3. A Metodologia ABP (Aprendizagem Baseada em Projetos)</h2>
+          <p class="lesson-text">
+            O PI utiliza como base metodológica a **ABP (Aprendizagem Baseada em Projetos)**. Isso significa que todo o seu desenvolvimento será pautado na resolução de um problema real. O ciclo de aprendizado segue 4 etapas sequenciais:
+          </p>
+          <div class="lesson-highlight">
+            <ol style="margin-left: 1.5rem; font-size: 14px; line-height: 1.8; color: var(--text);">
+              <li><strong>Planejamento Integrado (Fase da Equipe Pedagógica):</strong> Onde a escola e o docente conectam as competências das disciplinas ao projeto.</li>
+              <li><strong>Problematização (Fase Atual):</strong> Onde você mapeia o mercado, encontra problemas de logística na região de Araçatuba, analisa causas-raiz e formula a pergunta-desafio do projeto.</li>
+              <li><strong>Desenvolvimento:</strong> Onde a equipe cria o plano de ação (5W2H), desenvolve a solução, colhe dados práticos e monta relatórios periódicos de progresso.</li>
+              <li><strong>Síntese:</strong> O momento de consolidação. A equipe monta a apresentação final, autoavalia as competências adquiridas e expõe o projeto para a banca de avaliação externa.</li>
+            </ol>
+          </div>
+          <p class="lesson-text">
+            A ABP nos força a substituir opiniões vagas por **investigação empírica guiada**. Não adianta supor o problema; sua equipe deve levantar evidências reais junto a empresas, parceiros ou fontes estatísticas governamentais confiáveis.
+          </p>
+        </section>
+
+        <!-- 4. INTEGRAÇÃO DE UCS -->
+        <section class="lesson-section" id="sec-integracao">
+          <h2 class="lesson-title">4. A Integração das Unidades Curriculares na Prática</h2>
+          <p class="lesson-text">
+            Para dar significado educacional ao projeto, cada equipe deve integrar de forma evidente os conhecimentos técnicos adquiridos em diferentes **Unidades Curriculares (UCs)** do curso Técnico em Logística.
+          </p>
+          <p class="lesson-text">
+            Imagine que o seu projeto integrador mapeie um atraso crônico na entrega de pedidos para um cliente local de Araçatuba. A falha final manifesta-se no transporte, mas a causa-raiz geralmente está espalhada em outras áreas da empresa. Veja como as UCs se integram na resolução:
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card" style="border-top: 3px solid var(--navy);">
+              <div class="lesson-card-title">📦 UC3 — Recebimento e Estoques</div>
+              <p class="lesson-card-text">Garante a acurácia dos itens no sistema. Se o inventário está incorreto (o sistema diz que tem o item, mas o estoque físico está vazio), a separação para o envio é atrasada instantaneamente.</p>
+            </div>
+            <div class="lesson-card" style="border-top: 3px solid var(--orange);">
+              <div class="lesson-card-title">🏢 UC1 — Layout e Armazenagem</div>
+              <p class="lesson-card-text">Organiza as posições de estoque. Um layout confuso ou falta de sinalização no almoxarifado fazem o operador perder minutos cruciais localizando e pegando os produtos (gargalo de picking).</p>
+            </div>
+            <div class="lesson-card" style="border-top: 3px solid var(--navy);">
+              <div class="lesson-card-title">🛒 UC4 — Compras e Suprimentos</div>
+              <p class="lesson-card-text">Gere o lead time do fornecedor. Se a matéria-prima ou produtos comprados atrasam para chegar ao armazém, toda a cadeia de produção e expedição sofre interrupção por falta de insumos.</p>
+            </div>
+            <div class="lesson-card" style="border-top: 3px solid var(--orange);">
+              <div class="lesson-card-title">🚚 UC5 — Distribuição e Transportes</div>
+              <p class="lesson-card-text">Gerencia a entrega final ao cliente. Otimização de rotas, definição de fretes mais eficientes e garantia do tempo de trânsito final para evitar quebra de acordos de entrega.</p>
+            </div>
+          </div>
+          <p class="lesson-text">
+            A integração de UCs é demonstrada no portfólio e nas apresentações mostrando como cada decisão de melhoria no transporte foi viabilizada pelo alinhamento das compras, do estoque e da armazenagem.
+          </p>
+        </section>
+
+        <!-- 5. TEMA GERADOR E REGIONALIDADE -->
+        <section class="lesson-section" id="sec-tema">
+          <h2 class="lesson-title">5. O Tema Gerador: SLA e a Realidade Regional de Araçatuba-SP</h2>
+          <p class="lesson-text">
+            O ponto de partida do seu projeto será o **SLA (Service Level Agreement - Acordo de Nível de Serviço)**. No mercado de trabalho de logística, o SLA é o contrato formal que define as metas de qualidade e prazos acordados entre o prestador de serviços e o cliente. Se a meta de entrega é de 24 horas, qualquer desvio quebrará o SLA.
+          </p>
+          <div class="lesson-highlight" style="background: rgba(0,69,135,0.03); border-left-color: var(--navy);">
+            <div class="lesson-highlight-title" style="color: var(--navy);">🏭 Por que investigar o SLA em Araçatuba e Região?</div>
+            <p class="lesson-card-text">
+              Araçatuba é um importante polo econômico regional de São Paulo, cercado por usinas do setor sucroenergético, cooperativas agroindustriais de grande porte, e-commerce em expansão e distribuidoras locais. Para essas indústrias, a quebra de um SLA de suprimentos (ex: atraso na entrega de peças para manutenção de colhedoras ou caminhões de usina) pode paralisar linhas inteiras de produção, gerando prejuízos milionários e multas pesadas.
+            </p>
+          </div>
+          <p class="lesson-text">
+            Seu projeto deve analisar onde e por que as empresas locais falham em atingir seus SLAs. Para isso, usaremos o padrão internacional **OTIF (On-Time In-Full)**.
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card">
+              <div class="lesson-card-title">⏰ On-Time (No Prazo)</div>
+              <p class="lesson-card-text">O produto foi entregue exatamente no horário ou dia agendado? Atrasos quebram a confiança operacional do cliente.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">📦 In-Full (Completo)</div>
+              <p class="lesson-card-text">O pedido foi entregue na quantidade certa, sem faltas, trocas ou avarias físicas? Entregar a menos gera custos extras de reenvio.</p>
+            </div>
+          </div>
+          <p class="lesson-text">
+            <strong>O cálculo do OTIF é multiplicativo:</strong> se a empresa realiza 90% das entregas no prazo (On-Time) e 90% das entregas corretas (In-Full), o OTIF real é \(0.9 \times 0.9 = 81\%\). Ou seja, 19% dos pedidos chegam com algum problema. O padrão de indústrias de alto nível exige metas de OTIF superiores a **97%**.
+          </p>
+        </section>
+
+        <!-- 6. METAS SMART -->
+        <section class="lesson-section" id="sec-kpis">
+          <h2 class="lesson-title">6. Formulação Científica: Metas S.M.A.R.T. e KPIs</h2>
+          <p class="lesson-text">
+            Ao formular a proposta de solução do seu Projeto Integrador, substitua frases genéricas por metas científicas bem estruturadas baseadas na metodologia **S.M.A.R.T.**:
+          </p>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Elemento S.M.A.R.T.</th>
+                <th>Significado Prático na Logística</th>
+                <th>Exemplo Errado (Vago)</th>
+                <th>Exemplo Correto (SMART)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>S — Specific</strong> (Específico)</td>
+                <td>Define claramente a ação e a área afetada.</td>
+                <td>"Melhorar a estocagem."</td>
+                <td>"Implantar o endereçamento de posições WMS."</td>
+              </tr>
+              <tr>
+                <td><strong>M — Measurable</strong> (Mensurável)</td>
+                <td>Vincula a meta a um indicador numérico (KPI).</td>
+                <td>"Acelerar a separação."</td>
+                <td>"Reduzir o tempo de picking de 45 para 20 min."</td>
+              </tr>
+              <tr>
+                <td><strong>A — Achievable</strong> (Alcançável)</td>
+                <td>Deve ser realista para o prazo do semestre letivo.</td>
+                <td>"Automatizar 100% com robôs."</td>
+                <td>"Implementar separação por zonas e caixas físicas."</td>
+              </tr>
+              <tr>
+                <td><strong>R — Relevant</strong> (Relevante)</td>
+                <td>Atende à causa-raiz e gera impacto regional.</td>
+                <td>"Mudar a cor das etiquetas."</td>
+                <td>"Elevar a acurácia de inventário de 72% para 96%."</td>
+              </tr>
+              <tr>
+                <td><strong>T — Time-bound</strong> (Prazo)</td>
+                <td>Tem uma data limite ou marco definidos.</td>
+                <td>"Fazer o mais rápido possível."</td>
+                <td>"Atingir a meta até a 8ª semana do projeto."</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="lesson-text">
+            O objetivo final de cada grupo deve seguir a **Fórmula de Ouro do PI**:
+          </p>
+          <div class="lesson-highlight" style="text-align: center; font-size: 16px; font-weight: 700; color: var(--navy);">
+            "Nós vamos [OBJETIVO] medido por [CONJUNTO DE RESULTADOS-CHAVE S.M.A.R.T.] em [EMPRESA PARCEIRA] até [DATA]."
+          </div>
+        </section>
+
+        <!-- 7. PLANO DE AÇÃO E PORTFÓLIO -->
+        <section class="lesson-section" id="sec-plano">
+          <h2 class="lesson-title">7. O Plano de Ação 5W2H e o e-Portfólio</h2>
+          <p class="lesson-text">
+            Para colocar a solução em prática, você utilizará o **Plano de Ação 5W2H**, que servirá como o contrato operacional do seu time. Ele deve ser detalhado na plataforma com atividades claras e responsáveis definidos.
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card">
+              <div class="lesson-card-title">What (O que fazer)</div>
+              <p class="lesson-card-text">Ação clara (ex: Realizar inventário rotativo semanal das posições A).</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">Why (Por que fazer)</div>
+              <p class="lesson-card-text">Motivação técnica (ex: Corrigir divergências antes da geração de pedidos).</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">Who (Quem fará)</div>
+              <p class="lesson-card-text">Nome do integrante responsável (evite colocar "Grupo", atribua à pessoas).</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">When (Quando)</div>
+              <p class="lesson-card-text">Data limite realista (ex: Início: 10/04 - Conclusão: 17/04).</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">How (Como fazer)</div>
+              <p class="lesson-card-text">Método ou passos operacionais a serem seguidos pelo responsável.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">How Much (Quanto custa)</div>
+              <p class="lesson-card-text">Custo financeiro associado. Se for custo zero (mão de obra própria), escreva "Custo Interno".</p>
+            </div>
+          </div>
+          <p class="lesson-text">
+            Paralelamente, o grupo deve alimentar seu **e-Portfólio** (utilizando ferramentas sugeridas como Google Sites, Canva ou Notion). O portfólio não é uma pasta de relatórios formais prontos; é um <strong>diário evolutivo de bordo</strong>. Nele, vocês devem arquivar fotos de brainstormings em cartazes, fotos de visitas técnicas a centros de distribuição em Araçatuba, rascunhos de planilhas descartados, e-mails trocados com parceiros e as autoavaliações semanais da equipe.
+          </p>
+        </section>
+
+        <!-- 8. MODELO DE AVALIAÇÃO -->
+        <section class="lesson-section" id="sec-avaliacao">
+          <h2 class="lesson-title">8. Como você será avaliado: Foco Processual e Formativo</h2>
+          <p class="lesson-text">
+            Em conformidade com a prática pedagógica do Senac, a avaliação no PI é **processual, formativa e contínua**. Não existe uma prova teórica de encerramento; a avaliação é construída encontro a encontro com base nas evidências geradas pelo grupo e no comportamento profissional demonstrado.
+          </p>
+          <p class="lesson-text">
+            Os **3 Indicadores Oficiais de Avaliação** (conforme o Documento Técnico 4) são:
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card" style="border-left: 3px solid var(--navy);">
+              <div class="lesson-card-title">Indicador 1: Cumprimento do Plano</div>
+              <p class="lesson-card-text">A equipe cumpre os prazos definidos no cronograma do Hub? O plano 5W2H é ajustado e executado com autonomia e profissionalismo?</p>
+            </div>
+            <div class="lesson-card" style="border-left: 3px solid var(--orange);">
+              <div class="lesson-card-title">Indicador 2: Resolução de Problemas</div>
+              <p class="lesson-card-text">A proposta apresentada resolve de fato a problemática identificada? As metas de SLA e KPIs foram desenhadas de forma correta e mensurável?</p>
+            </div>
+            <div class="lesson-card" style="border-left: 3px solid var(--navy);">
+              <div class="lesson-card-title">Indicador 3: Mobilização de Marcas</div>
+              <p class="lesson-card-text">Os alunos demonstraram domínio técnico nas entregas, atitude colaborativa, visão crítica e autonomia no decorrer das visitas e relatórios?</p>
+            </div>
+          </div>
+          <p class="lesson-text">
+            <strong>Sistema de Menções do Senac:</strong><br>
+            • <strong>Atendido (A):</strong> Demonstrado com autonomia, qualidade técnica esperada e completude.<br>
+            • <strong>Parcialmente Atendido (PA):</strong> Demonstrado com necessidade de mediação frequente do docente ou entrega incompleta.<br>
+            • <strong>Não Atendido (NA):</strong> Ausência de entrega ou fuga completa ao tema.<br>
+            <em>Para aprovação final na UC12, todos os indicadores da rubrica precisam atingir a menção "Atendido (A)" ao fim do semestre. O critério usual de 75% de frequência mínima presencial não se aplica a UCs de PI, focando inteiramente na entrega e alcance das competências.</em>
+          </p>
+        </section>
+
+        <!-- 9. OFICINA DE FORMULAÇÃO -->
+        <section class="lesson-section" id="sec-desafio">
+          <h2 class="lesson-title">9. Oficina Interativa: Formule seu Desafio SMART</h2>
+          <p class="lesson-text">
+            Utilize o simulador abaixo para rascunhar o desafio da sua equipe. Este exercício ajudará a garantir que sua proposta tenha rigor técnico antes de inseri-la no painel oficial do Hub.
+          </p>
+
+          <div class="simulator-box">
+            <div class="simulator-title">🛠 Simulador de Desafios Logísticos SMART</div>
+
+            <div class="sim-field">
+              <label for="inp-acao">1. Qual será a ação de melhoria (Verbo no Infinitivo)?</label>
+              <select class="sim-select" id="inp-acao">
+                <option value="Reduzir">Reduzir (Custo, tempo, desperdício)</option>
+                <option value="Elevar">Elevar / Aumentar (Acurácia, eficiência, produtividade)</option>
+                <option value="Implantar">Implantar (Processos, sistemas, rotinas)</option>
+                <option value="Otimizar">Otimizar (Layout, roteirização, ocupação)</option>
+              </select>
+            </div>
+
+            <div class="sim-field">
+              <label for="inp-indicador">2. Qual o indicador logístico e o gargalo atual?</label>
+              <input type="text" class="sim-input" id="inp-indicador" placeholder="Ex: o tempo médio de picking de 45 para 20 min">
+            </div>
+
+            <div class="sim-field">
+              <label for="inp-local">3. Qual a empresa ou setor logístico em Araçatuba e região?</label>
+              <input type="text" class="sim-input" id="inp-local" placeholder="Ex: em uma distribuidora de autopeças de Araçatuba-SP">
+            </div>
+
+            <div class="sim-field">
+              <label for="inp-prazo">4. Qual o prazo final (Marco do PI)?</label>
+              <input type="text" class="sim-input" id="inp-prazo" placeholder="Ex: até o final da semana 9 do projeto">
+            </div>
+
+            <button type="button" class="btn-sim" onclick="gerarDesafio()">Validar Desafio →</button>
+
+            <div class="sim-result" id="sim-res">
+              <div class="sim-result-title">🎯 Desafio Formulador com Rigor Pedagógico:</div>
+              <p id="sim-text" style="font-weight: 600; font-size: 14px; margin-bottom: 0.75rem; color: #fff;"></p>
+              <p style="font-size: 11px; color: var(--orange-light);">
+                * Copie a frase estruturada acima e cole no campo "Tema / Desafio" no painel da sua equipe no Hub para validação do docente!
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <footer role="contentinfo">
+    <div class="f-logo">SENAC</div>
+    <div class="f-center" id="footer-center">
+      <div class="f-line1">Hub de Projetos — Gestão de Projetos Integradores</div>
+      <div class="f-line2">Senac Araçatuba</div>
+    </div>
+    <div class="f-right" id="footer-right"></div>
+  </footer>
+  <div class="f-copy">© Senac São Paulo · Material educacional interno · 2025</div>
+
+  <script>
+    function toggleMenu() {
+      const h = document.getElementById('ham');
+      const m = document.getElementById('mob-menu');
+      const isOpen = h.classList.toggle('open');
+      m.classList.toggle('open');
+      h.setAttribute('aria-expanded', isOpen);
+    }
+    function closeMenu() {
+      document.getElementById('ham').classList.remove('open');
+      document.getElementById('mob-menu').classList.remove('open');
+    }
+
+    function gerarDesafio() {
+      const acao = document.getElementById('inp-acao').value;
+      const ind = document.getElementById('inp-indicador').value.trim();
+      const loc = document.getElementById('inp-local').value.trim();
+      const prz = document.getElementById('inp-prazo').value.trim();
+
+      if (!ind || !loc || !prz) {
+        alert('Por favor, preencha todos os campos do simulador.');
+        return;
+      }
+
+      const resBox = document.getElementById('sim-res');
+      const resText = document.getElementById('sim-text');
+
+      resText.textContent = `"${acao} ${ind} ${loc} ${prz}."`;
+      resBox.style.display = 'block';
+    }
+
+    // Dynamic active state on sidebar scroll
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.lesson-section');
+      const links = document.querySelectorAll('.sidebar-link');
+      let current = '';
+
+      sections.forEach(sec => {
+        const top = sec.offsetTop;
+        if (pageYOffset >= top - 150) {
+          current = sec.getAttribute('id');
+        }
+      });
+
+      links.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
