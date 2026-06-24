@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 02 — Hub de Projetos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="db.js"></script>
+  <style>
+    /* Specific styles for the interactive lesson */
+    .lesson-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .lesson-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        position: static;
+      }
+    }
+
+    .sidebar-title {
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--navy);
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--orange);
+      padding-bottom: 0.5rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sidebar-link {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(247, 148, 29, 0.08);
+      color: var(--orange);
+      padding-left: 1rem;
+    }
+
+    .sidebar-link.active {
+      background: rgba(0, 69, 135, 0.06);
+      color: var(--navy);
+      font-weight: 700;
+      border-left: 3px solid var(--navy);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Content Area */
+    .lesson-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (max-width: 600px) {
+      .lesson-content {
+        padding: 1.5rem;
+      }
+    }
+
+    .lesson-section {
+      margin-bottom: 3.5rem;
+      scroll-margin-top: 100px;
+    }
+
+    .lesson-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .lesson-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lesson-title::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 1.2em;
+      background: var(--orange);
+      border-radius: 2px;
+    }
+
+    .lesson-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      text-align: justify;
+    }
+
+    .lesson-highlight {
+      background: rgba(247, 148, 29, 0.06);
+      border-left: 4px solid var(--orange);
+      padding: 1.25rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1.5rem 0;
+    }
+
+    .lesson-highlight-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      font-size: 14px;
+    }
+
+    /* Grid layout inside content */
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .lesson-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.3s;
+    }
+
+    .lesson-card:hover {
+      border-color: rgba(247, 148, 29, 0.25);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .lesson-card-title {
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 14px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .lesson-card-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* Interactive GUT matrix builder */
+    .gut-builder {
+      background: rgba(0, 69, 135, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .gut-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
+    }
+
+    @media (max-width: 600px) {
+      .gut-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+    }
+
+    .gut-input {
+      width: 100%;
+      padding: 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .gut-select {
+      width: 100%;
+      padding: 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    /* Ishikawa Fishbone Diagram simulator */
+    .ishikawa-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .ishikawa-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 600px) {
+      .ishikawa-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ishikawa-m {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .ishikawa-m-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(247, 148, 29, 0.3);
+      padding-bottom: 0.25rem;
+    }
+
+    .ishikawa-textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      background: var(--surface);
+      color: var(--text);
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .btn-act {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-act:hover {
+      background: var(--navy-dark);
+    }
+
+    .btn-orange {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+    }
+
+    .btn-orange:hover {
+      box-shadow: 0 4px 12px rgba(247, 148, 29, 0.35);
+    }
+  </style>
+</head>
+
+<body>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+  <nav class="nav nav-light" role="navigation" aria-label="Navegação principal">
+    <a href="index.html" class="nav-logo">Hub <span>de Projetos</span></a>
+    <div class="nav-links">
+      <a href="index.html">Início</a>
+      <a href="materiais.html" class="nav-active">Materiais</a>
+      <a href="admin.html" class="nav-btn">🔑 Admin</a>
+    </div>
+    <button class="hamburger" id="ham" type="button" onclick="toggleMenu()" aria-label="Abrir menu"
+      aria-expanded="false" aria-controls="mob-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mob-menu" role="menu" aria-label="Menu de navegação">
+    <a href="index.html" role="menuitem" onclick="closeMenu()">Início</a>
+    <a href="materiais.html" role="menuitem" onclick="closeMenu()">Materiais</a>
+    <a href="admin.html" role="menuitem" onclick="closeMenu()">🔑 Admin</a>
+  </div>
+
+  <div class="page" id="main-content" style="padding-top: 80px;">
+    <section class="page-header">
+      <h1>Aula 02: <span>Tema Gerador e Problematização</span></h1>
+      <p>Desenvolvimento da Etapa de Problematização do PI: investigação de causa-raiz e priorização com Matriz GUT e Ishikawa.</p>
+    </section>
+
+    <div class="lesson-container">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="sidebar-title">Conteúdo</div>
+        <ul class="sidebar-menu">
+          <li><a href="#sec-intro" class="sidebar-link active">1. Introdução à Etapa</a></li>
+          <li><a href="#sec-temavsdesafio" class="sidebar-link">2. Tema vs. Desafio</a></li>
+          <li><a href="#sec-gut" class="sidebar-link">3. Priorização (GUT)</a></li>
+          <li><a href="#sec-ishikawa" class="sidebar-link">4. Causa-Raiz (Ishikawa)</a></li>
+          <li><a href="#sec-aracatuba" class="sidebar-link">5. Gargalos Regionais</a></li>
+          <li><a href="#sec-smart" class="sidebar-link">6. Formulando o Desafio</a></li>
+          <li><a href="#sec-passos" class="sidebar-link">7. Próximos Passos</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Lesson Content -->
+      <main class="lesson-content">
+
+        <!-- 1. INTRODUÇÃO À ETAPA -->
+        <section class="lesson-section" id="sec-intro">
+          <h2 class="lesson-title">1. A Etapa de Problematização no Projeto Integrador</h2>
+          <p class="lesson-text">
+            Após compreender o funcionamento do Projeto Integrador na aula inaugural, entramos oficialmente na **Fase de Problematização**. Esta etapa é crítica porque define o rumo de toda a sua consultoria logística. Conforme a metodologia de *Aprendizagem Baseada em Projetos (ABP)*, um projeto de alto nível não nasce de uma solução pronta, mas sim de um **problema real, autêntico e bem delimitado**.
+          </p>
+          <div class="lesson-highlight">
+            <div class="lesson-highlight-title">🔍 O que deve ocorrer nesta etapa?</div>
+            <p class="lesson-card-text">
+              Com a mediação do docente, as equipes devem realizar *brainstormings*, visitar pátios ou centros de operação logística locais, coletar relatos de motoristas, clientes ou gestores e aplicar ferramentas científicas para isolar o principal gargalo de atendimento (SLA) regional.
+            </p>
+          </div>
+        </section>
+
+        <!-- 2. TEMA VS DESAFIO -->
+        <section class="lesson-section" id="sec-temavsdesafio">
+          <h2 class="lesson-title">2. A Diferença Entre Tema Gerador e Desafio do Projeto</h2>
+          <p class="lesson-text">
+            Um erro muito comum no início do Projeto Integrador é confundir o **Tema Gerador** (que é o macro-assunto fornecido pelo Senac, ex: *SLA e Níveis de Serviço em Logística*) com o **Desafio** (que é a dor operacional delimitada e específica que a equipe irá resolver).
+          </p>
+          <p class="lesson-text">
+            Veja a distinção sob a ótica do Design Educacional:
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card">
+              <div class="lesson-card-title">📖 Tema Gerador (Amplo)</div>
+              <p class="lesson-card-text"><strong>Características:</strong> Assunto de relevância geral que orienta o curso e mobiliza as competências operacionais.<br><strong>Exemplo:</strong> "Otimização de transportes e redução de custos logísticos".</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">🎯 Desafio do Projeto (Focado)</div>
+              <p class="lesson-card-text"><strong>Características:</strong> Um recorte local específico que responde às perguntas: O Quê? Onde? Quanto? Quem? e Quando?<br><strong>Exemplo:</strong> "Como reduzir o índice de avarias no carregamento de insumos agrícolas na distribuidora X de Araçatuba de 5% para menos de 1% até o final do semestre?"</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. PRIORIZAÇÃO (GUT) -->
+        <section class="lesson-section" id="sec-gut">
+          <h2 class="lesson-title">3. Ferramenta de Priorização: A Matriz GUT</h2>
+          <p class="lesson-text">
+            Durante o brainstorming da equipe, diversos sintomas e pequenos problemas logísticos surgirão. Como escolher em qual focar? Para isso, usamos a **Matriz GUT** (Gravidade, Urgência e Tendência). Cada problema listado recebe uma nota de 1 a 5 em cada pilar:
+          </p>
+          <ul style="margin-left: 1.5rem; font-size: 14px; line-height: 1.8; color: var(--text); margin-bottom: 1.25rem;">
+            <li><strong>G — Gravidade:</strong> Avalia o impacto financeiro, operacional ou de imagem que a falha causa. (1: Leve / 5: Extremamente grave).</li>
+            <li><strong>U — Urgência:</strong> Analisa o tempo disponível para agir antes que cause perdas drásticas. (1: Pode esperar / 5: Exige ação imediata).</li>
+            <li><strong>T — Tendência:</strong> Avalia a evolução do problema se a equipe não intervir. (1: Vai sumir / 5: Vai piorar muito).</li>
+          </ul>
+          <p class="lesson-text">
+            O resultado final de cada dor é calculado pela multiplicação dos pilares: \(\text{GUT} = G \times U \times T\). O problema com a maior nota deve ser o alvo prioritário do seu Projeto Integrador.
+          </p>
+
+          <!-- Interactive GUT matrix tool -->
+          <div class="gut-builder">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">🧮 Simulador Prático: Calculadora de Matriz GUT</h3>
+            <p class="lesson-card-text" style="margin-bottom: 1rem;">Insira até 3 problemas detectados na equipe e selecione as notas para descobrir a prioridade científica:</p>
+            
+            <div id="gut-rows-container">
+              <div class="gut-row">
+                <input type="text" class="gut-input" id="prob-1" placeholder="Problema 1 (ex: Atraso no picking do armazém)">
+                <select class="gut-select" id="g-1"><option value="1">G: 1</option><option value="2">G: 2</option><option value="3">G: 3</option><option value="4">G: 4</option><option value="5">G: 5</option></select>
+                <select class="gut-select" id="u-1"><option value="1">U: 1</option><option value="2">U: 2</option><option value="3">U: 3</option><option value="4">U: 4</option><option value="5">U: 5</option></select>
+                <select class="gut-select" id="t-1"><option value="1">T: 1</option><option value="2">T: 2</option><option value="3">T: 3</option><option value="4">T: 4</option><option value="5">T: 5</option></select>
+              </div>
+              <div class="gut-row">
+                <input type="text" class="gut-input" id="prob-2" placeholder="Problema 2 (ex: Ruptura de estoque no estoque local)">
+                <select class="gut-select" id="g-2"><option value="1">G: 1</option><option value="2">G: 2</option><option value="3">G: 3</option><option value="4">G: 4</option><option value="5">G: 5</option></select>
+                <select class="gut-select" id="u-2"><option value="1">U: 1</option><option value="2">U: 2</option><option value="3">U: 3</option><option value="4">U: 4</option><option value="5">U: 5</option></select>
+                <select class="gut-select" id="t-2"><option value="1">T: 1</option><option value="2">T: 2</option><option value="3">T: 3</option><option value="4">T: 4</option><option value="5">T: 5</option></select>
+              </div>
+              <div class="gut-row">
+                <input type="text" class="gut-input" id="prob-3" placeholder="Problema 3 (ex: Caminhões esperando no pátio da usina)">
+                <select class="gut-select" id="g-3"><option value="1">G: 1</option><option value="2">G: 2</option><option value="3">G: 3</option><option value="4">G: 4</option><option value="5">G: 5</option></select>
+                <select class="gut-select" id="u-3"><option value="1">U: 1</option><option value="2">U: 2</option><option value="3">U: 3</option><option value="4">U: 4</option><option value="5">U: 5</option></select>
+                <select class="gut-select" id="t-3"><option value="1">T: 1</option><option value="2">T: 2</option><option value="3">T: 3</option><option value="4">T: 4</option><option value="5">T: 5</option></select>
+              </div>
+            </div>
+
+            <button type="button" class="btn-act btn-orange" onclick="calcularGUT()" style="margin-top: 0.5rem; width: 100%;">Priorizar Gargalos Logísticos →</button>
+
+            <div id="gut-res" style="display:none; margin-top: 1rem; padding: 1rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;">
+              <h4 style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;">📊 Ranking de Prioridade Logística:</h4>
+              <ol id="gut-res-list" style="margin-left: 1.5rem; font-size: 13px; color: var(--text);"></ol>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. CAUSA-RAIZ (ISHIKAWA) -->
+        <section class="lesson-section" id="sec-ishikawa">
+          <h2 class="lesson-title">4. Diagnóstico Detalhado: Diagrama de Ishikawa (Os 6Ms)</h2>
+          <p class="lesson-text">
+            Uma vez priorizado o problema principal, o time precisa identificar **por que** ele acontece. Propor soluções para os sintomas (ex: contratar mais motoristas para conter atrasos) sem tratar a causa-raiz (ex: o atraso na emissão de notas fiscais) gera desperdício financeiro.
+          </p>
+          <p class="lesson-text">
+            Para isso, aplicamos o **Diagrama de Causa e Efeito (Ishikawa / Espinha de Peixe)**, analisando as 6 categorias causais (6Ms):
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card">
+              <div class="lesson-card-title">Mão de Obra</div>
+              <p class="lesson-card-text">Falta de treinamento dos operadores no sistema WMS, pressa, cansaço operacional, erros na comunicação interna.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">Método</div>
+              <p class="lesson-card-text">Processos informais e não padronizados, falta de roteirização definida, separação de itens sem ordem otimizada.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">Material</div>
+              <p class="lesson-card-text">Embalagens frágeis que provocam avaria de carga no transporte, etiquetas de identificação rasgadas ou apagadas.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">Máquina</div>
+              <p class="lesson-card-text">Empilhadeiras e transpaleteiras quebradas ou sem manutenção, frotas de caminhões desatualizadas.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">Medida</div>
+              <p class="lesson-card-text">Ausência de metas de tempo por etapa, falta de monitoramento diário do OTIF, controle manual ineficiente.</p>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-card-title">Meio Ambiente</div>
+              <p class="lesson-card-text">Almoxarifado escuro, pátio com buracos atrasando manobras, calor excessivo ou layout físico saturado.</p>
+            </div>
+          </div>
+
+          <!-- Interactive Ishikawa builder -->
+          <div class="ishikawa-box">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 1rem;">🐟 Ferramenta Prática: Rascunho do Diagrama de Ishikawa</h3>
+            <p class="lesson-card-text" style="margin-bottom: 1.25rem;">Digite as causas potenciais identificadas em cada categoria para o seu projeto:</p>
+            
+            <div class="ishikawa-grid">
+              <div class="ishikawa-m">
+                <div class="ishikawa-m-title">👤 Mão de Obra</div>
+                <textarea class="ishikawa-textarea" id="ish-mao" placeholder="Ex: Operadores de empilhadeira sem treinamento no novo sistema..."></textarea>
+              </div>
+              <div class="ishikawa-m">
+                <div class="ishikawa-m-title">🔄 Método</div>
+                <textarea class="ishikawa-textarea" id="ish-metodo" placeholder="Ex: Falta de roteiro de picking sequencial no almoxarifado..."></textarea>
+              </div>
+              <div class="ishikawa-m">
+                <div class="ishikawa-m-title">📦 Material</div>
+                <textarea class="ishikawa-textarea" id="ish-material" placeholder="Ex: Caixas de papelão muito finas que amassam no empilhamento..."></textarea>
+              </div>
+              <div class="ishikawa-m">
+                <div class="ishikawa-m-title">🚜 Máquina</div>
+                <textarea class="ishikawa-textarea" id="ish-maquina" placeholder="Ex: Leitores de código de barras lentos ou sem bateria..."></textarea>
+              </div>
+            </div>
+
+            <button type="button" class="btn-act" onclick="compilarIshikawa()" style="margin-top: 1rem; width: 100%;">Compilar Causas do Projeto →</button>
+
+            <div id="ish-res" style="display:none; margin-top: 1.25rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;">
+              <h4 style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.25rem;">📋 Causas Estruturadas do Projeto:</h4>
+              <div id="ish-res-text" style="font-size: 12px; line-height: 1.6; color: var(--text-light); white-space: pre-wrap;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. GARGALOS REGIONAIS -->
+        <section class="lesson-section" id="sec-aracatuba">
+          <h2 class="lesson-title">5. Contextualização Local: Araçatuba e o Noroeste Paulista</h2>
+          <p class="lesson-text">
+            O Senac Araçatuba atua no coração de uma microrregião caracterizada por atividades agroindustriais expressivas e e-commerce regional em expansão. Veja 3 casos reais de gargalos que afetam os níveis de serviço locais e que podem guiar o seu PI:
+          </p>
+          <div class="lesson-grid">
+            <div class="lesson-card" style="border-left: 3px solid var(--orange);">
+              <div class="lesson-card-title">🌾 Caso 1: Escoamento de Cana nas Usinas</div>
+              <p class="lesson-card-text"><strong>O Problema:</strong> Filas excessivas de caminhões rodotrem de cana nos pátios de entrada das usinas durante a safra. O atraso na pesagem ou na descarga quebra o fluxo de moagem industrial (SLA crítico). As causas-raiz residem na falta de roteirização de colheita ou desajustes de balança (UC5 e UC1).</p>
+            </div>
+            <div class="lesson-card" style="border-left: 3px solid var(--navy);">
+              <div class="lesson-card-title">📦 Caso 2: Giro de Estoque em Cooperativas Agrícolas</div>
+              <p class="lesson-card-text"><strong>O Problema:</strong> Demora no abastecimento de defensivos e sementes nas filiais de atendimento aos produtores. Isso acontece por divergências crônicas no inventário físico do depósito central da cooperativa em Araçatuba, atrasando o picking e gerando quebra de promessa de entrega em 24h (SLA de vendas - UC3 e UC4).</p>
+            </div>
+            <div class="lesson-card" style="border-left: 3px solid var(--orange);">
+              <div class="lesson-card-title">🚚 Caso 3: Roteirização no Varejo de Araçatuba</div>
+              <p class="lesson-card-text"><strong>O Problema:</strong> Altas taxas de reentrega e custo por quilômetro rodado elevado para entrega de eletrodomésticos locais devido a rotas cruzadas e falta de agendamento prévio com os moradores das residências (UC5 - Distribuição).</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. FORMULANDO O DESAFIO -->
+        <section class="lesson-section" id="sec-smart">
+          <h2 class="lesson-title">6. Formulação do Desafio Baseado na Fórmula de Ouro</h2>
+          <p class="lesson-text">
+            Nenhum projeto de consultoria é validado sem uma pergunta-problema bem estruturada. Utilize a **Fórmula de Ouro do Desafio Logístico**:
+          </p>
+          <div class="lesson-highlight" style="font-size: 16px; font-weight: 700; text-align: center; color: var(--navy);">
+            "Como [Ação de melhoria] + [KPI/Meta a alcançar] + em [Empresa/Setor de Araçatuba] + para atingir o [SLA acordado]?"
+          </div>
+          <p class="lesson-text">
+            Consulte a tabela abaixo para verificar se a sua pergunta atende aos critérios científicos de aceitação:
+          </p>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Pergunta do Desafio</th>
+                <th>Status Técnico</th>
+                <th>Motivo Pedagógico</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>"Como melhorar as entregas de cana nas usinas da nossa região?"</td>
+                <td style="color:#ff8888; font-weight:700">❌ Rejeitado</td>
+                <td>Muito vago. Não define a ação técnica, a meta numérica, a empresa parceira específica e o prazo de conclusão.</td>
+              </tr>
+              <tr>
+                <td>"Como otimizar o layout de picking para reduzir o tempo de separação de peças de 45 para 20 min na Distribuidora X de Araçatuba até junho?"</td>
+                <td style="color:#5ae09a; font-weight:700">✅ Aprovado</td>
+                <td>Específico, mensurável (redução de tempo), local (Araçatuba), aponta a ação técnica e estabelece um prazo realista.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- 7. PRÓXIMOS PASSOS -->
+        <section class="lesson-section" id="sec-passos">
+          <h2 class="lesson-title">7. Próximos Passos Operacionais da Equipe</h2>
+          <p class="lesson-text">
+            Para finalizar a Etapa de Problematização com protagonismo e autonomia digital:
+          </p>
+          <div class="formula-box">
+            1. **Submeter o Desafio no Hub:** Acesse o painel da sua equipe no Hub e preencha a Ficha de Problematização.<br>
+            2. **Alimentar o e-Portfólio:** Insira fotos das notas da Matriz GUT do grupo, rascunhos de brainstormings e rascunhos de Ishikawa no Google Sites/Canal da equipe.<br>
+            3. **Aguardar Mediação:** O docente avaliará a proposta e emitirá o feedback (Atendido / Parcialmente Atendido). Com o desafio aprovado, o planejador 5W2H é destravado no Hub para a próxima etapa (Desenvolvimento).
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <footer role="contentinfo">
+    <div class="f-logo">SENAC</div>
+    <div class="f-center" id="footer-center">
+      <div class="f-line1">Hub de Projetos — Gestão de Projetos Integradores</div>
+      <div class="f-line2">Senac Araçatuba</div>
+    </div>
+    <div class="f-right" id="footer-right"></div>
+  </footer>
+  <div class="f-copy">© Senac São Paulo · Material educacional interno · 2026</div>
+
+  <script>
+    function toggleMenu() {
+      const h = document.getElementById('ham');
+      const m = document.getElementById('mob-menu');
+      const isOpen = h.classList.toggle('open');
+      m.classList.toggle('open');
+      h.setAttribute('aria-expanded', isOpen);
+    }
+    function closeMenu() {
+      document.getElementById('ham').classList.remove('open');
+      document.getElementById('mob-menu').classList.remove('open');
+    }
+
+    function calcularGUT() {
+      const results = [];
+      for (let i = 1; i <= 3; i++) {
+        const prob = document.getElementById('prob-' + i).value.trim();
+        const g = parseInt(document.getElementById('g-' + i).value);
+        const u = parseInt(document.getElementById('u-' + i).value);
+        const t = parseInt(document.getElementById('t-' + i).value);
+        if (prob) {
+          const total = g * u * t;
+          results.push({ prob, total, g, u, t });
+        }
+      }
+
+      if (results.length === 0) {
+        alert('Digite ao menos um problema para realizar o cálculo.');
+        return;
+      }
+
+      // Sort by score desc
+      results.sort((a, b) => b.total - a.total);
+
+      const resBox = document.getElementById('gut-res');
+      const resList = document.getElementById('gut-res-list');
+      resList.innerHTML = results.map((r, idx) => `
+        <li style="margin-bottom: 0.5rem;">
+          <strong>${r.prob}</strong> — Pontuação GUT: <span style="color:var(--orange); font-weight:700">${r.total}</span> 
+          (G: ${r.g} · U: ${r.u} · T: ${r.t}) 
+          ${idx === 0 ? '<span style="font-size: 11px; background: rgba(50,200,100,0.15); color:#5ae09a; padding: 0.1rem 0.5rem; border-radius: 10px; margin-left:0.5rem; font-weight:700">Foco do PI!</span>' : ''}
+        </li>
+      `).join('');
+      resBox.style.display = 'block';
+    }
+
+    function compilarIshikawa() {
+      const mao = document.getElementById('ish-mao').value.trim() || 'Sem causas identificadas.';
+      const met = document.getElementById('ish-metodo').value.trim() || 'Sem causas identificadas.';
+      const mat = document.getElementById('ish-material').value.trim() || 'Sem causas identificadas.';
+      const maq = document.getElementById('ish-maquina').value.trim() || 'Sem causas identificadas.';
+
+      const resBox = document.getElementById('ish-res');
+      const resText = document.getElementById('ish-res-text');
+
+      resText.textContent = `• Mão de Obra:\n  ${mao}\n\n• Métodos:\n  ${met}\n\n• Materiais:\n  ${mat}\n\n• Máquinas/Equipamentos:\n  ${maq}`;
+      resBox.style.display = 'block';
+    }
+
+    // Dynamic active state on sidebar scroll
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.lesson-section');
+      const links = document.querySelectorAll('.sidebar-link');
+      let current = '';
+
+      sections.forEach(sec => {
+        const top = sec.offsetTop;
+        if (pageYOffset >= top - 150) {
+          current = sec.getAttribute('id');
+        }
+      });
+
+      links.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

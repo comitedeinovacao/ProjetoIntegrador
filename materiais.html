@@ -615,7 +615,7 @@
     // ── Default materials ───────────────────────────────────────────────
     const DEFAULT_SLIDES = [
       { id: 's1', titulo: 'Aula Inaugural', descricao: 'Conceito, Etapas e Plano de Ação', badge: 'PI — Introdução', link: 'aula-inaugural.html', disponivel: true },
-      { id: 's2', titulo: 'Aula 02', descricao: 'Tema Gerador e Problematização', badge: 'Em breve', link: '', disponivel: false },
+      { id: 's2', titulo: 'Aula 02', descricao: 'Tema Gerador e Problematização', badge: 'PI — Problematização', link: 'aula02-slides.html', linkAluno: 'aula02-aluno.html', disponivel: true },
       { id: 's3', titulo: 'Aula 03', descricao: 'Desenvolvimento e Monitoramento', badge: 'Em breve', link: '', disponivel: false },
     ];
     const DEFAULT_VIDEOS = [
@@ -627,18 +627,31 @@
     function renderSlides() {
       const mat = getMat();
       const slides = (mat && mat.slides && mat.slides.length > 0) ? mat.slides : DEFAULT_SLIDES;
-      document.getElementById('slides-grid').innerHTML = slides.map(s => `
-        <div class="card ${!s.disponivel ? 'card-locked' : ''}" role="listitem">
-          <div class="card-icon" aria-hidden="true">🖥</div>
-          <div class="card-title">${s.titulo}</div>
-          <div class="card-sub">${s.descricao}</div>
-          <span class="badge ${s.disponivel ? 'badge-blue' : 'badge-gray'}">${s.badge || (s.disponivel ? 'Disponível' : 'Em breve')}</span>
-          ${s.disponivel && s.link
-          ? `<a href="${s.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-primary">📥 Acessar Slides</a>`
-          : s.disponivel
-            ? `<button class="btn-card btn-card-primary" onclick="alert('Link não configurado. Solicite ao docente.')">📥 Acessar Slides</button>`
-            : `<button class="btn-card btn-card-disabled" disabled>🔒 Em breve</button>`}
-        </div>`).join('');
+      document.getElementById('slides-grid').innerHTML = slides.map(s => {
+        let buttons = '';
+        if (s.disponivel) {
+          if (s.link && s.linkAluno) {
+            buttons = `
+              <a href="${s.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-primary" style="margin-bottom:0.5rem">🖥 Apresentação Slides</a>
+              <a href="${s.linkAluno}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-secondary">📚 Leitura do Aluno</a>
+            `;
+          } else if (s.link) {
+            buttons = `<a href="${s.link}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-primary">📥 Acessar Aula</a>`;
+          } else {
+            buttons = `<button class="btn-card btn-card-primary" onclick="alert('Link não configurado. Solicite ao docente.')">📥 Acessar Aula</button>`;
+          }
+        } else {
+          buttons = `<button class="btn-card btn-card-disabled" disabled>🔒 Em breve</button>`;
+        }
+        return `
+          <div class="card ${!s.disponivel ? 'card-locked' : ''}" role="listitem">
+            <div class="card-icon" aria-hidden="true">🖥</div>
+            <div class="card-title">${s.titulo}</div>
+            <div class="card-sub">${s.descricao}</div>
+            <span class="badge ${s.disponivel ? 'badge-blue' : 'badge-gray'}">${s.badge || (s.disponivel ? 'Disponível' : 'Em breve')}</span>
+            ${buttons}
+          </div>`;
+      }).join('');
     }
 
     function renderVideos() {

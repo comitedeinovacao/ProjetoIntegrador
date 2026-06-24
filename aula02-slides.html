@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apresentação: Aula 02 — Hub de Projetos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* Premium Slide Presentation Styles */
+    :root {
+      --navy: #002d6b;
+      --navy-light: #004587;
+      --orange: #F7941D;
+      --orange-light: #FFB84D;
+      --bg-dark: #07152b;
+      --text-light: #f2f5fa;
+      --text-muted: #8fa0b5;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+      --font: 'Montserrat', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-light);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+    }
+
+    /* Slides Container */
+    .slides-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      background: linear-gradient(135deg, #091a33 0%, #040e1f 100%);
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      justify-content: space-between;
+    }
+
+    /* Progress Bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), var(--orange-light));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Header & Footer Info */
+    .slide-header {
+      padding: 2rem 4rem 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    .slide-header .badge {
+      background: rgba(247, 148, 29, 0.15);
+      border: 1px solid rgba(247, 148, 29, 0.4);
+      color: var(--orange);
+      padding: 0.3rem 0.85rem;
+      border-radius: 20px;
+    }
+
+    .slide-footer {
+      padding: 1.5rem 4rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
+      z-index: 2;
+      background: rgba(4, 14, 31, 0.5);
+    }
+
+    /* Slide Content Wrap */
+    .slide-body {
+      flex: 1;
+      padding: 3rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 2;
+      position: relative;
+    }
+
+    /* Slide Switch Transitions */
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      transform: scale(0.98) translateY(10px);
+      padding: 6rem 4rem 5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Typography */
+    .slide-title {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .slide-title span {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .slide-desc {
+      font-size: clamp(16px, 2.5vw, 22px);
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Grid & Cards Inside Slides */
+    .slide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .slide-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .slide-card:hover {
+      border-color: rgba(247, 148, 29, 0.3);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .slide-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--orange-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-card-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-light);
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 4rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .btn-ctrl {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ctrl:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .btn-ctrl:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      background: var(--surface);
+      border-color: var(--border);
+    }
+
+    .slide-counter {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Special Elements */
+    .formula-box {
+      background: rgba(0, 45, 107, 0.3);
+      border: 1px solid rgba(0, 69, 135, 0.5);
+      border-left: 5px solid var(--orange);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .highlight-text {
+      color: var(--orange-light);
+      font-weight: 700;
+    }
+
+    /* Key indicator display */
+    .keyboard-hint {
+      margin-top: 1rem;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .kbd-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #fff;
+    }
+    /* Keyboard Hint */
+    .keyboard-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 4.5rem;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      z-index: 20;
+    }
+
+    @media (max-width: 900px) {
+      .keyboard-hint {
+        display: none;
+      }
+      .controls-panel {
+        right: 2rem;
+      }
+      .slide-header, .slide-footer, .slide {
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="slides-container">
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="p-bar"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="slide-header">
+      <span>Técnico em Logística · Senac Araçatuba</span>
+      <span class="badge">Aula 02 — Apresentação</span>
+    </div>
+
+    <!-- Slides Body -->
+    <div class="slide-body">
+
+      <!-- SLIDE 1 -->
+      <section class="slide active">
+        <h1 class="slide-title">Aula 02: <span>Tema Gerador e Problematização</span></h1>
+        <p class="slide-desc">Identificação de gargalos operacionais na logística regional e formulação do desafio prático do projeto.</p>
+        <div class="slide-grid" style="grid-template-columns: 1fr;">
+          <div class="slide-card" style="border-left: 4px solid var(--orange);">
+            <div class="slide-card-title">🔍 Do Sintoma à Causa-Raiz</div>
+            <p class="slide-card-text">Neste encontro, vamos investigar onde ocorrem as falhas de SLA e aprender a usar ferramentas científicas de diagnóstico organizacional para propor melhorias viáveis.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2 -->
+      <section class="slide">
+        <h1 class="slide-title">Objetivos do <span>Encontro</span></h1>
+        <p class="slide-desc">O que esperamos alcançar ao final desta aula prática:</p>
+        <div class="slide-grid">
+          <div class="slide-card">
+            <div class="slide-card-title">1. Mapear Gargalos</div>
+            <p class="slide-card-text">Identificar problemas logísticos reais nas empresas de Araçatuba e região.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">2. Priorizar Dores</div>
+            <p class="slide-card-text">Utilizar ferramentas de priorização (Matriz GUT) para focar na falha mais crítica.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">3. Formular o Desafio</div>
+            <p class="slide-card-text">Estruturar a pergunta-problema do PI de forma científica e mensurável (SMART).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3 -->
+      <section class="slide">
+        <h1 class="slide-title">O que é o <span>Tema Gerador?</span></h1>
+        <p class="slide-desc">O ponto de partida do Projeto Integrador no Senac.</p>
+        <div class="formula-box">
+          No Senac, o <strong>Tema Gerador</strong> é um assunto amplo da área profissional (neste caso, <span class="highlight-text">SLA - Níveis de Serviço em Logística</span>) que atua como desencadeador de investigações e debates sobre a realidade local.
+        </div>
+        <div class="slide-grid">
+          <div class="slide-card">
+            <div class="slide-card-title">Conexão Real</div>
+            <p class="slide-card-text">Ele deve ser significativo para os alunos e estar intimamente ligado ao mercado de trabalho regional.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">Interdisciplinar</div>
+            <p class="slide-card-text">Mobiliza todas as competências das disciplinas integradas (Armazenagem, Estoques, Compras, Transporte).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4 -->
+      <section class="slide">
+        <h1 class="slide-title">Tema Gerador <span>vs.</span> Desafio do Projeto</h1>
+        <p class="slide-desc">Compreenda a diferença entre o macro-tema e a dor do seu cliente:</p>
+        <div class="slide-grid">
+          <div class="slide-card" style="border-top: 3px solid var(--orange);">
+            <div class="slide-card-title">Tema Gerador (Assunto Amplo)</div>
+            <p class="slide-card-text">"Níveis de Serviço (SLA) e Metas Logísticas em Empresas Locais."</p>
+          </div>
+          <div class="slide-card" style="border-top: 3px solid var(--navy-light);">
+            <div class="slide-card-title">Desafio do Projeto (Problema Específico)</div>
+            <p class="slide-card-text">"Como reduzir o tempo de descarga de caminhões de cana de 4h para 2h na Usina X de Araçatuba?"</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5 -->
+      <section class="slide">
+        <h1 class="slide-title">Diagnóstico: <span>1. Brainstorming</span></h1>
+        <p class="slide-desc">Tempestade de ideias para mapear os sintomas logísticos:</p>
+        <div class="slide-grid">
+          <div class="slide-card">
+            <div class="slide-card-title">Como fazer?</div>
+            <p class="slide-card-text">Reúna a equipe e liste todos os problemas logísticos identificados em visitas técnicas, estágios ou notícias da região, sem julgamento prévio.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">Foco em Sintomas</div>
+            <p class="slide-card-text">"Os clientes reclamam de atraso", "Há muita avaria de carga", "O almoxarifado está desorganizado".</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6 -->
+      <section class="slide">
+        <h1 class="slide-title">Diagnóstico: <span>2. Matriz GUT</span></h1>
+        <p class="slide-desc">Como priorizar qual problema focar no seu Projeto Integrador:</p>
+        <p class="slide-desc" style="font-size: 13px;">Dê notas de 1 a 5 para cada problema identificado nos seguintes critérios:</p>
+        <div class="slide-grid">
+          <div class="slide-card">
+            <div class="slide-card-title">G — Gravidade</div>
+            <p class="slide-card-text">Qual o impacto financeiro ou operacional do problema na empresa? (1: Leve, 5: Extremamente grave).</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">U — Urgência</div>
+            <p class="slide-card-text">Esse problema precisa de uma solução imediata ou pode esperar? (1: Pode esperar, 5: Exige ação imediata).</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">T — Tendência</div>
+            <p class="slide-card-text">Se nada for feito, o problema vai piorar rapidamente, estabilizar ou sumir? (1: Vai diminuir, 5: Vai piorar muito).</p>
+          </div>
+        </div>
+        <div class="formula-box" style="margin-top: 1rem; padding: 0.75rem 1.5rem; font-size: 13px; text-align: center;">
+          Multiplique os critérios: <span class="highlight-text">Pontuação = G x U x T</span>. O problema com maior pontuação será o foco do projeto!
+        </div>
+      </section>
+
+      <!-- SLIDE 7 -->
+      <section class="slide">
+        <h1 class="slide-title">Diagnóstico: <span>3. Ishikawa (Espinha de Peixe)</span></h1>
+        <p class="slide-desc">Identificando as verdadeiras causas do problema escolhido:</p>
+        <div class="slide-grid">
+          <div class="slide-card">
+            <div class="slide-card-title">Mão de Obra e Métodos</div>
+            <p class="slide-card-text">Falta de treinamento, cansaço operacional, ou processos informais e despadronizados no armazém.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">Máquinas e Materiais</div>
+            <p class="slide-card-text">Empilhadeiras quebradas, sinalizações de layout ineficientes ou embalagens frágeis.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">Medidas e Meio Ambiente</div>
+            <p class="slide-card-text">Ausência de indicadores de desempenho (KPIs) ou espaço físico saturado e mal iluminado.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8 -->
+      <section class="slide">
+        <h1 class="slide-title">Dores Logísticas em <span>Araçatuba e Região</span></h1>
+        <p class="slide-desc">Gargalos operacionais reais e oportunidades para o seu projeto:</p>
+        <div class="slide-grid">
+          <div class="slide-card">
+            <div class="slide-card-title">🌾 Agro & Sucroenergético</div>
+            <p class="slide-card-text">Tempo de espera de caminhões em pátios de usinas de açúcar/álcool e quebra de SLA no fornecimento de insumos agrícolas.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">🛒 Varejo e Distribuição</div>
+            <p class="slide-card-text">Dificuldade em atingir prazos de entrega rápida (e-commerce local) e alta taxa de devolução de pedidos.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">♻️ Logística Reversa</div>
+            <p class="slide-card-text">Coleta inadequada de embalagens vazias de defensivos agrícolas ou descarte ineficiente de paletes nas indústrias locais.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9 -->
+      <section class="slide">
+        <h1 class="slide-title">Fórmula do <span>Desafio SMART</span></h1>
+        <p class="slide-desc">Cada equipe deve formular a sua pergunta-desafio utilizando a seguinte estrutura:</p>
+        <div class="formula-box" style="font-size: 18px; text-align: center;">
+          "Como <span class="highlight-text">[Ação]</span> + <span class="highlight-text">[KPI/Meta]</span> em <span class="highlight-text">[Empresa de Araçatuba]</span> para atingir o <span class="highlight-text">[SLA acordado]</span>?"
+        </div>
+        <p class="slide-desc" style="font-size: 13px; text-align: center;">
+          Exemplo: <em>"Como otimizar a roteirização para reduzir o custo do frete em 15% na Transportadora TransRapido de Araçatuba até junho?"</em>
+        </p>
+      </section>
+
+      <!-- SLIDE 10 -->
+      <section class="slide">
+        <h1 class="slide-title">Validação por <span>Evidências</span></h1>
+        <p class="slide-desc">No Senac, não trabalhamos com suposições ou "achismos".</p>
+        <div class="slide-grid">
+          <div class="slide-card" style="border-left: 3px solid var(--orange);">
+            <div class="slide-card-title">📋 1. Fatos Concretos</div>
+            <p class="slide-card-text">Busque planilhas históricas de expedição, relatórios de devolução de clientes ou faça observação direta dos tempos operacionais.</p>
+          </div>
+          <div class="slide-card" style="border-left: 3px solid var(--orange);">
+            <div class="slide-card-title">📰 2. Dados Públicos</div>
+            <p class="slide-card-text">Utilize notícias locais, boletins sindicais ou dados do IBGE/IMEA sobre a infraestrutura logística regional.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 11 -->
+      <section class="slide">
+        <h1 class="slide-title">Atividade do Encontro: <span>Problematização</span></h1>
+        <p class="slide-desc">O que a sua equipe precisa fazer e entregar hoje:</p>
+        <div class="slide-grid">
+          <div class="slide-card">
+            <div class="slide-card-title">Passo 1</div>
+            <p class="slide-card-text">Aplicar a Matriz GUT na lista de problemas e escolher a dor principal do projeto.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">Passo 2</div>
+            <p class="slide-card-text">Formular o Desafio SMART oficial da equipe usando a fórmula estudada.</p>
+          </div>
+          <div class="slide-card">
+            <div class="slide-card-title">Passo 3</div>
+            <p class="slide-card-text">Cadastrar as informações no Hub de Projetos para receber o feedback do docente.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 12 -->
+      <section class="slide">
+        <h1 class="slide-title">Missão para o <span>Próximo Encontro</span></h1>
+        <p class="slide-desc">Prepare a base operacional da sua consultoria logística:</p>
+        <div class="formula-box">
+          ✔️ Validar o desafio com o professor.<br>
+          ✔️ Iniciar o rascunho do <strong>Plano de Ação 5W2H</strong> diretamente no planejador do Hub.<br>
+          ✔️ Abrir e configurar o <strong>e-Portfólio digital</strong> da equipe (Notion, Google Sites ou Canva).
+        </div>
+        <p class="slide-desc" style="text-align: center; color: var(--orange-light); font-weight: 700;">
+          Lembre-se: O PI exige protagonismo. A jornada logística começa com a organização do seu time!
+        </p>
+      </section>
+
+    </div>
+
+    <!-- Slide Footer -->
+    <div class="slide-footer">
+      <span class="slide-counter" id="slide-num">Slide 1 de 12</span>
+      <span style="color: var(--text-muted); margin-left: 2rem;">Aperte 💻 ou use o passador de slides</span>
+    </div>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+      <button class="btn-ctrl" id="prev-btn" onclick="prevSlide()" disabled>← Anterior</button>
+      <span class="slide-counter" id="ctrl-counter">1 / 12</span>
+      <button class="btn-ctrl" id="next-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <div class="keyboard-hint">
+      <span>Navegue usando as teclas:</span>
+      <span class="kbd-btn">←</span>
+      <span class="kbd-btn">→</span>
+      <span class="kbd-btn">Espaço</span>
+    </div>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const pBar = document.getElementById('p-bar');
+    const slideNum = document.getElementById('slide-num');
+    const ctrlCounter = document.getElementById('ctrl-counter');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function updateSlide() {
+      slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === currentSlideIndex);
+      });
+
+      // Progress bar percentage
+      const pct = ((currentSlideIndex) / (totalSlides - 1)) * 100;
+      pBar.style.width = pct + '%';
+
+      // Counter text
+      slideNum.textContent = `Slide ${currentSlideIndex + 1} de ${totalSlides}`;
+      ctrlCounter.textContent = `${currentSlideIndex + 1} / ${totalSlides}`;
+
+      // Enable/disable buttons
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateSlide();
+      }
+    }
+
+    // Keyboard controls (supports slide clicker / passador de slides)
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'PageDown') {
+        event.preventDefault();
+        nextSlide();
+      } else if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+        event.preventDefault();
+        prevSlide();
+      }
+    });
+
+    updateSlide();
+  </script>
+</body>
+
+</html>
